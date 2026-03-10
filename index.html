@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>Filamorfosis - Impresión 3D, UV y Corte Láser</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="Resources/Images/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="Resources/Images/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="Resources/Images/favicon_io/favicon-16x16.png">
+    <link rel="shortcut icon" href="Resources/Images/favicon_io/favicon.ico">
+    
+    <link rel="stylesheet" href="assets/fonts/fontawesome/css/brands.css">
+    <link rel="stylesheet" href="assets/fonts/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="assets/fonts/fontawesome/css/solid.css">
+    <link rel="stylesheet" href="assets/vendors/bootstrap/grid.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+    <div class="lang-switcher">
+        <button class="lang-btn active" data-lang="es">ES</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+
+    <div class="page-wrap">
+        <nav class="navbar">
+            <div class="container">
+                <div class="navbar__content">
+                    <div class="navbar__logo">
+                        <img src="Resources/Images/Circle_Transparent.png" alt="Filamorfosis Logo">
+                        <span class="navbar__brand">Filamorfosis</span>
+                    </div>
+                    <ul class="navbar__menu">
+                        <li><a href="#home" data-translate="nav_home">Inicio</a></li>
+                        <li><a href="#services" data-translate="nav_services">Servicios</a></li>
+                        <li><a href="#equipment" data-translate="nav_equipment">Equipos</a></li>
+                        <li><a href="#contact" data-translate="nav_contact">Contacto</a></li>
+                        <li class="navbar__menu-lang">
+                            <button class="lang-btn-menu active" data-lang="es">ES</button>
+                            <button class="lang-btn-menu" data-lang="en">EN</button>
+                        </li>
+                    </ul>
+                    <button class="navbar__toggle">
+                        <span></span><span></span><span></span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <section id="home" class="hero-section">
+            <div class="smoky" id="smoky-bg">
+                <canvas>Your browser does not support HTML5 canvas.</canvas>
+            </div>
+            <div id="particles-js"></div>
+            <div class="hero-overlay"></div>
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-logo">
+                        <img src="Resources/Images/Circle_Transparent.png" alt="Filamorfosis Logo">
+                    </div>
+                    <h1 class="hero-title animate-fade-in" data-translate="hero_title">Tus Ideas. Tu Realidad.</h1>
+                    <p class="hero-subtitle animate-fade-in-delay" data-translate="hero_subtitle">Transformamos tu imaginación en objetos tangibles, <strong>capa</strong> por <strong>capa.</strong></p>
+                    <hr class="hero-divider">
+                    <div class="hero-cta animate-fade-in-delay-2">
+                        <a href="#services" class="btn btn-primary" data-translate="hero_cta_secondary">Ver Servicios</a>
+                        <a href="#contact" class="btn btn-secondary" data-translate="hero_cta">Solicitar Cotización</a>
+                    </div>
+                </div>
+            </div>
+            <div class="scroll-indicator"><div class="mouse"></div></div>
+        </section>
+
+        <section id="services" class="services-section">
+            <div class="container">
+                <h2 class="section-title" data-translate="services_title">Nuestros Servicios</h2>
+                <p class="section-subtitle" data-translate="services_subtitle">Tecnología de vanguardia para tus proyectos</p>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-icon"><i class="fas fa-cube"></i></div>
+                        <h3 data-translate="service_3d_title">Impresión 3D</h3>
+                        <p data-translate="service_3d_desc">Impresión multicolor y multimaterial con tecnología Bambulab y Prusa.</p>
+                        <ul class="service-features">
+                            <li data-translate="service_3d_feat1">Multicolor (hasta 5 colores)</li>
+                            <li data-translate="service_3d_feat2">Multimaterial</li>
+                            <li data-translate="service_3d_feat3">Alta precisión</li>
+                        </ul>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon"><i class="fas fa-print"></i></div>
+                        <h3 data-translate="service_uv_title">Impresión UV</h3>
+                        <p data-translate="service_uv_desc">Impresión UV de alta calidad con Eufy Make.</p>
+                        <ul class="service-features">
+                            <li data-translate="service_uv_feat1">Impresión directa</li>
+                            <li data-translate="service_uv_feat2">Colores vibrantes</li>
+                            <li data-translate="service_uv_feat3">Múltiples superficies</li>
+                        </ul>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon"><i class="fas fa-cut"></i></div>
+                        <h3 data-translate="service_laser_title">Corte Láser</h3>
+                        <p data-translate="service_laser_desc">Corte y grabado láser de precisión con Scukpfun SFA9.</p>
+                        <ul class="service-features">
+                            <li data-translate="service_laser_feat1">Corte preciso</li>
+                            <li data-translate="service_laser_feat2">Grabado detallado</li>
+                            <li data-translate="service_laser_feat3">Múltiples materiales</li>
+                        </ul>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon"><i class="fas fa-camera"></i></div>
+                        <h3 data-translate="service_photo_title">Impresión Fotográfica</h3>
+                        <p data-translate="service_photo_desc">Impresión fotográfica profesional de alta calidad.</p>
+                        <ul class="service-features">
+                            <li data-translate="service_photo_feat1">Alta resolución</li>
+                            <li data-translate="service_photo_feat2">Papel premium</li>
+                            <li data-translate="service_photo_feat3">Varios formatos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="equipment" class="equipment-section">
+            <div class="container">
+                <h2 class="section-title" data-translate="equipment_title">¿Qué Podemos Crear?</h2>
+                <p class="section-subtitle" data-translate="equipment_subtitle">Desde pequeños juguetes hasta piezas grandes y resistentes</p>
+                
+                <div class="equipment-grid">
+                    <div class="equipment-card">
+                        <div class="equipment-badge">3D</div>
+                        <div class="equipment-icon">🚀</div>
+                        <h3 data-translate="equip_card1_title">Impresión 3D Súper Rápida</h3>
+                        <p data-translate="equip_card1_desc">Creamos objetos en plástico de colores. Perfecto para prototipos, figuras, y piezas personalizadas.</p>
+                        <ul class="equipment-features">
+                            <li data-translate="equip_card1_feat1">Tamaño: hasta 25cm x 25cm x 25cm</li>
+                            <li data-translate="equip_card1_feat2">Hasta 4 colores en una pieza</li>
+                            <li data-translate="equip_card1_feat3">Materiales: PLA, PETG, TPU flexible</li>
+                        </ul>
+                    </div>
+
+                    <div class="equipment-card">
+                        <div class="equipment-badge">3D</div>
+                        <div class="equipment-icon">🎨</div>
+                        <h3 data-translate="equip_card2_title">Impresión 3D Compacta</h3>
+                        <p data-translate="equip_card2_desc">Ideal para objetos pequeños y medianos. Rápida y silenciosa, perfecta para decoración y regalos.</p>
+                        <ul class="equipment-features">
+                            <li data-translate="equip_card2_feat1">Tamaño: hasta 18cm x 18cm x 18cm</li>
+                            <li data-translate="equip_card2_feat2">Multicolor disponible</li>
+                            <li data-translate="equip_card2_feat3">Materiales: PLA, PETG, TPU</li>
+                        </ul>
+                    </div>
+
+                    <div class="equipment-card">
+                        <div class="equipment-badge">3D</div>
+                        <div class="equipment-icon">🏗️</div>
+                        <h3 data-translate="equip_card3_title">Impresión 3D Grande y Fuerte</h3>
+                        <p data-translate="equip_card3_desc">Para proyectos grandes y resistentes. Podemos usar hasta 5 materiales diferentes en una sola pieza.</p>
+                        <ul class="equipment-features">
+                            <li data-translate="equip_card3_feat1">Tamaño: hasta 36cm x 36cm x 36cm</li>
+                            <li data-translate="equip_card3_feat2">Hasta 5 colores/materiales</li>
+                            <li data-translate="equip_card3_feat3">Materiales: PLA, PETG, ABS, PA+CF</li>
+                        </ul>
+                    </div>
+
+                    <div class="equipment-card">
+                        <div class="equipment-badge">UV</div>
+                        <div class="equipment-icon">🎭</div>
+                        <h3 data-translate="equip_card4_title">Impresión UV Directa</h3>
+                        <p data-translate="equip_card4_desc">Imprimimos diseños a todo color sobre casi cualquier cosa: tazas, vasos, madera, metal, vidrio, plástico. También hacemos stickers UV DTF.</p>
+                        <ul class="equipment-features">
+                            <li data-translate="equip_card4_feat1">Imprime en objetos cilíndricos (vasos, botellas)</li>
+                            <li data-translate="equip_card4_feat2">Stickers UV DTF resistentes</li>
+                            <li data-translate="equip_card4_feat3">Magnetos, placas y más</li>
+                        </ul>
+                    </div>
+
+                    <div class="equipment-card">
+                        <div class="equipment-badge">Láser</div>
+                        <div class="equipment-icon">✂️</div>
+                        <h3 data-translate="equip_card5_title">Corte y Grabado Láser</h3>
+                        <p data-translate="equip_card5_desc">Cortamos y grabamos diseños en madera, acrílico, cuero, cartón y más. Perfecto para letreros y decoración.</p>
+                        <ul class="equipment-features">
+                            <li data-translate="equip_card5_feat1">Área: 40cm x 40cm</li>
+                            <li data-translate="equip_card5_feat2">Corta madera de 2cm de grosor</li>
+                            <li data-translate="equip_card5_feat3">Grabados super detallados</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="materials-info">
+                    <h3 data-translate="materials_title">Materiales que Usamos</h3>
+                    <div class="materials-grid">
+                        <div class="material-card">
+                            <div class="material-icon">🎨</div>
+                            <h4>PLA</h4>
+                            <p data-translate="material_pla">El más común. Fácil de usar, viene en muchos colores. Perfecto para decoración y prototipos.</p>
+                            <div class="material-uses" data-translate="material_pla_uses">
+                                <strong>Ideal para:</strong> Figuras, juguetes, decoración, prototipos, organizadores
+                            </div>
+                        </div>
+                        <div class="material-card">
+                            <div class="material-icon">💪</div>
+                            <h4>PETG</h4>
+                            <p data-translate="material_petg">Más fuerte y flexible que PLA. Resistente al agua. Ideal para objetos que se usan mucho.</p>
+                            <div class="material-uses" data-translate="material_petg_uses">
+                                <strong>Ideal para:</strong> Botellas, contenedores, piezas mecánicas, objetos de exterior
+                            </div>
+                        </div>
+                        <div class="material-card">
+                            <div class="material-icon">🤸</div>
+                            <h4>TPU</h4>
+                            <p data-translate="material_tpu">Súper flexible como goma. Perfecto para fundas de teléfono, juguetes blandos y piezas que se doblan.</p>
+                            <div class="material-uses" data-translate="material_tpu_uses">
+                                <strong>Ideal para:</strong> Fundas de teléfono, correas, sellos, juguetes flexibles
+                            </div>
+                        </div>
+                        <div class="material-card">
+                            <div class="material-icon">🔥</div>
+                            <h4>ABS</h4>
+                            <p data-translate="material_abs">Muy resistente al calor. El mismo material de los LEGO. Ideal para piezas mecánicas.</p>
+                            <div class="material-uses" data-translate="material_abs_uses">
+                                <strong>Ideal para:</strong> Piezas de autos, carcasas, herramientas, piezas que aguantan calor
+                            </div>
+                        </div>
+                        <div class="material-card">
+                            <div class="material-icon">⚡</div>
+                            <h4>PA+CF</h4>
+                            <p data-translate="material_pacf">El más fuerte. Tiene fibra de carbono. Para piezas que necesitan ser super resistentes.</p>
+                            <div class="material-uses" data-translate="material_pacf_uses">
+                                <strong>Ideal para:</strong> Drones, piezas industriales, herramientas, soportes de carga
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="use-cases-section">
+                    <h3 data-translate="use_cases_title">Ejemplos de lo que Creamos</h3>
+                    <div class="use-cases-grid">
+                        <div class="use-case-card">
+                            <div class="use-case-icon">🎮</div>
+                            <h4 data-translate="use_case_1_title">Juguetes y Figuras</h4>
+                            <p data-translate="use_case_1_desc">Personajes de videojuegos, figuras coleccionables, juguetes personalizados</p>
+                        </div>
+                        <div class="use-case-card">
+                            <div class="use-case-icon">🏠</div>
+                            <h4 data-translate="use_case_2_title">Decoración del Hogar</h4>
+                            <p data-translate="use_case_2_desc">Macetas, lámparas, organizadores, letreros personalizados, marcos</p>
+                        </div>
+                        <div class="use-case-card">
+                            <div class="use-case-icon">🎁</div>
+                            <h4 data-translate="use_case_3_title">Regalos Personalizados</h4>
+                            <p data-translate="use_case_3_desc">Tazas con nombres, llaveros, placas grabadas, trofeos personalizados</p>
+                        </div>
+                        <div class="use-case-card">
+                            <div class="use-case-icon">🔧</div>
+                            <h4 data-translate="use_case_4_title">Piezas de Repuesto</h4>
+                            <p data-translate="use_case_4_desc">Repuestos para electrodomésticos, piezas de autos, componentes mecánicos</p>
+                        </div>
+                        <div class="use-case-card">
+                            <div class="use-case-icon">📱</div>
+                            <h4 data-translate="use_case_5_title">Accesorios Tech</h4>
+                            <p data-translate="use_case_5_desc">Fundas de teléfono, soportes para tablet, organizadores de cables</p>
+                        </div>
+                        <div class="use-case-card">
+                            <div class="use-case-icon">🏢</div>
+                            <h4 data-translate="use_case_6_title">Negocios y Oficina</h4>
+                            <p data-translate="use_case_6_desc">Letreros, tarjeteros, sellos personalizados, displays para productos</p>
+                        </div>
+                        <div class="use-case-card">
+                            <div class="use-case-icon">🎨</div>
+                            <h4 data-translate="use_case_7_title">Stickers UV DTF</h4>
+                            <p data-translate="use_case_7_desc">Calcomanías resistentes al agua, stickers para laptops, autos, botellas</p>
+                        </div>
+                        <div class="use-case-card">
+                            <div class="use-case-icon">☕</div>
+                            <h4 data-translate="use_case_8_title">Vasos y Tumblers</h4>
+                            <p data-translate="use_case_8_desc">Vasos térmicos personalizados, botellas con diseños, tazas con fotos</p>
+                        </div>
+                        <div class="use-case-card">
+                            <div class="use-case-icon">🧲</div>
+                            <h4 data-translate="use_case_9_title">Magnetos y Placas</h4>
+                            <p data-translate="use_case_9_desc">Imanes para refrigerador, placas de identificación, señalética</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-section">
+                    <h3 data-translate="gallery_title">Galería de Proyectos</h3>
+                    <p class="gallery-subtitle" data-translate="gallery_subtitle">Algunos ejemplos de lo que hemos creado</p>
+                    
+                    <div class="gallery-categories">
+                        <button class="gallery-filter active" data-filter="all" data-translate="gallery_filter_all">Todos</button>
+                        <button class="gallery-filter" data-filter="3d" data-translate="gallery_filter_3d">Impresión 3D</button>
+                        <button class="gallery-filter" data-filter="laser" data-translate="gallery_filter_laser">Corte Láser</button>
+                        <button class="gallery-filter" data-filter="uv" data-translate="gallery_filter_uv">Impresión UV</button>
+                    </div>
+
+                    <div class="gallery-grid">
+                        <!-- 3D Printing Examples -->
+                        <div class="gallery-item" data-category="3d">
+                            <div class="gallery-placeholder">
+                                <div class="gallery-icon">🎮</div>
+                                <p data-translate="gallery_3d_1">Figuras y Prototipos</p>
+                            </div>
+                            <div class="gallery-caption" data-translate="gallery_3d_1_caption">Personajes, figuras coleccionables y prototipos funcionales en PLA multicolor</div>
+                        </div>
+
+                        <div class="gallery-item" data-category="3d">
+                            <div class="gallery-placeholder">
+                                <div class="gallery-icon">🔧</div>
+                                <p data-translate="gallery_3d_2">Piezas Funcionales</p>
+                            </div>
+                            <div class="gallery-caption" data-translate="gallery_3d_2_caption">Repuestos, herramientas y componentes mecánicos en PETG y ABS</div>
+                        </div>
+
+                        <div class="gallery-item" data-category="3d">
+                            <div class="gallery-placeholder">
+                                <div class="gallery-icon">🏠</div>
+                                <p data-translate="gallery_3d_3">Decoración</p>
+                            </div>
+                            <div class="gallery-caption" data-translate="gallery_3d_3_caption">Macetas, lámparas, organizadores y objetos decorativos personalizados</div>
+                        </div>
+
+                        <!-- Laser Cutting Examples -->
+                        <div class="gallery-item" data-category="laser">
+                            <div class="gallery-placeholder">
+                                <div class="gallery-icon">🪵</div>
+                                <p data-translate="gallery_laser_1">Grabado en Madera</p>
+                            </div>
+                            <div class="gallery-caption" data-translate="gallery_laser_1_caption">Letreros, placas personalizadas y decoración en madera natural</div>
+                        </div>
+
+                        <div class="gallery-item" data-category="laser">
+                            <div class="gallery-placeholder">
+                                <div class="gallery-icon">👜</div>
+                                <p data-translate="gallery_laser_2">Grabado en Cuero</p>
+                            </div>
+                            <div class="gallery-caption" data-translate="gallery_laser_2_caption">Carteras, cinturones, llaveros y accesorios de cuero personalizados</div>
+                        </div>
+
+                        <div class="gallery-item" data-category="laser">
+                            <div class="gallery-placeholder">
+                                <div class="gallery-icon">💎</div>
+                                <p data-translate="gallery_laser_3">Corte en Acrílico</p>
+                            </div>
+                            <div class="gallery-caption" data-translate="gallery_laser_3_caption">Letreros luminosos, displays y piezas decorativas en acrílico</div>
+                        </div>
+
+                        <!-- UV Printing Examples -->
+                        <div class="gallery-item" data-category="uv">
+                            <div class="gallery-placeholder">
+                                <div class="gallery-icon">☕</div>
+                                <p data-translate="gallery_uv_1">Tazas y Vasos</p>
+                            </div>
+                            <div class="gallery-caption" data-translate="gallery_uv_1_caption">Tumblers, tazas y botellas personalizadas con impresión UV rotativa</div>
+                        </div>
+
+                        <div class="gallery-item" data-category="uv">
+                            <div class="gallery-placeholder">
+                                <div class="gallery-icon">🏷️</div>
+                                <p data-translate="gallery_uv_2">Stickers UV DTF</p>
+                            </div>
+                            <div class="gallery-caption" data-translate="gallery_uv_2_caption">Calcomanías resistentes al agua para laptops, autos y más</div>
+                        </div>
+
+                        <div class="gallery-item" data-category="uv">
+                            <div class="gallery-placeholder">
+                                <div class="gallery-icon">🧲</div>
+                                <p data-translate="gallery_uv_3">Magnetos y Placas</p>
+                            </div>
+                            <div class="gallery-caption" data-translate="gallery_uv_3_caption">Imanes personalizados, placas de identificación y señalética UV</div>
+                        </div>
+                    </div>
+                    
+                    <div class="gallery-cta">
+                        <p class="gallery-note" data-translate="gallery_note">💡 ¿Tienes un proyecto en mente? Contáctanos para una cotización personalizada</p>
+                        <a href="#contact" class="btn btn-primary" data-translate="gallery_cta_btn">Solicitar Cotización</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="contact-section">
+            <div class="container">
+                <h2 class="section-title" data-translate="contact_title">Contáctanos</h2>
+                <p class="section-subtitle" data-translate="contact_subtitle">Cuéntanos sobre tu proyecto</p>
+                <div class="contact-wrapper">
+                    <form id="contactForm" class="contact-form" action="https://api.web3forms.com/submit" method="POST">
+                        <!-- Web3Forms Access Key -->
+                        <input type="hidden" name="access_key" value="cf4a2e4d-c358-4b12-a9c2-e5833fd1dc00">
+                        
+                        <!-- Redirect after submission (optional) -->
+                        <input type="hidden" name="redirect" value="https://filamorfosis.github.io/index.html?success=true">
+                        
+                        <!-- Email destination -->
+                        <input type="hidden" name="from_name" value="Filamorfosis Website">
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name" data-translate="form_name">Nombre</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email" data-translate="form_email">Email</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone" data-translate="form_phone">Teléfono</label>
+                            <input type="tel" id="phone" name="phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="service" data-translate="form_service">Servicio</label>
+                            <select id="service" name="service" required>
+                                <option value="" data-translate="form_select">Selecciona</option>
+                                <option value="Impresión 3D" data-translate="form_opt_3d">Impresión 3D</option>
+                                <option value="Impresión UV" data-translate="form_opt_uv">Impresión UV</option>
+                                <option value="Corte Láser" data-translate="form_opt_laser">Corte Láser</option>
+                                <option value="Impresión Fotográfica" data-translate="form_opt_photo">Foto</option>
+                                <option value="Otro" data-translate="form_opt_other">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message" data-translate="form_message">Mensaje</label>
+                            <textarea id="message" name="message" rows="5" required></textarea>
+                        </div>
+                        
+                        <!-- Honeypot for spam protection -->
+                        <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
+                        
+                        <button type="submit" class="btn btn-primary btn-block" data-translate="form_submit">Enviar</button>
+                        <div id="formMessage" class="form-message"></div>
+                    </form>
+                    <div class="contact-info">
+                        <div class="contact-info-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h4 data-translate="contact_email_label">Email</h4>
+                                <p>filamorfosis@gmail.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-info-item">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <h4 data-translate="contact_hours_label">Horario</h4>
+                                <p data-translate="contact_hours">Lun - Vie: 9:00 - 18:00</p>
+                            </div>
+                        </div>
+                        <div class="social-links">
+                          <a href="https://www.instagram.com/filamorfosis" class="social-link"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <p class="footer-copyright">
+                        &copy; 2026 Filamorfosis. <span data-translate="footer_rights">Todos los derechos reservados.</span>
+                    </p>
+                    <p class="footer-trademark" data-translate="footer_trademark">
+                        Filamorfosis® es una marca registrada.
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="assets/vendors/particles.js/particles.js"></script>
+    <script src="assets/vendors/waterpipe/waterpipe.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
