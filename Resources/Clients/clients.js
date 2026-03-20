@@ -35,6 +35,13 @@ var CLIENTS =
 
       
     ]
+  },
+        {
+    "name": "PintorDeFotones",
+    "logo": "Resources/Clients/PintorDeFotones.png",
+    "socials": [
+      { "type": "instagram",       "url": "https://instagram.com/pintordefotones" }
+    ]
   }
 ]
 ;
