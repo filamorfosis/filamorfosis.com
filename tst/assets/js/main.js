@@ -3166,6 +3166,37 @@
     };
 
     // ── Convert showcase-media-grid to 2-row auto-scrolling slider ──────────
+    // ── Ensure videos in the initially-active panel start playing ────────────
+    document.querySelectorAll('.showcase-panel.active video').forEach(function(v) {
+        v.load();
+        v.play().catch(function(){});
+    });
+
+    // ── Image error fallback — hide broken images gracefully ─────────────────
+    document.querySelectorAll('img').forEach(function(img) {
+        img.addEventListener('error', function() {
+            this.style.opacity = '0';
+        });
+    });
+
+    // ── IntersectionObserver: play videos when they scroll into view ──────────
+    if ('IntersectionObserver' in window) {
+        var videoObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                var v = entry.target;
+                if (entry.isIntersecting) {
+                    if (v.paused) { v.load(); v.play().catch(function(){}); }
+                } else {
+                    if (!v.paused) v.pause();
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('video[autoplay]').forEach(function(v) {
+            videoObserver.observe(v);
+        });
+    }
+
     document.querySelectorAll('.showcase-media-grid').forEach(function(grid) {
         var items = Array.from(grid.children);
         if (!items.length) return;
@@ -3238,7 +3269,14 @@
                 if (t.getAttribute('aria-selected') !== null) t.setAttribute('aria-selected', 'true');
             });
             const panel = document.getElementById('showcase-' + target);
-            if (panel) panel.classList.add('active');
+            if (panel) {
+                panel.classList.add('active');
+                // Resume videos inside the newly visible panel
+                panel.querySelectorAll('video').forEach(function(v) {
+                    v.load();
+                    v.play().catch(function(){});
+                });
+            }
 
             // Update sticky CTA bar
             const stickyLabel = document.getElementById('showcaseStickyLabel');
