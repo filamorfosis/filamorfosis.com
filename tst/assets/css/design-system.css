@@ -1,0 +1,322 @@
+/* ═══════════════════════════════════════════════
+   FILAMORFOSIS® DESIGN SYSTEM
+   assets/css/design-system.css
+   Load this file FIRST on every page.
+   ═══════════════════════════════════════════════ */
+
+:root {
+  /* ── Color Palette ─────────────────────────────── */
+  --color-bg-primary:    #0a0e1a;
+  --color-bg-secondary:  #0f172a;
+  --color-bg-surface:    rgba(255, 255, 255, 0.04);
+  --color-bg-elevated:   #131929;
+  --color-border:        rgba(255, 255, 255, 0.07);
+  --color-border-strong: rgba(255, 255, 255, 0.12);
+
+  --color-text-primary:   #e2e8f0;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted:     #94a3b8;
+  --color-text-disabled:  #475569;
+
+  --color-accent-purple: #8b5cf6;
+  --color-accent-pink:   #ec4899;
+  --color-accent-indigo: #6366f1;
+  --color-accent-orange: #f97316;
+  --color-accent-cyan:   #06b6d4;
+
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error:   #ef4444;
+  --color-info:    #3b82f6;
+
+  --color-gradient-brand: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  --color-gradient-uv:    linear-gradient(135deg, #f97316, #ec4899);
+  --color-gradient-warm:  linear-gradient(135deg, #f59e0b, #f97316);
+
+  /* ── Typography Scale ──────────────────────────── */
+  --font-family-heading: 'Poppins', sans-serif;
+  --font-family-body:    'Roboto', sans-serif;
+
+  --font-size-xs:   0.75rem;   /* 12px */
+  --font-size-sm:   0.875rem;  /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-md:   1.125rem;  /* 18px */
+  --font-size-lg:   1.25rem;   /* 20px */
+  --font-size-xl:   1.5rem;    /* 24px */
+  --font-size-2xl:  2rem;      /* 32px */
+  --font-size-3xl:  2.5rem;    /* 40px */
+  --font-size-hero: clamp(2.5rem, 5vw, 4rem);
+
+  --font-weight-regular:   400;
+  --font-weight-medium:    500;
+  --font-weight-semibold:  600;
+  --font-weight-bold:      700;
+  --font-weight-extrabold: 800;
+
+  --line-height-tight:  1.2;
+  --line-height-normal: 1.6;
+  --line-height-loose:  1.8;
+
+  /* ── Spacing Scale (4px base unit) ────────────── */
+  --space-xs:   4px;
+  --space-sm:   8px;
+  --space-md:   12px;
+  --space-base: 16px;
+  --space-lg:   24px;
+  --space-xl:   32px;
+  --space-2xl:  48px;
+  --space-3xl:  64px;
+  --space-4xl:  96px;
+
+  /* ── Border Radius ─────────────────────────────── */
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   14px;
+  --radius-xl:   18px;
+  --radius-2xl:  24px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ───────────────────────────────────── */
+  --shadow-sm:          0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md:          0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg:          0 16px 48px rgba(0, 0, 0, 0.5);
+  --shadow-glow-purple: 0 0 20px rgba(139, 92, 246, 0.35);
+  --shadow-glow-pink:   0 0 20px rgba(236, 72, 153, 0.35);
+
+  /* ── Breakpoints (reference only — use in media queries) ── */
+  --bp-mobile:  480px;
+  --bp-tablet:  768px;
+  --bp-desktop: 1024px;
+
+  /* ── Z-index Scale ─────────────────────────────── */
+  --z-promo-banner: 1100;
+  --z-navbar:       1000;
+  --z-drawer:        900;
+  --z-modal:         800;
+  --z-toast:         700;
+  --z-fab:           600;
+  --z-dropdown:      500;
+
+  /* ── Transitions ───────────────────────────────── */
+  --transition-fast:   0.15s ease;
+  --transition-base:   0.25s ease;
+  --transition-slow:   0.4s ease;
+  --transition-spring: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ═══════════════════════════════════════════════
+   SHARED COMPONENT CLASSES
+   ═══════════════════════════════════════════════ */
+
+/* ── Buttons ───────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  background: var(--color-gradient-brand);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  text-decoration: none;
+}
+.btn-primary:hover  { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 3px;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-strong);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+  text-decoration: none;
+}
+.btn-secondary:hover {
+  border-color: var(--color-accent-purple);
+  background: rgba(139, 92, 246, 0.08);
+  transform: translateY(-1px);
+}
+.btn-secondary:active { transform: translateY(0); }
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 3px;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  background: transparent;
+  color: var(--color-accent-purple);
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  text-decoration: none;
+}
+.btn-ghost:hover { background: rgba(139, 92, 246, 0.1); }
+.btn-ghost:active { background: rgba(139, 92, 246, 0.18); }
+.btn-ghost:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 3px;
+}
+
+/* ── Card ──────────────────────────────────────── */
+.card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+/* ── Skeleton shimmer ──────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Badge ─────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.04em;
+}
+.badge-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.badge-warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.badge-error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.badge-purple {
+  background: rgba(139, 92, 246, 0.15);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+.badge-hot {
+  background: var(--color-gradient-uv);
+  color: #fff;
+  border: none;
+}
+.badge-new {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
+  border: none;
+}
+
+/* ═══════════════════════════════════════════════
+   ANIMATION KEYFRAMES
+   All animations use only transform and opacity.
+   ═══════════════════════════════════════════════ */
+
+/* ── Badge pulse (cart badge count increase) ─── */
+@keyframes badge-pulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* ── Toast enter (desktop — slides in from right) */
+@keyframes toast-in {
+  0%   { opacity: 0; transform: translateX(110%); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Toast exit (desktop — slides out to right) ─ */
+@keyframes toast-out {
+  0%   { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(110%); }
+}
+
+/* ── Toast enter mobile (slides down from top) ── */
+@keyframes toast-in-mobile {
+  0%   { opacity: 0; transform: translateY(-110%); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Toast exit mobile (slides up out of view) ── */
+@keyframes toast-out-mobile {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-110%); }
+}
+
+/* ── Cart / side drawer slide in from right ───── */
+@keyframes drawer-in {
+  0%   { opacity: 0; transform: translateX(100%); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Nav drawer slide in from left ────────────── */
+@keyframes nav-drawer-in {
+  0%   { opacity: 0; transform: translateX(-100%); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* ── WhatsApp FAB ring pulse ───────────────────── */
+@keyframes wa-pulse {
+  0%   { opacity: 0.6; transform: scale(1); }
+  70%  { opacity: 0;   transform: scale(1.8); }
+  100% { opacity: 0;   transform: scale(1.8); }
+}
+
+/* ── Order timeline step fill ──────────────────── */
+@keyframes timeline-fill {
+  0%   { opacity: 0; transform: scaleX(0); }
+  100% { opacity: 1; transform: scaleX(1); }
+}
+
+/* ── Slide down (inline form expand) ──────────── */
+@keyframes slide-down {
+  0%   { opacity: 0; transform: translateY(-12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
