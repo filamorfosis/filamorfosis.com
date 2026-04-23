@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Filamorfosis - Impresión 3D, UV y Corte Láser</title>
+    <title>Filamorfosis® | Impresión 3D, UV y Láser en México</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Transforma tus ideas en realidad con Filamorfosis®. Impresión 3D, UV, corte láser, escaneo 3D y más. Calidad garantizada, entregas rápidas en México.">
     
     <!-- Favicons -->
     <link rel="apple-touch-icon" sizes="180x180" href="Resources/Images/favicon_io/apple-touch-icon.png">
@@ -11,13 +12,13 @@
     <link rel="icon" type="image/png" sizes="16x16" href="Resources/Images/favicon_io/favicon-16x16.png">
     <link rel="shortcut icon" href="Resources/Images/favicon_io/favicon.ico">
     
-    <link rel="stylesheet" href="assets/fonts/fontawesome/css/brands.css">
-    <link rel="stylesheet" href="assets/fonts/fontawesome/css/fontawesome.min.css">
-    <link rel="stylesheet" href="assets/fonts/fontawesome/css/solid.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/design-system.css">
+    <link rel="stylesheet" href="assets/fonts/fontawesome/css/all.min.css">
     <link rel="stylesheet" href="assets/vendors/bootstrap/grid.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap">
     <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/products.css">
+    <link rel="stylesheet" href="assets/css/store.css">
 </head>
 <body>
     <div class="lang-switcher">
@@ -102,9 +103,25 @@
                     </div>
                     <ul class="navbar__menu">
                         <li><a href="#home" data-translate="nav_home">Inicio</a></li>
+                        <li><a href="#catalog" class="nav-catalog-link" data-translate="nav_catalog">Catálogo</a></li>
                         <li><a href="#services" data-translate="nav_services">Servicios</a></li>
                         <li><a href="#clients" data-translate="nav_clients">Clientes</a></li>
                         <li><a href="#contact" data-translate="nav_contact">Contacto</a></li>
+                        <!-- Cart icon -->
+                        <li class="navbar__cart-item">
+                            <button class="cart-icon" id="cart-nav-icon" aria-label="Ver carrito" onclick="FilamorfosisCart && FilamorfosisCart.openDrawer()">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span id="cart-count" class="cart-badge">0</span>
+                            </button>
+                        </li>
+                        <!-- Auth state -->
+                        <li data-auth="logged-in" style="display:none">
+                            <a href="account.html" id="navbar-user-name" class="navbar__link navbar__username"></a>
+                            <a href="javascript:void(0)" data-action="logout" class="navbar__link" title="Cerrar sesión"><i class="fas fa-sign-out-alt"></i></a>
+                        </li>
+                        <li data-auth="logged-out">
+                            <a href="javascript:void(0)" data-action="show-login" class="btn btn-outline-sm" data-t="auth.login">Iniciar sesión</a>
+                        </li>
                         <!-- Desktop lang selector as nav item -->
                         <li class="navbar__lang-item">
                             <select id="navLangSelect" class="nav-lang-select">
@@ -126,6 +143,14 @@
                                     <span class="flag">🇬🇧</span>
                                     <span class="lang-name">English</span>
                                 </button>
+                                <button class="lang-option-mobile" data-lang="de" data-flag="🇩🇪">
+                                    <span class="flag">🇩🇪</span>
+                                    <span class="lang-name">Deutsch</span>
+                                </button>
+                                <button class="lang-option-mobile" data-lang="pt" data-flag="🇧🇷">
+                                    <span class="flag">🇧🇷</span>
+                                    <span class="lang-name">Português</span>
+                                </button>
                                 <button class="lang-option-mobile" data-lang="ja" data-flag="🇯🇵">
                                     <span class="flag">🇯🇵</span>
                                     <span class="lang-name">日本語</span>
@@ -143,204 +168,150 @@
                 </div>
             </div>
         </nav>
+        <!-- Mobile floating cart button -->
+        <button class="mobile-cart-fab" aria-label="Ver carrito" onclick="FilamorfosisCart && FilamorfosisCart.openDrawer()">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="mobile-cart-count" class="cart-badge">0</span>
+        </button>
 
         <section id="home" class="hero-section">
-            <div class="smoky" id="smoky-bg">
-                <canvas>Your browser does not support HTML5 canvas.</canvas>
-            </div>
-            <div id="particles-js"></div>
+            <video class="hero-video-bg hero-video-bg--a" id="heroBgA" autoplay muted playsinline>
+                <source src="Resources/hero/FilamorfosisBanner_Low.mp4" type="video/mp4">
+            </video>
             <div class="hero-overlay"></div>
             <div class="container">
                 <div class="hero-content">
-                    <div class="hero-logo">
+                    <!-- <div class="hero-logo">
                         <img src="Resources/Images/Circle_Transparent.png" alt="Filamorfosis Logo">
-                    </div>
+                    </div> -->
                     <h1 class="hero-title animate-fade-in" data-translate="hero_title">Tus Ideas. Tu Realidad.</h1>
                     <p class="hero-subtitle animate-fade-in-delay" data-translate="hero_subtitle">Transformamos tu imaginación en objetos tangibles, <strong>capa</strong> por <strong>capa.</strong></p>
                     <hr class="hero-divider">
                     <div class="hero-cta animate-fade-in-delay-2">
-                        <a href="#services" class="btn btn-primary" data-translate="hero_cta_secondary">Ver Servicios</a>
-                        <a href="#contact" class="btn btn-secondary" data-translate="hero_cta">Solicitar Cotización</a>
+                        <a href="#catalog" class="btn btn-primary" data-t="hero.shopNow" onclick="event.preventDefault(); if(window._spaNavigate) window._spaNavigate('#catalog'); else window.location.hash='#catalog';">Explorar Productos</a>
+                        <a href="#services" class="btn btn-secondary" data-translate="hero_cta_secondary" onclick="event.preventDefault(); if(window._spaNavigate) window._spaNavigate('#services'); else window.location.hash='#services';">Explorar Servicios</a>
                     </div>
                 </div>
             </div>
             <div class="scroll-indicator"><div class="mouse"></div></div>
         </section>
 
-        <section id="services" class="services-section">
-            <div class="container">
-                <h2 class="section-title" data-translate="services_title">Nuestros Servicios</h2>
-                <p class="section-subtitle" data-translate="services_subtitle">Tecnología de vanguardia para tus proyectos</p>
-                <div class="services-grid">
+        <section id="services" class="showcase-section">
+            <!-- Service nav bar — inside section, not sticky -->
+            <div class="service-sidebar" id="serviceSidebar">
+                <div class="service-sidebar__header">
+                    <span class="service-sidebar__title" data-translate="services_title">Servicios a tu Medida</span>
+                </div>
 
-                    <!-- 3D Printing -->
-                    <div class="service-card">
-                        <div class="service-card-top">
-                            <div class="service-badge">3D</div>
-                            <div class="service-big-icon">🖨️</div>
-                        </div>
-                        <h3 data-translate="service_3d_title">Impresión 3D</h3>
-                        <p data-translate="service_3d_desc">Dale vida a tus ideas con impresión multicolor y multimaterial. Desde prototipos hasta piezas funcionales que realmente funcionan.</p>
-                        <ul class="service-features">
-                            <li data-translate="service_3d_feat1">Hasta 5 colores en una pieza</li>
-                            <li data-translate="service_3d_feat2">Materiales flexibles y resistentes</li>
-                            <li data-translate="service_3d_feat3">Precisión milimétrica</li>
+                <div class="service-sidebar__icons">
+                    <button class="service-sidebar__item active" data-tab="engrave" data-label-key="gallery_filter_engrave" title="Grabado Láser">✒</button>
+                    <button class="service-sidebar__item" data-tab="uv" data-label-key="gallery_filter_uv" title="Impresión UV">🎨</button>
+                    <button class="service-sidebar__item" data-tab="3d" data-label-key="gallery_filter_3d" title="Impresión 3D">🌀</button>
+                    <button class="service-sidebar__item" data-tab="laser" data-label-key="gallery_filter_laser" title="Corte Láser">✂</button>
+                    <button class="service-sidebar__item" data-tab="scan" data-label-key="gallery_filter_scan" title="Escaneo 3D">🗿</button>
+                    <button class="service-sidebar__item" data-tab="photo" data-label-key="gallery_filter_photo" title="Fotografía">🖨️</button>
+                </div>
+                <div class="service-sidebar__active-label" id="sidebarActiveLabel">
+                    <span class="service-sidebar__active-icon" id="sidebarActiveIcon">🔆</span>
+                    <span class="service-sidebar__active-name" id="sidebarActiveName">Grabado Láser</span>
+                    <a href="#catalog" class="service-sidebar__active-cta" id="sidebarActiveCta" onclick="event.preventDefault();_navToCat('engrave');" data-t="service.viewProducts">Ver productos →</a>
+                </div>
+                <span class="service-sidebar__subtitle" data-translate="services_subtitle">Productos listos para personalizar — o diseñamos juntos algo único para ti.</span>
+               
+            </div>
+
+            <!-- Laser Engraving -->
+            <div class="showcase-panel active" id="showcase-engrave" role="tabpanel">
+                <div class="showcase-service-info">
+                    <div class="showcase-service-text">
+                        <h3 data-translate="service_engrave_title">Grabado Láser</h3>
+                        <p data-translate="service_engrave_desc">Grabado de alta precisión sobre madera, metal, vidrio, cuero y más. Personaliza cualquier superficie con detalle fotográfico.</p>
+                        <ul class="showcase-features">
+                            <li data-translate="service_engrave_feat1">Detalle fotográfico y vectorial</li>
+                            <li data-translate="service_engrave_feat2">Permanente — no se borra ni desvanece</li>
+                            <li data-translate="service_engrave_feat3">Madera, metal, vidrio, cuero, piedra</li>
                         </ul>
-                        <div class="service-examples">
-                            <h4 data-translate="service_3d_examples_title">¿Qué puedes crear?</h4>
-                            <div class="example-tags">
-                                <span data-translate="service_3d_ex1">🎮 Figuras y juguetes</span>
-                                <span data-translate="service_3d_ex2">🏠 Decoración del hogar</span>
-                                <span data-translate="service_3d_ex3">🔧 Piezas de repuesto</span>
-                                <span data-translate="service_3d_ex4">📱 Accesorios tech</span>
-                                <span data-translate="service_3d_ex5">🎁 Regalos personalizados</span>
-                            </div>
-                        </div>
                     </div>
+                    <div class="showcase-service-tags">
+                        <span class="showcase-tag" data-translate="service_engrave_ex1">🎁 Regalos personalizados</span>
+                        <span class="showcase-tag" data-translate="service_engrave_ex2">🏅 Trofeos y placas</span>
+                        <span class="showcase-tag" data-translate="service_engrave_ex3">🔑 Llaveros y accesorios</span>
+                        <span class="showcase-tag" data-translate="service_engrave_ex4">🍾 Botellas y vasos</span>
+                        <span class="showcase-tag" data-translate="service_engrave_ex5">📱 Gadgets y electrónicos</span>
+                  </div>
+                </div>
+                <div class="showcase-media-grid" id="Showcase_Services">
+                    <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserENGRAVE/xtollPrecision.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserENGRAVE/xtoolCeramica.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserENGRAVE/xtoolGlass.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserENGRAVE/xtoolMetal.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserENGRAVE/xtoolVidrio.mp4" type="video/mp4"></video></div>
+                </div>
+            </div>
 
-                    <!-- UV Printing -->
-                    <div class="service-card">
-                        <div class="service-card-top">
-                            <div class="service-badge">UV</div>
-                            <div class="service-big-icon">🎨</div>
-                        </div>
+            <!-- UV Printing -->
+            <div class="showcase-panel" id="showcase-uv" role="tabpanel">
+                <div class="showcase-service-info">
+                    <div class="showcase-service-text">
                         <h3 data-translate="service_uv_title">Impresión UV</h3>
                         <p data-translate="service_uv_desc">Personaliza casi cualquier superficie con colores vibrantes y duraderos. Tazas, vasos, madera, metal, vidrio y más.</p>
-                        <ul class="service-features">
+                        <ul class="showcase-features">
                             <li data-translate="service_uv_feat1">Imprime en objetos cilíndricos</li>
                             <li data-translate="service_uv_feat2">Colores que no se desvanecen</li>
                             <li data-translate="service_uv_feat3">Stickers resistentes al agua</li>
                         </ul>
-                        <div class="service-examples">
-                            <h4 data-translate="service_uv_examples_title">¿Qué puedes personalizar?</h4>
-                            <div class="example-tags">
-                                <span data-translate="service_uv_ex1">☕ Tazas y vasos térmicos</span>
-                                <span data-translate="service_uv_ex2">🏷️ Stickers UV DTF</span>
-                                <span data-translate="service_uv_ex3">🧲 Magnetos personalizados</span>
-                                <span data-translate="service_uv_ex4">🪵 Placas de madera</span>
-                                <span data-translate="service_uv_ex5">🎨 Objetos decorativos</span>
-                            </div>
-                        </div>
                     </div>
-
-                    <!-- Laser Cutting -->
-                    <div class="service-card">
-                        <div class="service-card-top">
-                            <div class="service-badge">Láser</div>
-                            <div class="service-big-icon">✂️</div>
-                        </div>
-                        <h3 data-translate="service_laser_title">Corte Láser</h3>
-                        <p data-translate="service_laser_desc">Corta y graba con precisión quirúrgica. Perfecto para letreros, decoración, regalos personalizados y más.</p>
-                        <ul class="service-features">
-                            <li data-translate="service_laser_feat1">Cortes limpios y precisos</li>
-                            <li data-translate="service_laser_feat2">Grabados con detalles increíbles</li>
-                            <li data-translate="service_laser_feat3">Madera, acrílico, cuero y más</li>
-                        </ul>
-                        <div class="service-examples">
-                            <h4 data-translate="service_laser_examples_title">¿Qué podemos hacer?</h4>
-                            <div class="example-tags">
-                                <span data-translate="service_laser_ex1">🪵 Letreros de madera</span>
-                                <span data-translate="service_laser_ex2">👜 Accesorios de cuero</span>
-                                <span data-translate="service_laser_ex3">💎 Piezas de acrílico</span>
-                                <span data-translate="service_laser_ex4">🏢 Señalética empresarial</span>
-                                <span data-translate="service_laser_ex5">🎁 Regalos grabados</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 3D Scanning -->
-                    <div class="service-card">
-                        <div class="service-card-top">
-                            <div class="service-badge">Scan</div>
-                            <div class="service-big-icon">🔍</div>
-                        </div>
-                        <h3 data-translate="service_scan_title">Escaneo 3D</h3>
-                        <p data-translate="service_scan_desc">Convertimos objetos físicos en modelos digitales 3D. Ideal para replicar piezas, crear regalos personalizados o digitalizar recuerdos.</p>
-                        <ul class="service-features">
-                            <li data-translate="service_scan_feat1">Escanea desde joyería hasta muebles</li>
-                            <li data-translate="service_scan_feat2">Captura color y textura real</li>
-                            <li data-translate="service_scan_feat3">Listo para imprimir en 3D</li>
-                        </ul>
-                        <div class="service-examples">
-                            <h4 data-translate="service_scan_examples_title">¿Qué puedes escanear?</h4>
-                            <div class="example-tags">
-                                <span data-translate="service_scan_ex1">🏺 Figuras y esculturas</span>
-                                <span data-translate="service_scan_ex2">🔩 Piezas y repuestos</span>
-                                <span data-translate="service_scan_ex3">👤 Bustos y retratos</span>
-                                <span data-translate="service_scan_ex4">🎁 Objetos para replicar</span>
-                                <span data-translate="service_scan_ex5">🚗 Partes de vehículos</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Photo Printing -->
-                    <div class="service-card">
-                        <div class="service-card-top">
-                            <div class="service-badge">Foto</div>
-                            <div class="service-big-icon">📸</div>
-                        </div>
-                        <h3 data-translate="service_photo_title">Impresión Fotográfica</h3>
-                        <p data-translate="service_photo_desc">Tus recuerdos merecen la mejor calidad. Impresión profesional que hace justicia a tus momentos especiales.</p>
-                        <ul class="service-features">
-                            <li data-translate="service_photo_feat1">Calidad profesional</li>
-                            <li data-translate="service_photo_feat2">Papel de primera calidad</li>
-                            <li data-translate="service_photo_feat3">Todos los tamaños</li>
-                        </ul>
-                        <div class="service-examples">
-                            <h4 data-translate="service_photo_examples_title">¿Qué imprimimos?</h4>
-                            <div class="example-tags">
-                                <span data-translate="service_photo_ex1">📸 Fotos familiares</span>
-                                <span data-translate="service_photo_ex2">🖼️ Cuadros decorativos</span>
-                                <span data-translate="service_photo_ex3">📅 Calendarios personalizados</span>
-                                <span data-translate="service_photo_ex4">💼 Material promocional</span>
-                                <span data-translate="service_photo_ex5">🎨 Arte y posters</span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- MOQ Banner -->
-                <div class="moq-banner">
-                    <div class="moq-item">
-                        <span class="moq-num">1</span>
-                        <span class="moq-label" data-translate="moq_single">pieza mínima</span>
-                    </div>
-                    <div class="moq-divider"></div>
-                    <div class="moq-center">
-                        <p class="moq-headline" data-translate="moq_headline">Sin mínimos. Sin excusas.</p>
-                        <p class="moq-sub" data-translate="moq_sub">¿Necesitas una sola pieza? La hacemos. ¿Necesitas 500? También. Tú decides cuánto.</p>
-                    </div>
-                    <div class="moq-divider"></div>
-                    <div class="moq-item">
-                        <span class="moq-num">∞</span>
-                        <span class="moq-label" data-translate="moq_bulk">producción a escala</span>
+                    <div class="showcase-service-tags">
+                        <span class="showcase-tag" data-translate="service_uv_ex1">☕ Tazas y vasos térmicos</span>
+                        <span class="showcase-tag" data-translate="service_uv_ex2">🏷️ Stickers UV DTF</span>
+                        <span class="showcase-tag" data-translate="service_uv_ex3">🧲 Magnetos personalizados</span>
+                        <span class="showcase-tag" data-translate="service_uv_ex4">🪵 Placas de madera</span>
+                        <span class="showcase-tag" data-translate="service_uv_ex5">🎨 Objetos decorativos</span>
                     </div>
                 </div>
+                <div class="showcase-media-grid">
+                    <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/UV/eufy.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/UV/20260414_161455.jpg" alt="Impresión UV"></div>
+                    
+                    <div class="showcase-media-item"><img src="Resources/Banners/UV/20260318_083251.jpg" alt="Impresión UV"></div>
+                    <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/UV/Alquimia.mp4" type="video/mp4"></video></div>
+                    
+                    <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/UV/Cantina.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/UV/20260320_121700.jpg" alt="Impresión UV"></div>
+                
+                    <div class="showcase-media-item"><img src="Resources/Banners/UV/20260414_211301.jpg" alt="Impresión UV"></div>
+                    <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/UV/Spider.mp4" type="video/mp4"></video></div>
+                        
 
+                    <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/UV/Termo.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/UV/20260409_141044.jpg" alt="Impresión UV"></div>
+            
+                
+                </div>
             </div>
-        </section>
-        <div class="video-strip">
-            <video autoplay muted loop playsinline>
-                <source src="Resources/Filamorfosis.mp4" type="video/mp4">
-            </video>
-        </div>
 
-        <section id="materials" class="materials-section">
-            <div class="container">
-                <div class="materials-info">
-                    <h3 data-translate="materials_title">Materiales que Usamos</h3>
-                    <p class="materials-subtitle" data-translate="materials_subtitle">Haz clic en cada material para conocer más detalles</p>
-
-                    <!-- Eco-friendly banner -->
-                    <div class="eco-banner">
-                        <div class="eco-banner-icon">🌱</div>
-                        <div class="eco-banner-text">
-                            <strong data-translate="eco_headline">Impresión Consciente con el Planeta</strong>
-                            <span data-translate="eco_desc">Nuestro material principal, el PLA, es de origen vegetal — fabricado a partir de almïdón de maíz y caña de azúcar. Es biodegradable y una alternativa más verde a los plásticos tradicionales.</span>
-                        </div>
+            <!-- 3D Printing -->
+            <div class="showcase-panel" id="showcase-3d" role="tabpanel">
+                <div class="showcase-service-info">
+                    <div class="showcase-service-text">
+                        <h3 data-translate="service_3d_title">Impresión 3D</h3>
+                        <p data-translate="service_3d_desc">Dale vida a tus ideas con impresión multicolor y multimaterial. Desde prototipos hasta piezas funcionales que realmente funcionan.</p>
+                        <ul class="showcase-features">
+                            <li data-translate="service_3d_feat1">Hasta 5 colores en una pieza</li>
+                            <li data-translate="service_3d_feat2">Materiales flexibles y resistentes</li>
+                            <li data-translate="service_3d_feat3">Precisión milimétrica</li>
+                        </ul>
                     </div>
-
+                    <div class="showcase-service-tags">
+                        <span class="showcase-tag" data-translate="service_3d_ex1">🎮 Figuras y juguetes</span>
+                        <span class="showcase-tag" data-translate="service_3d_ex2">🏠 Decoración del hogar</span>
+                        <span class="showcase-tag" data-translate="service_3d_ex3">🔧 Piezas de repuesto</span>
+                        <span class="showcase-tag" data-translate="service_3d_ex4">📱 Accesorios tech</span>
+                        <span class="showcase-tag" data-translate="service_3d_ex5">🎁 Regalos personalizados</span>
+                   </div>
+                </div>
+            <div class="container" id="3DMaterials">
+                <div class="materials-info">
                     <!-- Mobile collapsible toggle -->
                     <button class="materials-toggle" id="materialsToggle" aria-expanded="false" aria-controls="materialsCollapsible">
                         <span class="materials-toggle-icon">🧪</span>
@@ -349,237 +320,251 @@
                     </button>
 
                     <div class="materials-collapsible" id="materialsCollapsible">
-                    <div class="materials-grid">
-                        <div class="material-card clickable" data-material="pla">
-                            <div class="material-icon">🎨</div>
-                            <h4>PLA</h4>
-                            <p data-translate="material_pla">El más común. Fácil de usar, viene en muchos colores. Perfecto para decoración y prototipos.</p>
-                            <div class="material-uses" data-translate="material_pla_uses">
-                                <strong>Ideal para:</strong> Figuras, juguetes, decoración, prototipos, organizadores
-                            </div>
-                        </div>
-                        <div class="material-card clickable" data-material="petg">
-                            <div class="material-icon">💪</div>
-                            <h4>PETG</h4>
-                            <p data-translate="material_petg">Más fuerte y flexible que PLA. Resistente al agua. Ideal para objetos que se usan mucho.</p>
-                            <div class="material-uses" data-translate="material_petg_uses">
-                                <strong>Ideal para:</strong> Botellas, contenedores, piezas mecánicas, objetos de exterior
-                            </div>
-                        </div>
-                        <div class="material-card clickable" data-material="tpu">
-                            <div class="material-icon">🤸</div>
-                            <h4>TPU</h4>
-                            <p data-translate="material_tpu">Súper flexible como goma. Perfecto para fundas de teléfono, juguetes blandos y piezas que se doblan.</p>
-                            <div class="material-uses" data-translate="material_tpu_uses">
-                                <strong>Ideal para:</strong> Fundas de teléfono, correas, sellos, juguetes flexibles
-                            </div>
-                        </div>
-                        <div class="material-card clickable" data-material="abs">
-                            <div class="material-icon">🔥</div>
-                            <h4>ABS</h4>
-                            <p data-translate="material_abs">Muy resistente al calor. El mismo material de los LEGO. Ideal para piezas mecánicas.</p>
-                            <div class="material-uses" data-translate="material_abs_uses">
-                                <strong>Ideal para:</strong> Piezas de autos, carcasas, herramientas, piezas que aguantan calor
-                            </div>
-                        </div>
-                        <div class="material-card clickable" data-material="pacf">
-                            <div class="material-icon">⚡</div>
-                            <h4>PA+CF</h4>
-                            <p data-translate="material_pacf">El más fuerte. Tiene fibra de carbono. Para piezas que necesitan ser super resistentes.</p>
-                            <div class="material-uses" data-translate="material_pacf_uses">
-                                <strong>Ideal para:</strong> Drones, piezas industriales, herramientas, soportes de carga
-                            </div>
-                        </div>
-                    </div>
-                    </div><!-- /.materials-collapsible -->
-                </div>
+                        <div class="mat-widget">
 
-                <!-- Material Modal -->
-                <div id="materialModal" class="material-modal">
-                    <div class="material-modal-content">
-                        <span class="material-modal-close">&times;</span>
-                        <div class="material-modal-header">
-                            <div class="material-modal-icon"></div>
-                            <h2 class="material-modal-title"></h2>
-                        </div>
-                        <div class="material-modal-body">
-                            <div class="material-modal-section">
-                                <h3 data-translate="modal_properties">Propiedades</h3>
-                                <ul class="material-modal-properties"></ul>
-                            </div>
-                            <div class="material-modal-section">
-                                <h3 data-translate="modal_advantages">Ventajas</h3>
-                                <ul class="material-modal-advantages"></ul>
-                            </div>
-                            <div class="material-modal-section">
-                                <h3 data-translate="modal_applications">Aplicaciones</h3>
-                                <p class="material-modal-applications"></p>
-                            </div>
-                            <div class="material-modal-section">
-                                <h3 data-translate="modal_examples">Ejemplos de Uso</h3>
-                                <div class="material-modal-examples"></div>
-                            </div>
-                            <div class="material-modal-tech-btn-container">
-                                <button class="material-tech-details-btn" data-translate="modal_tech_btn">
-                                    📊 Click aquí para detalles técnicos del material
+                            <!-- Tab strip -->
+                            <div class="mat-widget__tabs" role="tablist">
+                                <button class="mat-widget__tab active" data-mat="pla" role="tab" aria-selected="true">
+                                    <span class="mat-widget__tab-icon">🎨</span>
+                                    <span class="mat-widget__tab-name">PLA</span>
+                                    <span class="mat-widget__tab-badge mat-badge--eco" data-translate="mat_badge_eco">Eco</span>
+                                </button>
+                                <button class="mat-widget__tab" data-mat="petg" role="tab" aria-selected="false">
+                                    <span class="mat-widget__tab-icon">💪</span>
+                                    <span class="mat-widget__tab-name">PETG</span>
+                                    <span class="mat-widget__tab-badge mat-badge--tough" data-translate="mat_badge_tough">Duro</span>
+                                </button>
+                                <button class="mat-widget__tab" data-mat="tpu" role="tab" aria-selected="false">
+                                    <span class="mat-widget__tab-icon">🤸</span>
+                                    <span class="mat-widget__tab-name">TPU</span>
+                                    <span class="mat-widget__tab-badge mat-badge--flex" data-translate="mat_badge_flex">Flex</span>
+                                </button>
+                                <button class="mat-widget__tab" data-mat="abs" role="tab" aria-selected="false">
+                                    <span class="mat-widget__tab-icon">🔥</span>
+                                    <span class="mat-widget__tab-name">ABS</span>
+                                    <span class="mat-widget__tab-badge mat-badge--heat" data-translate="mat_badge_heat">Calor</span>
+                                </button>
+                                <button class="mat-widget__tab" data-mat="pacf" role="tab" aria-selected="false">
+                                    <span class="mat-widget__tab-icon">⚡</span>
+                                    <span class="mat-widget__tab-name">PA+CF</span>
+                                    <span class="mat-widget__tab-badge mat-badge--pro" data-translate="mat_badge_pro">Pro</span>
                                 </button>
                             </div>
-                        </div>
+
+                            <!-- Panels -->
+                            <div class="mat-widget__body">
+
+                                <!-- PLA -->
+                                <div class="mat-widget__panel active mat-panel clickable" data-material="pla" role="tabpanel">
+                                    <div class="mat-widget__panel-left">
+                                        <div class="mat-widget__big-icon">🎨</div>
+                                        <h4 class="mat-widget__name">PLA</h4>
+                                        <p class="mat-widget__desc" data-translate="material_pla">El más común. Fácil de usar, viene en muchos colores. Perfecto para decoración y prototipos.</p>
+                                        <div class="mat-widget__eco-pill">🌱 <span data-translate="eco_headline">Impresión Consciente con el Planeta</span></div>
+                                    </div>
+                                    <div class="mat-widget__panel-right">
+                                        <div class="mat-widget__uses-label" data-translate="mat_ideal_for">Ideal para</div>
+                                        <div class="mat-widget__tags" data-translate="material_pla_uses">Figuras, juguetes, decoración, prototipos, organizadores</div>
+                                        <div class="mat-widget__btn-row">
+                                            <button class="mat-widget__learn-btn" data-material="pla" data-translate="mat_learn_more">✨ Saber más</button>
+                                            <button class="mat-widget__detail-btn" data-material="pla" data-translate="mat_more_info">📋 Ver detalles técnicos</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- PETG -->
+                                <div class="mat-widget__panel mat-panel clickable" data-material="petg" role="tabpanel">
+                                    <div class="mat-widget__panel-left">
+                                        <div class="mat-widget__big-icon">💪</div>
+                                        <h4 class="mat-widget__name">PETG</h4>
+                                        <p class="mat-widget__desc" data-translate="material_petg">Más fuerte y flexible que PLA. Resistente al agua. Ideal para objetos que se usan mucho.</p>
+                                    </div>
+                                    <div class="mat-widget__panel-right">
+                                        <div class="mat-widget__uses-label" data-translate="mat_ideal_for">Ideal para</div>
+                                        <div class="mat-widget__tags" data-translate="material_petg_uses">Botellas, contenedores, piezas mecánicas, objetos de exterior</div>
+                                        <div class="mat-widget__btn-row">
+                                            <button class="mat-widget__learn-btn" data-material="petg" data-translate="mat_learn_more">✨ Saber más</button>
+                                            <button class="mat-widget__detail-btn" data-material="petg" data-translate="mat_more_info">📋 Ver detalles técnicos</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- TPU -->
+                                <div class="mat-widget__panel mat-panel clickable" data-material="tpu" role="tabpanel">
+                                    <div class="mat-widget__panel-left">
+                                        <div class="mat-widget__big-icon">🤸</div>
+                                        <h4 class="mat-widget__name">TPU</h4>
+                                        <p class="mat-widget__desc" data-translate="material_tpu">Súper flexible como goma. Perfecto para fundas de teléfono, juguetes blandos y piezas que se doblan.</p>
+                                    </div>
+                                    <div class="mat-widget__panel-right">
+                                        <div class="mat-widget__uses-label" data-translate="mat_ideal_for">Ideal para</div>
+                                        <div class="mat-widget__tags" data-translate="material_tpu_uses">Fundas de teléfono, correas, sellos, juguetes flexibles</div>
+                                        <div class="mat-widget__btn-row">
+                                            <button class="mat-widget__learn-btn" data-material="tpu" data-translate="mat_learn_more">✨ Saber más</button>
+                                            <button class="mat-widget__detail-btn" data-material="tpu" data-translate="mat_more_info">📋 Ver detalles técnicos</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ABS -->
+                                <div class="mat-widget__panel mat-panel clickable" data-material="abs" role="tabpanel">
+                                    <div class="mat-widget__panel-left">
+                                        <div class="mat-widget__big-icon">🔥</div>
+                                        <h4 class="mat-widget__name">ABS</h4>
+                                        <p class="mat-widget__desc" data-translate="material_abs">Muy resistente al calor. El mismo material de los LEGO. Ideal para piezas mecánicas.</p>
+                                    </div>
+                                    <div class="mat-widget__panel-right">
+                                        <div class="mat-widget__uses-label" data-translate="mat_ideal_for">Ideal para</div>
+                                        <div class="mat-widget__tags" data-translate="material_abs_uses">Piezas de autos, carcasas, herramientas, piezas que aguantan calor</div>
+                                        <div class="mat-widget__btn-row">
+                                            <button class="mat-widget__learn-btn" data-material="abs" data-translate="mat_learn_more">✨ Saber más</button>
+                                            <button class="mat-widget__detail-btn" data-material="abs" data-translate="mat_more_info">📋 Ver detalles técnicos</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- PA+CF -->
+                                <div class="mat-widget__panel mat-panel clickable" data-material="pacf" role="tabpanel">
+                                    <div class="mat-widget__panel-left">
+                                        <div class="mat-widget__big-icon">⚡</div>
+                                        <h4 class="mat-widget__name">PA+CF</h4>
+                                        <p class="mat-widget__desc" data-translate="material_pacf">El más fuerte. Tiene fibra de carbono. Para piezas que necesitan ser super resistentes.</p>
+                                    </div>
+                                    <div class="mat-widget__panel-right">
+                                        <div class="mat-widget__uses-label" data-translate="mat_ideal_for">Ideal para</div>
+                                        <div class="mat-widget__tags" data-translate="material_pacf_uses">Drones, piezas industriales, herramientas, soportes de carga</div>
+                                        <div class="mat-widget__btn-row">
+                                            <button class="mat-widget__learn-btn" data-material="pacf" data-translate="mat_learn_more">✨ Saber más</button>
+                                            <button class="mat-widget__detail-btn" data-material="pacf" data-translate="mat_more_info">📋 Ver detalles técnicos</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div><!-- /.mat-widget__body -->
+                        </div><!-- /.mat-widget -->
+                    </div><!-- /.materials-collapsible -->
+                </div><!-- /.materials-info -->
+            </div><!-- /.3DMaterials container -->
+                <div class="showcase-media-grid">
+                    <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3D/prusa.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/3D/Balon.jpeg" alt="Impresión 3D"></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/3D/CajaOasis.jpeg" alt="Impresión 3D"></div>
+                    <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3D/Mano.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/3D/pexels-jakubzerdzicki-17509941.jpg" alt="Impresión 3D"></div>
+                    <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3D/Balon.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/3D/pexels-mikhail-nilov-9242925.jpg" alt="Impresión 3D"></div>
+                    <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3D/Pelota.mp4" type="video/mp4"></video></div>
+                </div>
+            </div><!-- /.showcase-3d -->
+
+            <!-- Laser Cutting -->
+            <div class="showcase-panel" id="showcase-laser" role="tabpanel">
+                <div class="showcase-service-info">
+                    <div class="showcase-service-text">
+                        <h3 data-translate="service_laser_title">Corte Láser</h3>
+                        <p data-translate="service_laser_desc">Corta y graba con precisión quirúrgica. Perfecto para letreros, decoración, regalos personalizados y más.</p>
+                        <ul class="showcase-features">
+                            <li data-translate="service_laser_feat1">Cortes limpios y precisos</li>
+                            <li data-translate="service_laser_feat2">Grabados con detalles increíbles</li>
+                            <li data-translate="service_laser_feat3">Madera, acrílico, cuero y más</li>
+                        </ul>
+                    </div>
+                    <div class="showcase-service-tags">
+                        <span class="showcase-tag" data-translate="service_laser_ex1">🪵 Letreros de madera</span>
+                        <span class="showcase-tag" data-translate="service_laser_ex2">👜 Accesorios de cuero</span>
+                        <span class="showcase-tag" data-translate="service_laser_ex3">💎 Piezas de acrílico</span>
+                        <span class="showcase-tag" data-translate="service_laser_ex4">🏢 Señalética empresarial</span>
+                        <span class="showcase-tag" data-translate="service_laser_ex5">🎁 Regalos grabados</span>
                     </div>
                 </div>
+                <div class="showcase-media-grid">
+                    <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserCUT/laser.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/LaserCUT/xtool.webp" alt="Corte Láser"></div>
+                    <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserCUT/UVLaser.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/LaserCUT/download.jpg" alt="Corte Láser"></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/LaserCUT/pexels-karola-g2-6272.jpg" alt="Corte Láser"></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/LaserCUT/pexels-optlasers-7097316.jpg" alt="Corte Láser"></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/LaserCUT/pexels-optlasers-7254428.jpg" alt="Corte Láser"></div>
+                </div>
+            </div>
 
-                <!-- Technical Details Modal -->
-                <div id="technicalModal" class="material-modal">
-                    <div class="material-modal-content technical-modal-content">
-                        <span class="technical-modal-close">&times;</span>
-                        <div class="material-modal-header">
-                            <div class="material-modal-icon"></div>
-                            <h2 class="technical-modal-title"></h2>
-                        </div>
-                        <div class="material-modal-body">
-                            <div class="technical-specs-grid">
-                                <div class="tech-spec-card">
-                                    <h4 data-translate="tech_mechanical">Propiedades Mecánicas</h4>
-                                    <ul class="tech-spec-list mechanical-specs"></ul>
-                                </div>
-                                <div class="tech-spec-card">
-                                    <h4 data-translate="tech_thermal">Propiedades Térmicas</h4>
-                                    <ul class="tech-spec-list thermal-specs"></ul>
-                                </div>
-                                <div class="tech-spec-card">
-                                    <h4 data-translate="tech_physical">Propiedades Físicas</h4>
-                                    <ul class="tech-spec-list physical-specs"></ul>
-                                </div>
-                                <div class="tech-spec-card">
-                                    <h4 data-translate="tech_durability">Durabilidad y Resistencia</h4>
-                                    <ul class="tech-spec-list durability-specs"></ul>
-                                </div>
-                            </div>
-                            <div class="material-modal-section">
-                                <h3 data-translate="tech_recommendations">Recomendaciones de Uso</h3>
-                                <p class="tech-recommendations"></p>
-                            </div>
-                        </div>
+            <!-- 3D Scanning -->
+            <div class="showcase-panel" id="showcase-scan" role="tabpanel">
+                <div class="showcase-service-info">
+                    <div class="showcase-service-text">
+                        <h3 data-translate="service_scan_title">Escaneo 3D</h3>
+                        <p data-translate="service_scan_desc">Convertimos objetos físicos en modelos digitales 3D. Ideal para replicar piezas, crear regalos personalizados o digitalizar recuerdos.</p>
+                        <ul class="showcase-features">
+                            <li data-translate="service_scan_feat1">Escanea desde joyería hasta muebles</li>
+                            <li data-translate="service_scan_feat2">Captura color y textura real</li>
+                            <li data-translate="service_scan_feat3">Listo para imprimir en 3D</li>
+                        </ul>
+                    </div>
+                    <div class="showcase-service-tags">
+                        <span class="showcase-tag" data-translate="service_scan_ex1">🏺 Figuras y esculturas</span>
+                        <span class="showcase-tag" data-translate="service_scan_ex2">🔩 Piezas y repuestos</span>
+                        <span class="showcase-tag" data-translate="service_scan_ex3">👤 Bustos y retratos</span>
+                        <span class="showcase-tag" data-translate="service_scan_ex4">🎁 Objetos para replicar</span>
+                        <span class="showcase-tag" data-translate="service_scan_ex5">🚗 Partes de vehículos</span>
+                    </div>
+                </div>
+                <div class="showcase-media-grid">
+                    <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3DScan/3DScanner.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3DScan/3DScanner2.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3DScan/3DScanner3.mp4" type="video/mp4"></video></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/3DScan/Blending_Tradition_and_Technology-The_Evolution_of_Wood_Sculpture_f62f8841-d18c-4a2b-8d3e-780feb82b0ef.webp" alt="Escaneo 3D"></div>
+                    <div class="showcase-media-item"><img src="Resources/Banners/3DScan/Is_Face_Scanning_with_the_Toucan_3D_Scanner_Safe_8880194e-fc29-4851-b876-d9fa17a54f28.webp" alt="Escaneo 3D"></div>
+                </div>
+            </div>
+
+            <!-- Photo Printing -->
+            <div class="showcase-panel" id="showcase-photo" role="tabpanel">
+                <div class="showcase-service-info">
+                    <div class="showcase-service-text">
+                        <h3 data-translate="service_photo_title">Impresión Fotográfica</h3>
+                        <p data-translate="service_photo_desc">Tus recuerdos merecen la mejor calidad. Impresión profesional que hace justicia a tus momentos especiales.</p>
+                        <ul class="showcase-features">
+                            <li data-translate="service_photo_feat1">Calidad profesional</li>
+                            <li data-translate="service_photo_feat2">Papel de primera calidad</li>
+                            <li data-translate="service_photo_feat3">Todos los tamaños</li>
+                        </ul>
+                    </div>
+                    <div class="showcase-service-tags">
+                        <span class="showcase-tag" data-translate="service_photo_ex1">📸 Fotos familiares</span>
+                        <span class="showcase-tag" data-translate="service_photo_ex2">🖼️ Cuadros decorativos</span>
+                        <span class="showcase-tag" data-translate="service_photo_ex3">📅 Calendarios personalizados</span>
+                        <span class="showcase-tag" data-translate="service_photo_ex4">💼 Material promocional</span>
+                        <span class="showcase-tag" data-translate="service_photo_ex5">🎨 Arte y posters</span>
+                   </div>
+                </div>
+                <div class="showcase-media-grid">
+                    <div class="showcase-media-item showcase-media-item--wide" style="background:#0f172a;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#64748b">
+                        <span style="font-size:4rem">📸</span><span style="font-size: 1rem">Próximamente</span>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <section id="gallery" class="gallery-section-wrap">
-            <div class="container">
-                <div class="use-cases-section">
-                    <h3 data-translate="use_cases_title">Ejemplos de lo que Creamos</h3>
-                    <p class="gallery-subtitle" data-translate="gallery_subtitle">Algunos ejemplos de lo que hemos creado</p>
-
-                    <!-- 3D Printing Carousel -->
-                    <div class="carousel-block">
-                        <div class="carousel-label">
-                            <span class="carousel-badge badge-3d">3D</span>
-                            <h4 data-translate="gallery_filter_3d">Impresión 3D</h4>
-                        </div>
-                        <div class="carousel" id="carousel-3d">
-                            <button class="carousel-btn carousel-prev" aria-label="Anterior">&#8249;</button>
-                            <div class="carousel-track-wrap">
-                                <div class="carousel-track">
-                                    <div class="carousel-slide"><video autoplay muted loop playsinline><source src="Resources/Examples/3D-Printing/prusa.mp4" type="video/mp4"></video></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/Resultado.jpeg" alt="Resultado 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/CajaOasis.jpeg" alt="Caja Oasis" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/Balon.jpeg" alt="Balón 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/Diseno.jpeg" alt="Diseño" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/QR.jpeg" alt="QR 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/pexels-fox-58267-15686999.jpg" alt="Impresión 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/pexels-introspectivedsgn-14158951.jpg" alt="Impresión 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/pexels-jakubzerdzicki-17509941.jpg" alt="Impresión 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/pexels-jakubzerdzicki-19124461.jpg" alt="Impresión 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/pexels-jakubzerdzicki-20326699.jpg" alt="Impresión 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/pexels-mikhail-nilov-9242925.jpg" alt="Impresión 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/pexels-mikhail-nilov-9242927.jpg" alt="Impresión 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/pexels-paduret-1476318.jpg" alt="Impresión 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/pexels-papaz-30620861.jpg" alt="Impresión 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/pexels-papaz-30640195.jpg" alt="Impresión 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/pexels-papaz-30669280.jpg" alt="Impresión 3D" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Printing/pexels-papaz-30780285.jpg" alt="Impresión 3D" loading="lazy"></div>
-                                </div>
-                            </div>
-                            <button class="carousel-btn carousel-next" aria-label="Siguiente">&#8250;</button>
-                        </div>
-                        <div class="carousel-dots" id="dots-3d"></div>
-                    </div>
-
-                    <!-- UV Printing Carousel -->
-                    <div class="carousel-block">
-                        <div class="carousel-label">
-                            <span class="carousel-badge badge-uv">UV</span>
-                            <h4 data-translate="gallery_filter_uv">Impresión UV</h4>
-                        </div>
-                        <div class="carousel" id="carousel-uv">
-                            <button class="carousel-btn carousel-prev" aria-label="Anterior">&#8249;</button>
-                            <div class="carousel-track-wrap">
-                                <div class="carousel-track">
-                                    <div class="carousel-slide"><img src="Resources/Examples/UV-Printing/FilamorfosisUV.jpeg" alt="Filamorfosis UV" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/UV-Printing/FilamorfosisUV2.jpeg" alt="Filamorfosis UV 2" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/UV-Printing/ImanUV.jpeg" alt="Imán UV" loading="lazy"></div>
-                                </div>
-                            </div>
-                            <button class="carousel-btn carousel-next" aria-label="Siguiente">&#8250;</button>
-                        </div>
-                        <div class="carousel-dots" id="dots-uv"></div>
-                    </div>
-
-                    <!-- Laser Cutting Carousel -->
-                    <div class="carousel-block">
-                        <div class="carousel-label">
-                            <span class="carousel-badge badge-laser">✦</span>
-                            <h4 data-translate="gallery_filter_laser">Corte Láser</h4>
-                        </div>
-                        <div class="carousel" id="carousel-laser">
-                            <button class="carousel-btn carousel-prev" aria-label="Anterior">&#8249;</button>
-                            <div class="carousel-track-wrap">
-                                <div class="carousel-track">
-                                    <div class="carousel-slide"><video autoplay muted loop playsinline><source src="Resources/Examples/Laser-Cutting/laser.mp4" type="video/mp4"></video></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/Laser-Cutting/download.jpg" alt="Corte Láser" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/Laser-Cutting/pexels-fotografia-eles-dois-245057130-13625513.jpg" alt="Corte Láser" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/Laser-Cutting/pexels-karola-g2-6272.jpg" alt="Corte Láser" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/Laser-Cutting/pexels-optlasers-7097316.jpg" alt="Corte Láser" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/Laser-Cutting/pexels-optlasers-7254428.jpg" alt="Corte Láser" loading="lazy"></div>
-                                </div>
-                            </div>
-                            <button class="carousel-btn carousel-next" aria-label="Siguiente">&#8250;</button>
-                        </div>
-                        <div class="carousel-dots" id="dots-laser"></div>
-                    </div>
-
-                    <!-- 3D Scanning Carousel -->
-                    <div class="carousel-block">
-                        <div class="carousel-label">
-                            <span class="carousel-badge badge-scan">🔍</span>
-                            <h4 data-translate="gallery_filter_scan">Escaneo 3D</h4>
-                        </div>
-                        <div class="carousel" id="carousel-scan">
-                            <button class="carousel-btn carousel-prev" aria-label="Anterior">&#8249;</button>
-                            <div class="carousel-track-wrap">
-                                <div class="carousel-track">
-                                    <div class="carousel-slide"><video autoplay muted loop playsinline><source src="Resources/Examples/3D-Scanning/3DScanner.mp4" type="video/mp4"></video></div>
-                                    <div class="carousel-slide"><video autoplay muted loop playsinline><source src="Resources/Examples/3D-Scanning/3DScanner2.mp4" type="video/mp4"></video></div>
-                                    <div class="carousel-slide"><video autoplay muted loop playsinline><source src="Resources/Examples/3D-Scanning/3DScanner3.mp4" type="video/mp4"></video></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Scanning/Blending_Tradition_and_Technology-The_Evolution_of_Wood_Sculpture_f62f8841-d18c-4a2b-8d3e-780feb82b0ef.webp" alt="Escaneo 3D - Escultura" loading="lazy"></div>
-                                    <div class="carousel-slide"><img src="Resources/Examples/3D-Scanning/Is_Face_Scanning_with_the_Toucan_3D_Scanner_Safe_8880194e-fc29-4851-b876-d9fa17a54f28.webp" alt="Escaneo 3D - Rostro" loading="lazy"></div>
-                                </div>
-                            </div>
-                            <button class="carousel-btn carousel-next" aria-label="Siguiente">&#8250;</button>
-                        </div>
-                        <div class="carousel-dots" id="dots-scan"></div>
-                    </div>
-
-                    <div class="gallery-cta">
-                        <p class="gallery-note" data-translate="gallery_note">💡 ¿Tienes un proyecto en mente? Contáctanos para una cotización personalizada</p>
-                        <a href="#contact" class="btn btn-primary" data-translate="gallery_cta_btn">Solicitar Cotización</a>
-                    </div>
+            <!-- MOQ Banner -->
+            <div class="moq-banner">
+                <div class="moq-item"><span class="moq-num">1</span><span class="moq-label" data-translate="moq_single">pieza mínima</span></div>
+                <div class="moq-divider"></div>
+                <div class="moq-center">
+                    <p class="moq-headline" data-translate="moq_headline">Sin mínimos. Sin excusas.</p>
+                    <p class="moq-sub" data-translate="moq_sub">¿Necesitas una sola pieza? La hacemos. ¿Necesitas 500? También. Tú decides cuánto.</p>
                 </div>
-
+                <div class="moq-divider"></div>
+                <div class="moq-item"><span class="moq-num">∞</span><span class="moq-label" data-translate="moq_bulk">producción a escala</span></div>
             </div>
+
         </section>
 
+
+
+        <div class="video-strip">
+            <video autoplay muted loop playsinline preload="none" data-lazy="true">
+                <source data-src="Resources/Banners/Filamorfosis.mp4" type="video/mp4">
+            </video>
+        </div>
         <section id="bring-to-life" class="btl-section">
             <div class="btl-bg-glow"></div>
             <div class="container btl-container">
@@ -652,19 +637,91 @@
             </div>
         </section>
 
+        <!-- Material Modal (position:fixed — outside all panels) -->
+        <div id="materialModal" class="material-modal">
+            <div class="material-modal-content">
+                <span class="material-modal-close">&times;</span>
+                <div class="material-modal-header">
+                    <div class="material-modal-icon"></div>
+                    <h2 class="material-modal-title"></h2>
+                </div>
+                <div class="material-modal-body">
+                    <div class="material-modal-section">
+                        <h3 data-translate="modal_properties">Propiedades</h3>
+                        <ul class="material-modal-properties"></ul>
+                    </div>
+                    <div class="material-modal-section">
+                        <h3 data-translate="modal_advantages">Ventajas</h3>
+                        <ul class="material-modal-advantages"></ul>
+                    </div>
+                    <div class="material-modal-section">
+                        <h3 data-translate="modal_applications">Aplicaciones</h3>
+                        <p class="material-modal-applications"></p>
+                    </div>
+                    <div class="material-modal-section">
+                        <h3 data-translate="modal_examples">Ejemplos de Uso</h3>
+                        <div class="material-modal-examples"></div>
+                    </div>
+                    <div class="material-modal-tech-btn-container">
+                        <button class="material-tech-details-btn" data-translate="modal_tech_btn">
+                            📊 Click aquí para detalles técnicos del material
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Details Modal (position:fixed — outside all panels) -->
+        <div id="technicalModal" class="material-modal">
+            <div class="material-modal-content technical-modal-content">
+                <span class="technical-modal-close">&times;</span>
+                <div class="material-modal-header">
+                    <div class="material-modal-icon"></div>
+                    <h2 class="technical-modal-title"></h2>
+                </div>
+                <div class="material-modal-body">
+                    <div class="technical-specs-grid">
+                        <div class="tech-spec-card">
+                            <h4 data-translate="tech_mechanical">Propiedades Mecánicas</h4>
+                            <ul class="tech-spec-list mechanical-specs"></ul>
+                        </div>
+                        <div class="tech-spec-card">
+                            <h4 data-translate="tech_thermal">Propiedades Térmicas</h4>
+                            <ul class="tech-spec-list thermal-specs"></ul>
+                        </div>
+                        <div class="tech-spec-card">
+                            <h4 data-translate="tech_physical">Propiedades Físicas</h4>
+                            <ul class="tech-spec-list physical-specs"></ul>
+                        </div>
+                        <div class="tech-spec-card">
+                            <h4 data-translate="tech_durability">Durabilidad y Resistencia</h4>
+                            <ul class="tech-spec-list durability-specs"></ul>
+                        </div>
+                    </div>
+                    <div class="material-modal-section">
+                        <h3 data-translate="tech_recommendations">Recomendaciones de Uso</h3>
+                        <p class="tech-recommendations"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <section id="clients" class="clients-section">
             <div class="container">
                 <h2 class="section-title" data-translate="clients_title">Nuestros Clientes</h2>
                 <p class="section-subtitle" data-translate="clients_subtitle">Empresas que confían en nosotros</p>
-                <div class="clients-grid" id="clientsGrid">
-                    <!-- Populated dynamically from Resources/Clients/clients.json -->
+            </div>
+            <div class="clients-marquee-wrap">
+                <div class="clients-grid clients-marquee" id="clientsGrid">
+                    <!-- Populated dynamically -->
                 </div>
+            </div>
             </div>
         </section>
 
                 <div class="video-strip">
-            <video autoplay muted loop playsinline>
-                <source src="Resources/Alquimia.mp4" type="video/mp4">
+            <video autoplay muted loop playsinline preload="none" data-lazy="true">
+                <source data-src="Resources/Banners/Alquimia.mp4" type="video/mp4">
             </video>
         </div>
 
@@ -698,6 +755,7 @@
                                 <option value="Impresión 3D" data-translate="form_opt_3d">Impresión 3D</option>
                                 <option value="Impresión UV" data-translate="form_opt_uv">Impresión UV</option>
                                 <option value="Corte Láser" data-translate="form_opt_laser">Corte Láser</option>
+                                <option value="Grabado Láser" data-translate="form_opt_engrave">Grabado Láser</option>
                                 <option value="Impresión Fotográfica" data-translate="form_opt_photo">Foto</option>
                                 <option value="Otro" data-translate="form_opt_other">Otro</option>
                             </select>
@@ -724,12 +782,8 @@
             </div>
         </section>
 
-        <button class="whatsapp-bubble" id="waBubble" aria-label="WhatsApp">
-            <i class="fab fa-whatsapp"></i>
-        </button>
-
-        <!-- WhatsApp Modal -->
-        <div class="wa-modal-overlay" id="waModal">
+        <!-- WhatsApp popup modal (opened by the FAB) -->
+        <div class="wa-modal-overlay" id="waModal" style="display:none">
             <div class="wa-modal">
                 <button class="wa-modal-close" id="waModalClose">&times;</button>
                 <div class="wa-modal-header">
@@ -747,6 +801,189 @@
             </div>
         </div>
 
+
+        <!-- ══ CATALOG SECTION (SPA) ══ -->
+        <section id="catalog" class="spa-section" style="display:none">
+<!-- ── HERO ── -->
+<section class="cat-hero">
+    <div class="smoky" id="smoky-bg-cat">
+        <canvas>Your browser does not support HTML5 canvas.</canvas>
+    </div>
+    <div id="particles-js-cat"></div>
+    <div class="cat-hero-bg"></div>
+    <div class="cat-hero-content">
+        <h1 ><span data-translate="hero_title_1">Productos</span> <span class="cat-hero-gradient" data-translate="hero_title_2">Listos para Ordenar</span></h1>
+        <p data-translate="hero_subtitle">Elige tu producto, personalízalo a tu gusto y recíbelo en casa. Productos únicos hechos para ti — porque ser igual que todos no es una opción.</p>
+        <div class="cat-hero-stats">
+            <div class="cat-stat"><span class="cat-stat-num" id="statProducts">0</span><span data-translate="stat_products">Productos</span></div>
+            <div class="cat-stat-div"></div>
+            <div class="cat-stat"><span class="cat-stat-num">1</span><span data-translate="stat_min">Pieza mínima</span></div>
+            <div class="cat-stat-div"></div>
+            <div class="cat-stat"><span class="cat-stat-num">24h</span><span data-translate="stat_response">Respuesta</span></div>
+        </div>
+    </div>
+    <div class="cat-hero-scroll"><i class="fas fa-chevron-down"></i></div>
+</section>
+
+<!-- ── CATEGORY TABS ── -->
+<div class="cat-tabs-wrap" id="catTabsWrap">
+    <div class="cat-tabs" id="catTabs">
+        <!-- injected by JS -->
+    </div>
+</div>
+
+<!-- ── FILTER BAR ── -->
+<div class="cat-filter-bar" id="catFilterBar">
+    <div class="cat-filter-inner">
+        <div class="cat-search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="catSearch" placeholder="Buscar producto...">
+        </div>
+        <div class="cat-filter-chips" id="catFilterChips">
+            <!-- injected by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- ── CATALOG GRID ── -->
+<main class="cat-main">
+    <div class="cat-section-header" id="catSectionHeader">
+        <h2 id="catSectionTitle"></h2>
+        <p id="catSectionDesc"></p>
+    </div>
+    <div class="cat-grid" id="catGrid">
+        <!-- injected by JS -->
+    </div>
+    <div class="cat-empty" id="catEmpty" style="display:none">
+        <i class="fas fa-box-open"></i>
+        <p data-translate="empty_text">No se encontraron productos</p>
+    </div>
+</main>
+
+<!-- ── PRODUCT MODAL ── -->
+<div class="cat-modal-overlay" id="catModal">
+    <div class="cat-modal">
+        <button class="cat-modal-close" id="catModalClose"><i class="fas fa-times"></i></button>
+        <div class="cat-modal-inner" id="catModalInner">
+            <!-- injected by JS -->
+        </div>
+    </div>
+</div>
+        </section>
+
+        <!-- Brand Story Section -->
+        <style>
+          @media (max-width: 768px) {
+            .brand-story-grid { grid-template-columns: 1fr !important; }
+          }
+        </style>
+        <section class="brand-story-section" id="brand-story" style="background:var(--dark-bg,#0f172a);padding:5rem 0">
+          <div class="container">
+            <div class="brand-story-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center">
+              <div class="brand-story-text">
+                <p class="brand-story-eyebrow" style="color:#8b5cf6;font-size: 1rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.75rem">Nuestra historia</p>
+                <h2 style="font-size:clamp(1.8rem,3vw,2.5rem);font-weight:800;color:#fff;margin-bottom:1rem;line-height:1.2">Tus Ideas. Tu Realidad.</h2>
+                <p style="color:#94a3b8;line-height:1.8;margin-bottom:1.5rem">Somos un equipo apasionado por la fabricación digital. Desde impresión 3D multicolor hasta grabado láser de precisión, transformamos tus ideas en objetos reales con tecnología de vanguardia.</p>
+                <p style="color:#94a3b8;line-height:1.8;margin-bottom:2rem">Ofrecemos impresión 3D, impresión UV, corte láser, escaneo 3D e impresión fotográfica — todo bajo un mismo techo, con calidad garantizada y entregas rápidas.</p>
+                <a href="#catalog" class="btn-ghost" style="display:inline-flex;display:none; align-items:center;gap:0.5rem;color:#8b5cf6;border:1px solid rgba(139,92,246,0.4);padding:0.75rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;transition:all 0.2s" data-translate="brandStory.learnMore">Conoce nuestra historia →</a>
+              </div>
+              <div class="brand-story-image" style="border-radius:16px;overflow:hidden;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center">
+                <div style="text-align:center;padding:2rem">
+                  <div style="font-size:4rem;margin-bottom:1rem">🖨️</div>
+                  <p style="color:#94a3b8;font-size: 1rem">Filamorfosis® — Fabricación Digital</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reviews Section -->
+        <section class="reviews-section">
+          <div class="container">
+            <h2 class="section-title" data-translate="reviews.title" style="text-align:center;margin-bottom:2.5rem">Lo que dicen nuestros clientes</h2>
+          </div>
+          <div class="reviews-marquee-wrap">
+            <div class="reviews-marquee">
+              <!-- card 1 -->
+              <div class="review-card">
+                <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                <p class="review-text">"Recomiendo ampliamente a mis amigos de Filamorfosis que se rifaron con esta impresión UV sobre una placa de acero con excelentes detalles. Muy satisfecho con el trabajo realizado, de 10!! 👌👌👌"</p>
+                <p class="review-author">— Mauricio A. · Impresión UV</p>
+              </div>
+              <!-- card 2 -->
+              <div class="review-card">
+                <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                <p class="review-text">"Excelente servicio y atención. Los vasos personalizados quedaron increíbles, el diseño se ve muy profesional. Definitivamente volvería a pedir."</p>
+                <p class="review-author">— Galo M. · Impresión UV</p>
+              </div>
+              <!-- card 3 -->
+              <div class="review-card">
+                <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                <p class="review-text">"Excelente calidad en la impresión 3D. Mi figura quedó perfecta, con todos los detalles que pedí. Sí volvería a pedir."</p>
+                <p class="review-author">— Carlos M. · Impresión 3D</p>
+              </div>
+              <!-- card 4 -->
+              <div class="review-card">
+                <div class="review-stars">⭐⭐⭐⭐</div>
+                <p class="review-text">"Los vasos quedaron muy padres para un evento que tuve. El diseño se ve muy profesional. Uno llegó roto pero me enviaron uno nuevo sin problema."</p>
+                <p class="review-author">— Ana L. · Impresión UV</p>
+              </div>
+              <!-- card 5 -->
+              <div class="review-card">
+                <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                <p class="review-text">"El corte láser en madera fue preciso y el acabado es hermoso. Muy recomendados para proyectos personalizados."</p>
+                <p class="review-author">— Roberto S. · Corte Láser</p>
+              </div>
+              <!-- duplicate set for seamless loop -->
+              <div class="review-card">
+                <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                <p class="review-text">"Recomiendo ampliamente a mis amigos de Filamorfosis que se rifaron con esta impresión UV sobre una placa de acero con excelentes detalles. Muy satisfecho con el trabajo realizado, de 10!! 👌👌👌"</p>
+                <p class="review-author">— Mauricio A. · Impresión UV</p>
+              </div>
+              <div class="review-card">
+                <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                <p class="review-text">"Excelente servicio y atención. Los vasos personalizados quedaron increíbles, el diseño se ve muy profesional. Definitivamente volvería a pedir."</p>
+                <p class="review-author">— Galo M. · Impresión UV</p>
+              </div>
+              <div class="review-card">
+                <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                <p class="review-text">"Excelente calidad en la impresión 3D. Mi figura quedó perfecta, con todos los detalles que pedí. Sí volvería a pedir."</p>
+                <p class="review-author">— Carlos M. · Impresión 3D</p>
+              </div>
+              <div class="review-card">
+                <div class="review-stars">⭐⭐⭐⭐</div>
+                <p class="review-text">"Los vasos quedaron muy padres para un evento que tuve. El diseño se ve muy profesional. Uno llegó roto pero me enviaron uno nuevo sin problema."</p>
+                <p class="review-author">— Ana L. · Impresión UV</p>
+              </div>
+              <div class="review-card">
+                <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                <p class="review-text">"El corte láser en madera fue preciso y el acabado es hermoso. Muy recomendados para proyectos personalizados."</p>
+                <p class="review-author">— Roberto S. · Corte Láser</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Certifications Section -->
+        <section style="background:#0f172a;padding:3rem 0;border-top:1px solid rgba(255,255,255,0.06)">
+          <div class="container">
+            <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:2rem;align-items:center">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;text-align:center">
+                <i class="fas fa-flag" style="font-size:1.5rem;color:#8b5cf6"></i>
+                <span style="font-size:1rem;color:#94a3b8;font-weight:600" data-translate="cert_mexico">Producción en México</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;text-align:center">
+                <i class="fas fa-certificate" style="font-size:1.5rem;color:#8b5cf6"></i>
+                <span style="font-size:1rem;color:#94a3b8;font-weight:600" data-translate="cert_materials">Materiales certificados</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;text-align:center">
+                <i class="fas fa-star" style="font-size:1.5rem;color:#8b5cf6"></i>
+                <span style="font-size:1rem;color:#94a3b8;font-weight:600" data-translate="cert_quality">Calidad garantizada</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <footer class="footer">
             <div class="container">
                 <div class="footer-content">
@@ -756,15 +993,44 @@
                     <p class="footer-trademark" data-translate="footer_trademark">
                         Filamorfosis® es una marca registrada.
                     </p>
+                    <div class="footer-contact" style="display:flex;flex-wrap:wrap;justify-content:center;gap:1.5rem;margin-top:1rem">
+                      <a href="https://wa.me/13152071586" target="_blank" rel="noopener" class="footer-contact-link" aria-label="WhatsApp" style="display:flex;align-items:center;gap:0.5rem;color:#94a3b8;text-decoration:none;font-size:1rem;transition:color 0.2s">
+                        <i class="fab fa-whatsapp" style="color:#25d366"></i> WhatsApp
+                      </a>
+                      <a href="mailto:contacto@filamorfosis.com" class="footer-contact-link" aria-label="Email" style="display:flex;align-items:center;gap:0.5rem;color:#94a3b8;text-decoration:none;font-size:1rem;transition:color 0.2s">
+                        <i class="fas fa-envelope" style="color:#8b5cf6"></i> Email
+                      </a>
+                      <a href="https://instagram.com/filamorfosis" target="_blank" rel="noopener" class="footer-contact-link" aria-label="Instagram" style="display:flex;align-items:center;gap:0.5rem;color:#94a3b8;text-decoration:none;font-size:1rem;transition:color 0.2s">
+                        <i class="fab fa-instagram" style="color:#ec4899"></i> Instagram
+                      </a>
+                    </div>
                 </div>
             </div>
         </footer>
     </div>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="assets/vendors/particles.js/particles.js"></script>
     <script src="assets/vendors/waterpipe/waterpipe.js"></script>
     <script src="Resources/Clients/clients.js"></script>
+    <!-- Catalog core: CATEGORIES, translations, lang engine -->
+    <script src="products/data/catalog.js"></script>
+    <!-- E-commerce modules — must load BEFORE products.js and main.js -->
+    <script>
+      if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        window.FILAMORFOSIS_API_BASE = 'http://localhost:5205/api/v1';
+      }
+    </script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/cart.js"></script>
+    <!-- Catalog render engine -->
+    <script src="assets/js/products.js"></script>
     <script src="assets/js/main.js"></script>
+    <script src="assets/js/store-i18n.js"></script>
+    <script src="assets/js/promo-banner.js" defer></script>
+    <script src="assets/js/whatsapp-fab.js" defer></script>
+    <script src="assets/js/cookie-consent.js" defer></script>
+    <script src="assets/js/toast.js" defer></script>
 </body>
 </html>
 

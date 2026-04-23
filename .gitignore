@@ -1,0 +1,69 @@
+# ── .NET build artifacts ──────────────────────────────────────────────────────
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+*.DotSettings.user
+
+# ── NuGet ─────────────────────────────────────────────────────────────────────
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ── Test results ──────────────────────────────────────────────────────────────
+TestResults/
+coverage/
+*.trx
+*.coveragexml
+
+# ── Secrets & local overrides — NEVER commit these (Requirement 14.5) ─────────
+# Local developer overrides that may contain real credentials
+appsettings.Local.json
+appsettings.Secrets.json
+appsettings.Production.json
+appsettings.Staging.json
+**/appsettings.Local.json
+**/appsettings.Secrets.json
+**/appsettings.Production.json
+**/appsettings.Staging.json
+
+# Generic local JSON overrides
+*.local.json
+**/*.local.json
+
+# .env files (never commit — secrets must live in AWS Secrets Manager)
+.env
+.env.*
+**/.env
+**/.env.*
+
+# ASP.NET Core user secrets (local dev only)
+secrets.json
+
+# AWS credential files
+.aws/credentials
+.aws/config
+
+# ── OS / editor noise ─────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ── Node (frontend tooling) ───────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log
+
+# ── Python scripts (utility scripts at repo root) ─────────────────────────────
+__pycache__/
+*.pyc
+*.pyo

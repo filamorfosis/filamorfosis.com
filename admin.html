@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Filamorfosis®</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/fonts/fontawesome/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="admin-page">
+
+  <!-- Navbar -->
+  <nav class="admin-navbar" id="main-navbar">
+    <div class="admin-navbar-content">
+      <a href="index.html" class="admin-navbar-brand">
+        <img src="assets/img/Profile2.png" alt="Filamorfosis" class="admin-navbar-logo">
+        <div class="admin-navbar-brand-text">
+          <span class="admin-navbar-title">Filamorfosis<sup>®</sup></span>
+          <span class="admin-navbar-subtitle">Panel de Administración</span>
+        </div>
+      </a>
+      <div class="admin-navbar-actions">
+        <span data-auth="logged-in" style="display:none" class="admin-navbar-user">
+          <div class="admin-navbar-user-info">
+            <i class="fas fa-user-circle"></i>
+            <span id="navbar-user-name" class="admin-navbar-username"></span>
+          </div>
+          <button data-action="logout" class="admin-navbar-logout" title="Cerrar sesión">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Salir</span>
+          </button>
+        </span>
+        <span data-auth="logged-out">
+          <button data-action="show-login" class="admin-navbar-login">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Iniciar sesión</span>
+          </button>
+        </span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Toast -->
+  <div id="admin-toast"></div>
+  <div id="login-modal" class="admin-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
+    <div class="admin-modal-box">
+      <div class="admin-modal-title" id="login-modal-title">
+        <i class="fas fa-shield-alt" style="margin-right:8px"></i>Acceso Administrador
+      </div>
+      <div class="admin-modal-subtitle">Filamorfosis® · Panel de Administración</div>
+
+      <!-- Step 1: email + password -->
+      <div id="login-step-1">
+        <span class="mfa-step-label">Paso 1 de 2 — Credenciales</span>
+        <form id="login-form-step1" novalidate>
+          <div class="modal-form-field">
+            <label for="login-email">Correo electrónico</label>
+            <input type="email" id="login-email" name="email" autocomplete="username"
+                   placeholder="admin@filamorfosis.com" required>
+          </div>
+          <div class="modal-form-field">
+            <label for="login-password">Contraseña</label>
+            <input type="password" id="login-password" name="password" autocomplete="current-password"
+                   placeholder="••••••••" required>
+          </div>
+          <div class="modal-error" id="login-err-step1"></div>
+          <button type="submit" class="btn-modal-primary">
+            <i class="fas fa-arrow-right"></i>&nbsp; Continuar
+          </button>
+        </form>
+      </div>
+
+      <!-- Step 2: TOTP code -->
+      <div id="login-step-2" style="display:none">
+        <span class="mfa-step-label">Paso 2 de 2 — Verificación</span>
+
+        <!-- Shown when MFA is NOT yet enrolled -->
+        <div id="mfa-setup-section">
+          <p style="font-size: 1rem;color:#94a3b8;margin-bottom:14px">
+            Tu cuenta requiere configurar la autenticación de dos pasos.<br>
+            Haz clic en el botón para generar tu código QR.
+          </p>
+          <button type="button" id="btn-trigger-mfa-setup" class="btn-modal-ghost">
+            <i class="fas fa-qrcode"></i>&nbsp; Configurar autenticador
+          </button>
+          <hr class="modal-divider">
+        </div>
+
+        <!-- Shown when MFA IS enrolled (or after setup) -->
+        <div id="mfa-verify-section" style="display:none">
+          <p style="font-size: 1rem;color:#94a3b8;margin-bottom:14px">
+            Ingresa el código de 6 dígitos de tu app autenticadora.
+          </p>
+        </div>
+
+        <form id="login-form-step2" novalidate data-mfa-enabled="false">
+          <div class="modal-form-field">
+            <label for="login-totp">Código TOTP</label>
+            <input type="text" id="login-totp" name="totpCode"
+                   inputmode="numeric" pattern="[0-9]{6}"
+                   maxlength="6" autocomplete="one-time-code"
+                   placeholder="123456" required>
+          </div>
+          <div class="modal-error" id="login-err-step2"></div>
+          <button type="submit" class="btn-modal-primary">
+            <i class="fas fa-unlock"></i>&nbsp; Verificar y entrar
+          </button>
+        </form>
+
+        <button type="button" class="btn-modal-ghost" style="margin-top:10px"
+                onclick="document.getElementById('login-step-1').style.display='';document.getElementById('login-step-2').style.display='none'">
+          <i class="fas fa-arrow-left"></i>&nbsp; Volver al paso 1
+        </button>
+      </div>
+    </div>
+  </div>
+
+<div id="mfa-setup-modal" class="admin-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mfa-setup-title">
+    <div class="admin-modal-box">
+      <button class="admin-modal-close" id="btn-close-mfa-setup" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="admin-modal-title" id="mfa-setup-title">
+        <i class="fas fa-qrcode" style="margin-right:8px"></i>Configurar Autenticador
+      </div>
+      <div class="admin-modal-subtitle">Escanea el código con Google Authenticator, Authy u otra app compatible.</div>
+
+      <!-- QR code renders here via admin-auth.js -->
+      <div id="mfa-qr-container" style="
+        display:flex;align-items:center;justify-content:center;
+        min-height:180px;margin:16px 0;
+        border:1px solid rgba(255,255,255,0.07);border-radius:10px;
+        background:rgba(255,255,255,0.02);padding:16px">
+        <i class="fas fa-spinner fa-spin" style="color:#8b5cf6;font-size:1.5rem"></i>
+      </div>
+
+      <p style="font-size: 1rem;color:#64748b;margin-bottom:4px">
+        ¿No puedes escanear? Ingresa este código manualmente:
+      </p>
+      <div class="mfa-secret-box" id="mfa-setup-secret">—</div>
+
+      <hr class="modal-divider">
+      <p style="font-size: 1rem;color:#94a3b8;margin-bottom:12px">
+        Ingresa el código generado por la app para confirmar la configuración:
+      </p>
+
+      <form id="mfa-setup-confirm-form" novalidate>
+        <div class="modal-form-field">
+          <label for="mfa-setup-totp">Código de confirmación</label>
+          <input type="text" id="mfa-setup-totp" name="totpCode"
+                 inputmode="numeric" pattern="[0-9]{6}"
+                 maxlength="6" autocomplete="one-time-code"
+                 placeholder="123456" required>
+        </div>
+        <div class="modal-error" id="mfa-setup-err"></div>
+        <button type="submit" class="btn-modal-primary">
+          <i class="fas fa-check"></i>&nbsp; Confirmar y continuar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <main class="admin-wrap">
+    <div class="admin-header">
+      <h1><i class="fas fa-shield-alt" style="margin-right:10px;font-size:1.4rem;background:linear-gradient(135deg,#6366f1,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text"></i>Panel de Administración</h1>
+      <a href="index.html" class="btn-admin btn-admin-secondary"><i class="fas fa-arrow-left"></i> Volver al sitio</a>
+    </div>
+
+    <!-- Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="orders"><i class="fas fa-shopping-bag"></i> Pedidos</button>
+      <button class="admin-tab" data-tab="products"><i class="fas fa-box"></i> Productos</button>
+      <button class="admin-tab" data-tab="categories"><i class="fas fa-tags"></i> Categorías</button>
+      <button class="admin-tab" data-tab="users"><i class="fas fa-users"></i> Usuarios</button>
+      <button class="admin-tab" data-tab="materials"><i class="fas fa-layer-group"></i> Materiales</button>
+      <button class="admin-tab" data-tab="globalparams"><i class="fas fa-globe"></i> Parámetros Globales</button>
+    </div>
+
+ <div id="panel-orders" class="admin-panel active">
+
+      <!-- Filter bar -->
+      <div class="admin-section">
+        <div class="admin-section-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <span><i class="fas fa-shopping-bag"></i> Todos los pedidos</span>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <!-- Status filter -->
+            <select id="orders-status-filter"
+                    style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;font-family:Poppins,sans-serif;font-size: 1rem;padding:7px 12px;cursor:pointer"
+                    aria-label="Filtrar por estado">
+              <option value="">Todos los estados</option>
+              <option value="Pending">Pendiente</option>
+              <option value="PendingPayment">Pago Pendiente</option>
+              <option value="Paid">Pagado</option>
+              <option value="Preparing">En Preparación</option>
+              <option value="Shipped">Enviado</option>
+              <option value="Delivered">Entregado</option>
+              <option value="Cancelled">Cancelado</option>
+              <option value="PaymentFailed">Pago Fallido</option>
+            </select>
+            <!-- Search input -->
+            <div style="position:relative">
+              <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b;font-size: 1rem;pointer-events:none"></i>
+              <input type="search" id="orders-search" placeholder="Buscar por ID o email..."
+                     style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;font-family:Poppins,sans-serif;font-size: 1rem;padding:7px 12px 7px 32px;width:240px;transition:border-color 0.2s"
+                     aria-label="Buscar pedidos">
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders table -->
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="orders-table">
+            <thead>
+              <tr>
+                <th>ID Pedido</th>
+                <th>Cliente</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody">
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:#64748b"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination controls (rendered by admin-orders.js via renderPagination) -->
+        <div id="orders-pagination"></div>
+      </div>
+    </div>
+
+    <!-- Order detail modal -->
+    <div id="order-detail-modal" class="admin-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="order-detail-title"
+         style="display:none">
+      <div class="admin-modal-box">
+        <button class="admin-modal-close" id="btn-close-order-detail" aria-label="Cerrar">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="admin-modal-title" id="order-detail-title">
+          <i class="fas fa-receipt" style="margin-right:8px"></i>Detalle del Pedido
+        </div>
+        <hr class="modal-divider">
+        <div id="order-detail-body">
+          <!-- Populated by AdminOrders.renderOrderDetail() -->
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-products" class="admin-panel">
+
+      <!-- Add Product form -->
+      <div class="admin-section">
+        <div class="admin-section-title"><i class="fas fa-plus-circle"></i> Agregar Producto</div>
+        <button class="btn-admin btn-admin-primary add-form-toggle" id="toggle-add-product">
+          <i class="fas fa-plus"></i> Nuevo producto
+        </button>
+        <div class="add-form-body" id="add-product-form-wrap">
+          <form id="add-product-form" novalidate>
+            <div class="admin-form">
+              <div class="form-field">
+                <label>Título (ES)</label>
+                <input type="text" name="titleEs" required placeholder="Nombre en español">
+              </div>
+              <div class="form-field">
+                <label>Categoría</label>
+                <select name="categoryId" id="add-product-category" data-category-select required>
+                  <option value="">-- Seleccionar --</option>
+                </select>
+              </div>
+              <div class="form-field admin-form-full">
+                <label>Descripción (ES)</label>
+                <textarea name="descriptionEs" placeholder="Descripción en español"></textarea>
+              </div>
+
+              <div class="form-field">
+                <label>Tags (separados por coma)</label>
+                <input type="text" name="tags" placeholder="uv, madera, personalizado">
+              </div>
+              <div class="form-field">
+                <label>Badge</label>
+                <select name="badge" id="add-product-badge">
+                  <option value="">(ninguno)</option>
+                  <option value="hot">🔥 hot — Más vendido</option>
+                  <option value="new">✨ new — Nuevo</option>
+                  <option value="promo">🏷️ promo — Promo</option>
+                  <option value="popular">⭐ popular — Popular</option>
+                </select>
+              </div>
+              <div class="form-field-check">
+                <input type="checkbox" name="isActive" id="add-product-active" checked>
+                <label for="add-product-active">Activo</label>
+              </div>
+              <div class="form-error" id="add-product-err"></div>
+              <div class="form-actions">
+                <button type="submit" class="btn-admin btn-admin-primary"><i class="fas fa-save"></i> Guardar producto</button>
+                <button type="button" class="btn-admin btn-admin-secondary" id="cancel-add-product">Cancelar</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Products table -->
+      <div class="admin-section">
+        <div class="admin-section-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <span><i class="fas fa-list"></i> Todos los productos</span>
+          <!-- Search input (wired by admin-products.js) -->
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="position:relative">
+              <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b;font-size: 1rem;pointer-events:none"></i>
+              <input type="search" id="products-search" placeholder="Buscar productos..."
+                     style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;font-family:Poppins,sans-serif;font-size: 1rem;padding:7px 12px 7px 32px;width:220px;transition:border-color 0.2s"
+                     aria-label="Buscar productos">
+            </div>
+          </div>
+        </div>
+        <!-- Category filter buttons -->
+        <div id="products-category-filters" class="prod-cat-filters"></div>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="products-table">
+            <thead>
+              <tr>
+                <th>Título (ES)</th>
+                <th>Categoría</th>
+                <th>Estado</th>
+                <th>Variantes</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="products-tbody">
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:#64748b"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="products-pagination"></div>
+      </div>
+    </div>
+
+  <div id="panel-categories" class="admin-panel">
+
+      <!-- Add Category -->
+      <div class="admin-section">
+        <div class="admin-section-title" style="justify-content:space-between">
+          <span><i class="fas fa-plus-circle"></i> Agregar Categoría</span>
+          <button class="btn-admin btn-admin-primary" onclick="AdminCategories.openAddCategoryModal()">
+            <i class="fas fa-plus"></i> Nueva categoría
+          </button>
+        </div>
+      </div>
+
+      <!-- Categories table -->
+      <div class="admin-section">
+        <div class="admin-section-title"><i class="fas fa-list"></i> Todas las categorías</div>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="categories-table">
+            <thead>
+              <tr>
+                <th>Slug</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="categories-tbody">
+              <tr><td colspan="4" style="text-align:center;padding:24px;color:#64748b"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TAB: USERS
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div id="panel-users" class="admin-panel">
+      
+      <!-- Admin Users Section -->
+      <div class="admin-section">
+        <div class="admin-section-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <span><i class="fas fa-user-shield"></i> Administradores</span>
+          <button class="btn-admin btn-admin-primary" id="btn-add-admin">
+            <i class="fas fa-user-plus"></i> Agregar Administrador
+          </button>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="admin-users-table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Nombre</th>
+                <th>Fecha de Registro</th>
+                <th>MFA</th>
+                <th>Rol</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-tbody">
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:#64748b"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Store Users Section -->
+      <div class="admin-section">
+        <div class="admin-section-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <span><i class="fas fa-users"></i> Usuarios de Tienda</span>
+          <div style="position:relative">
+            <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b;font-size: 1rem;pointer-events:none"></i>
+            <input type="search" id="store-users-search" placeholder="Buscar usuarios..."
+                   style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;font-family:Poppins,sans-serif;font-size: 1rem;padding:7px 12px 7px 32px;width:240px;transition:border-color 0.2s"
+                   aria-label="Buscar usuarios">
+          </div>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="store-users-table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Nombre</th>
+                <th>Fecha de Registro</th>
+                <th>MFA</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="store-users-tbody">
+              <tr><td colspan="5" style="text-align:center;padding:24px;color:#64748b"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination controls -->
+        <div id="store-users-pagination"></div>
+      </div>
+    </div>
+
+    <!-- Add Admin User Modal -->
+    <div id="add-admin-modal" class="admin-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="add-admin-title">
+      <div class="admin-modal-box">
+        <button class="admin-modal-close" id="btn-close-add-admin" aria-label="Cerrar">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="admin-modal-title" id="add-admin-title">
+          <i class="fas fa-user-plus" style="margin-right:8px"></i>Agregar Administrador
+        </div>
+        <div class="admin-modal-subtitle">Crear una nueva cuenta de administrador</div>
+
+        <form id="add-admin-form" novalidate>
+          <div class="modal-form-field">
+            <label for="add-admin-email">Correo electrónico</label>
+            <input type="email" id="add-admin-email" name="email" required
+                   placeholder="admin@filamorfosis.com">
+          </div>
+          <div class="modal-form-field">
+            <label for="add-admin-password">Contraseña</label>
+            <input type="password" id="add-admin-password" name="password" required
+                   placeholder="Mínimo 8 caracteres">
+          </div>
+          <div class="modal-form-field">
+            <label for="add-admin-firstname">Nombre</label>
+            <input type="text" id="add-admin-firstname" name="firstName" required
+                   placeholder="Nombre">
+          </div>
+          <div class="modal-form-field">
+            <label for="add-admin-lastname">Apellido</label>
+            <input type="text" id="add-admin-lastname" name="lastName" required
+                   placeholder="Apellido">
+          </div>
+          <div class="modal-form-field">
+            <label>Roles</label>
+            <div class="role-checkboxes" id="add-admin-roles-group">
+              <div class="form-field-check">
+                <input type="checkbox" id="role-cb-OrderManagement" value="OrderManagement" checked>
+                <label for="role-cb-OrderManagement">OrderManagement</label>
+              </div>
+              <div class="form-field-check">
+                <input type="checkbox" id="role-cb-ProductManagement" value="ProductManagement">
+                <label for="role-cb-ProductManagement">ProductManagement</label>
+              </div>
+              <div class="form-field-check">
+                <input type="checkbox" id="role-cb-UserManagement" value="UserManagement">
+                <label for="role-cb-UserManagement">UserManagement</label>
+              </div>
+              <div class="form-field-check">
+                <input type="checkbox" id="role-cb-PriceManagement" value="PriceManagement">
+                <label for="role-cb-PriceManagement">PriceManagement</label>
+              </div>
+              <div class="form-field-check">
+                <input type="checkbox" id="role-cb-Master" value="Master">
+                <label for="role-cb-Master">Master</label>
+              </div>
+            </div>
+          </div>
+          <div class="modal-error" id="add-admin-err"></div>
+          <button type="submit" class="btn-modal-primary">
+            <i class="fas fa-check"></i>&nbsp; Crear Administrador
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Confirmation Modal (reusable) -->
+    <!-- Product Edit Modal (full product editor: fields + variants + images + discounts) -->
+    <div id="prod-edit-modal" class="prod-modal-overlay" role="dialog" aria-modal="true">
+      <div class="prod-modal-box">
+        <div class="prod-modal-header">
+          <div class="prod-modal-title">
+            <i class="fas fa-edit" style="margin-right:8px"></i>
+            <span id="prod-edit-modal-title">Editar Producto</span>
+          </div>
+          <button class="prod-modal-close" id="prod-edit-modal-close" aria-label="Cerrar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <!-- Dynamic content injected by openEditProductModal() -->
+        <div id="prod-edit-modal-body"></div>
+      </div>
+    </div>
+
+    <!-- Variant Edit Modal (stacks on top of product modal) -->
+    <div id="var-edit-modal" class="prod-modal-overlay" role="dialog" aria-modal="true">
+      <div class="prod-modal-box narrow">
+        <div class="prod-modal-header">
+          <div class="prod-modal-title">
+            <i class="fas fa-cubes" style="margin-right:8px"></i>Editar Variante
+          </div>
+          <button class="prod-modal-close" id="var-edit-modal-close" aria-label="Cerrar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <form id="var-edit-modal-form" class="admin-form" novalidate>
+          <!-- ── Identity fields (top) ── -->
+          <div class="form-field"><label>Label (ES) <span class="req">*</span></label><input type="text" id="vmod-labelEs" required></div>
+          <div class="form-field"><label>SKU <span class="req">*</span></label><input type="text" id="vmod-sku" required></div>
+          <div class="form-field-check">
+            <input type="checkbox" id="vmod-avail">
+            <label for="vmod-avail">Disponible</label>
+          </div>
+          <div class="form-field-check">
+            <input type="checkbox" id="vmod-design">
+            <label for="vmod-design">Acepta archivo de diseño</label>
+          </div>
+          <hr class="admin-form-full" style="border:none;border-top:1px solid rgba(139,92,246,0.15);margin:4px 0">
+
+          <!-- ── Multi-Material Usages Section ── -->
+          <div class="admin-form-full" id="vmod-material-usages-section"
+               style="margin-top:4px;border-top:1px solid rgba(139,92,246,0.15);padding-top:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <span style="font-size: 1rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em">
+                <i class="fas fa-layer-group" style="color:#8b5cf6;margin-right:5px"></i>Materiales
+              </span>
+              <button type="button" class="btn-admin btn-admin-primary btn-admin-sm"
+                      onclick="AdminProducts._addMaterialUsageRow()"
+                      id="vmod-add-material-btn">
+                <i class="fas fa-plus"></i> Agregar material
+              </button>
+            </div>
+
+            <!-- Material usages table -->
+            <table id="vmod-material-usages-table"
+                   style="width:100%;border-collapse:collapse;font-size: 1rem;display:none">
+              <thead>
+                <tr style="color:#64748b;font-size: 1rem;text-transform:uppercase;letter-spacing:0.04em">
+                  <th style="padding:6px 8px;text-align:left;font-weight:600">Material</th>
+                  <th style="padding:6px 8px;text-align:right;font-weight:600;width:90px">Cantidad</th>
+                  <th style="padding:6px 8px;text-align:right;font-weight:600;width:100px">Costo</th>
+                  <th style="padding:6px 8px;width:36px"></th>
+                </tr>
+              </thead>
+              <tbody id="vmod-material-usages-tbody"></tbody>
+            </table>
+            <div id="vmod-material-usages-empty"
+                 style="color:#475569;font-size: 1rem;padding:8px 0">
+              Sin materiales. Haz clic en "+ Agregar material" para añadir.
+            </div>
+          </div>
+          <!-- Manufacture time — always visible -->
+          <div class="form-field admin-form-full">
+            <label>Tiempo de fabricación (min)</label>
+            <input type="number" id="vmod-manufactureTimeMinutes" min="0" step="1" placeholder="0" oninput="AdminProducts._updatePricePreview()">
+          </div>
+          <hr class="admin-form-full" style="border:none;border-top:1px solid rgba(139,92,246,0.2);margin:8px 0">
+          <!-- Costo Producción (read-only: material + supplies) -->
+          <div class="form-field">
+            <label>Costo Producción (MXN)</label>
+            <input type="text" id="vmod-production-cost" readonly
+                   style="background:rgba(255,255,255,0.03);color:#94a3b8;cursor:default;font-weight:600" placeholder="0.00">
+          </div>
+          <!-- Ganancia -->
+          <div class="form-field">
+            <label>Ganancia (MXN)</label>
+            <input type="number" step="0.01" min="0" id="vmod-profit" value="0" oninput="AdminProducts._updatePricePreview()">
+          </div>
+          <div class="form-field">
+            <label>Precio final con IVA (MXN)</label>
+            <input type="text" id="vmod-price-preview" readonly style="background:rgba(255,255,255,0.03);color:#a78bfa;cursor:default;font-weight:700" placeholder="—">
+            <div id="vmod-discount-preview" style="display:none;font-size: 1rem;color:#64748b;margin-top:3px;text-decoration:line-through"></div>
+          </div>
+          <!-- Dynamic attribute inputs injected here as a grid -->
+          <div id="vmod-attributes-wrap" class="admin-form-full vmod-attrs-grid"></div>
+          <div class="form-error admin-form-full" id="vmod-err"></div>
+        </form>
+        <!-- Variant discounts — injected dynamically by openEditVariantModal() -->
+        <div id="vmod-discounts-body"></div>
+        <!-- Save / Cancel — below discounts -->
+        <div class="form-actions" style="margin-top:20px">
+          <button type="submit" form="var-edit-modal-form" class="btn-admin btn-admin-primary btn-admin-sm">
+            <i class="fas fa-save"></i> Guardar
+          </button>
+          <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" id="var-edit-modal-cancel">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TAB: MATERIALES
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div id="panel-materials" class="admin-panel">
+      <div class="admin-section">
+        <div class="admin-section-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <span><i class="fas fa-layer-group"></i> Materiales Base</span>
+          <button class="btn-admin btn-admin-primary btn-admin-sm" onclick="AdminCosts.openAddMaterialModal()">
+            <i class="fas fa-plus"></i> Agregar Material
+          </button>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Etiqueta de Tamaño</th>
+                <th>Ancho (cm)</th>
+                <th>Alto (cm)</th>
+                <th>Peso (g)</th>
+                <th>Costo Base (MXN)</th>
+                <th>Stock</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="materials-tbody">
+              <tr><td colspan="9" style="text-align:center;color:#64748b;padding:24px">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TAB: PARÁMETROS GLOBALES
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div id="panel-globalparams" class="admin-panel">
+      <div class="admin-section">
+        <div class="admin-section-title">
+          <span><i class="fas fa-globe"></i> Parámetros Globales</span>
+        </div>
+        <p style="color:#94a3b8;font-size: 1rem;margin-bottom:16px">
+          <i class="fas fa-info-circle" style="color:#a78bfa;margin-right:6px"></i>
+          Estos parámetros aplican a todas las categorías y procesos.
+        </p>
+        <div id="global-params-container">
+          <p style="color:#64748b">Cargando...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Modal (reusable) -->
+    <div id="confirm-modal" class="admin-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+      <div class="admin-modal-box">
+        <div class="admin-modal-title" id="confirm-modal-title">
+          <i class="fas fa-exclamation-triangle" style="margin-right:8px;color:#f59e0b"></i>
+          <span id="confirm-modal-title-text">Confirmar acción</span>
+        </div>
+        <div class="admin-modal-subtitle" id="confirm-modal-message">
+          ¿Estás seguro de que quieres realizar esta acción?
+        </div>
+        <div style="display:flex;gap:12px;margin-top:24px">
+          <button id="confirm-modal-cancel" class="btn-modal-ghost" style="flex:1">
+            <i class="fas fa-times"></i>&nbsp; Cancelar
+          </button>
+          <button id="confirm-modal-confirm" class="btn-modal-primary" style="flex:1;background:linear-gradient(135deg,#ef4444,#dc2626)">
+            <i class="fas fa-check"></i>&nbsp; Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+         CATEGORY MODAL
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div id="category-modal" class="admin-modal-overlay" onclick="if(event.target===this)AdminCategories.closeCategoryModal()" style="display:none">
+    <div class="admin-modal-box">
+      <button class="admin-modal-close" onclick="AdminCategories.closeCategoryModal()" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="admin-modal-title">
+        <i class="fas fa-tag" style="margin-right:8px"></i>
+        <span id="category-modal-title">Categoría</span>
+      </div>
+      <div class="admin-modal-subtitle" id="category-modal-subtitle">Completa los datos de la categoría</div>
+
+      <form id="category-modal-form" onsubmit="AdminCategories.saveCategoryModal(event)" novalidate>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="modal-form-field">
+            <label for="cat-modal-nameEs">Nombre ES <span style="color:#f87171">*</span></label>
+            <input type="text" id="cat-modal-nameEs" placeholder="Impresión UV" required>
+          </div>
+          <div class="modal-form-field">
+            <label for="cat-modal-nameEn">Nombre EN <span style="color:#f87171">*</span></label>
+            <input type="text" id="cat-modal-nameEn" placeholder="UV Printing" required>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="modal-form-field">
+            <label for="cat-modal-slug">Slug <span style="color:#f87171">*</span></label>
+            <input type="text" id="cat-modal-slug" placeholder="uv-printing" required>
+          </div>
+          <div class="modal-form-field">
+            <label for="cat-modal-imageUrl">Image URL <span style="color:#475569;font-weight:400;text-transform:none">(opcional)</span></label>
+            <input type="text" id="cat-modal-imageUrl" placeholder="https://cdn.filamorfosis.com/...">
+          </div>
+        </div>
+
+        <!-- Cost Parameters Section -->
+        <div id="cat-modal-cost-section" style="display:none;margin-top:4px;border-top:1px solid rgba(139,92,246,0.2);padding-top:16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <i class="fas fa-flask" style="color:#8b5cf6;font-size: 1rem"></i>
+            <span style="font-size: 1rem;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:0.06em">Parámetros de Costo</span>
+          </div>
+
+          <!-- Scrollable list of existing params -->
+          <div id="cat-modal-cost-list"
+               style="max-height:240px;overflow-y:auto;border:1px solid #334155;border-radius:8px;
+                      background:#0f172a;padding:6px 8px;margin-bottom:10px">
+            <div id="cat-modal-cost-empty" style="color:#475569;font-size: 1rem;padding:10px 4px;text-align:center">
+              Sin parámetros de costo.
+            </div>
+          </div>
+
+          <!-- Add new param row -->
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;align-items:end">
+            <div class="modal-form-field" style="margin-bottom:0">
+              <label for="cat-modal-cp-label">Suministro</label>
+              <input type="text" id="cat-modal-cp-label" placeholder="Ej. Tinta plana">
+            </div>
+            <div class="modal-form-field" style="margin-bottom:0">
+              <label for="cat-modal-cp-unit">Unidad</label>
+              <select id="cat-modal-cp-unit" class="modal-select" style="padding:10px 8px">
+                <option value="MXN/cm²">MXN/cm²</option>
+                <option value="MXN/g">MXN/g</option>
+                <option value="MXN/hoja">MXN/hoja</option>
+                <option value="MXN/hr">MXN/hr</option>
+                <option value="MXN/unidad">MXN/unidad</option>
+              </select>
+            </div>
+            <div class="modal-form-field" style="margin-bottom:0">
+              <label for="cat-modal-cp-value">Valor</label>
+              <input type="number" step="0.0001" min="0" id="cat-modal-cp-value" value="0">
+            </div>
+            <button type="button" class="btn-admin btn-admin-primary btn-admin-sm"
+                    style="margin-bottom:0;height:40px;white-space:nowrap"
+                    onclick="AdminCategories.addCostParameterRow()">
+              <i class="fas fa-plus"></i> Agregar
+            </button>
+          </div>
+          <div class="modal-error" id="cat-modal-cp-err" style="margin-top:6px"></div>
+        </div>
+
+        <div class="modal-error" id="category-modal-err" style="margin-top:10px"></div>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button type="button" class="btn-modal-ghost" style="flex:1" onclick="AdminCategories.closeCategoryModal()">
+            <i class="fas fa-times"></i>&nbsp; Cancelar
+          </button>
+          <button type="submit" class="btn-modal-primary" style="flex:1;margin-top:0" id="category-modal-save-btn">
+            <i class="fas fa-save"></i>&nbsp; Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+         MATERIAL MODAL
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div id="material-modal" class="admin-modal-overlay" onclick="if(event.target===this)AdminCosts.closeMaterialModal()" style="display:none">
+    <div class="admin-modal-box">
+      <button class="admin-modal-close" onclick="AdminCosts.closeMaterialModal()" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="admin-modal-title">
+        <i class="fas fa-layer-group" style="margin-right:8px"></i>
+        <span id="material-modal-title">Material</span>
+      </div>
+      <div class="admin-modal-subtitle">Completa los datos del material base</div>
+      <form id="material-form" onsubmit="AdminCosts.saveMaterial(event)" novalidate>
+        <div class="modal-form-field">
+          <label for="mat-name">Nombre <span style="color:#f87171">*</span></label>
+          <input type="text" id="mat-name" placeholder="Ej. Acrílico Transparente" required>
+        </div>
+        <div class="modal-form-field">
+          <label for="mat-sizeLabel">Descripción</label>
+          <input type="text" id="mat-sizeLabel" placeholder="Ej. Acrílico transparente 20×30 cm">
+        </div>
+        <div class="modal-form-field">
+          <label for="mat-category">Categoría <span style="color:#f87171">*</span></label>
+          <select id="mat-category" class="modal-select" onchange="AdminCosts._onMatCategoryChange()">
+            <option value="">-- Seleccionar --</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">
+          <div class="modal-form-field">
+            <label for="mat-widthCm">Ancho (cm)</label>
+            <input type="number" step="0.01" min="0" id="mat-widthCm" placeholder="20">
+          </div>
+          <div class="modal-form-field">
+            <label for="mat-heightCm">Alto (cm)</label>
+            <input type="number" step="0.01" min="0" id="mat-heightCm" placeholder="30">
+          </div>
+          <div class="modal-form-field">
+            <label for="mat-depthCm">Profundo (cm)</label>
+            <input type="number" step="0.01" min="0" id="mat-depthCm" placeholder="5">
+          </div>
+          <div class="modal-form-field">
+            <label for="mat-weightGrams">Peso (g)</label>
+            <input type="number" step="1" min="0" id="mat-weightGrams" placeholder="500">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="modal-form-field">
+            <label for="mat-stockQuantity">Stock disponible</label>
+            <input type="number" step="1" min="0" id="mat-stockQuantity" placeholder="0" value="0">
+          </div>
+          <div class="modal-form-field">
+            <label for="mat-baseCostManual">Costo base (MXN)
+              <span style="font-size: 1rem;color:#64748b;font-weight:400;margin-left:4px">precio del material</span>
+            </label>
+            <input type="number" step="0.01" min="0" id="mat-baseCostManual" placeholder="0.00"
+                   oninput="AdminCosts._updateTotalCostPreview()"
+                   style="font-family:monospace">
+          </div>
+        </div>
+
+        <!-- ── Supply Usages Section ── -->
+        <div style="margin-top:16px;border-top:1px solid rgba(139,92,246,0.2);padding-top:16px">
+          <div style="margin-bottom:10px">
+            <span style="font-size: 1rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em">
+              <i class="fas fa-boxes" style="color:#8b5cf6;margin-right:5px"></i>Usos de Insumos
+            </span>
+            <div style="font-size: 1rem;color:#475569;margin-top:3px">
+              Marca los parámetros que consume este material e ingresa la cantidad.
+            </div>
+          </div>
+
+          <!-- Checkbox list — scrollable, rendered by JS -->
+          <div id="mat-supply-usages-list"
+               style="max-height:220px;overflow-y:auto;border:1px solid #334155;
+                      border-radius:6px;padding:4px 6px;background:#0f172a">
+            <div id="mat-supply-usages-empty" style="color:#94a3b8;font-size: 1rem;padding:10px 4px">
+              Selecciona una categoría para ver los parámetros disponibles.
+            </div>
+          </div>
+
+          <!-- Cost summary -->
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.05);
+                      display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+            <div style="display:flex;gap:16px;align-items:center">
+              <span style="font-size: 1rem;color:#64748b">Costo base material:</span>
+              <span id="mat-basecost-preview" style="font-size: 1rem;color:#94a3b8;font-family:monospace">$0.00</span>
+            </div>
+            <div style="display:flex;gap:16px;align-items:center">
+              <span style="font-size: 1rem;color:#64748b">Costo insumos:</span>
+              <span id="mat-suppliescost-preview" style="font-size: 1rem;color:#94a3b8;font-family:monospace">$0.00</span>
+            </div>
+            <div style="display:flex;gap:16px;align-items:center;margin-top:4px;padding-top:6px;border-top:1px solid rgba(139,92,246,0.2)">
+              <span style="font-size: 1rem;font-weight:700;color:#c4b5fd">Costo Total:</span>
+              <span id="mat-totalcost-preview" style="font-size:1rem;font-weight:700;color:#a78bfa;font-family:monospace">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-error" id="material-form-err" style="margin-top:12px"></div>
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button type="button" class="btn-modal-ghost" style="flex:1" onclick="AdminCosts.closeMaterialModal()">
+            <i class="fas fa-times"></i>&nbsp; Cancelar
+          </button>
+          <button type="submit" class="btn-modal-primary" style="flex:1" id="material-save-btn">
+            <i class="fas fa-save"></i>&nbsp; Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Auto-detect local dev vs production
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      window.FILAMORFOSIS_API_BASE = 'http://localhost:5205/api/v1';
+      // No CDN in local dev — images stored as raw S3 keys will show a placeholder
+      window.FILAMORFOSIS_CDN_BASE = null;
+    } else {
+      window.FILAMORFOSIS_CDN_BASE = 'https://cdn.filamorfosis.com';
+    }
+  </script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/admin-api.js"></script>
+  <script src="assets/js/admin-ui.js"></script>
+  <script src="assets/js/admin-auth.js"></script>
+  <script src="assets/js/admin-categories.js"></script>
+  <script src="assets/js/admin-products.js"></script>
+  <script src="assets/js/admin-orders.js"></script>
+  <script src="assets/js/admin-users.js"></script>
+  <script src="assets/js/admin-costs.js"></script>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // ── Tab permission map (Requirements 3.1–3.8) ─────────────────────────────
+    var TAB_PERMISSIONS = {
+      orders:       ['Master', 'OrderManagement'],
+      products:     ['Master', 'ProductManagement'],
+      categories:   ['Master', 'ProductManagement', 'PriceManagement'],
+      users:        ['Master', 'UserManagement'],
+      materials:    ['Master', 'PriceManagement', 'ProductManagement'],
+      globalparams: ['Master', 'PriceManagement']
+    };
+
+    var ACCESS_DENIED_HTML = `
+      <div style="text-align:center;padding:80px 24px">
+        <i class="fas fa-ban" style="font-size:3rem;color:#f87171;margin-bottom:16px;display:block"></i>
+        <h2 style="color:#f87171;margin-bottom:8px">Acceso Denegado</h2>
+        <p style="color:#94a3b8">Tu cuenta no tiene permisos para ninguna sección del panel.</p>
+        <a href="index.html" class="btn-admin btn-admin-secondary" style="margin-top:20px;display:inline-flex">
+          <i class="fas fa-arrow-left"></i>&nbsp; Volver al sitio
+        </a>
+      </div>`;
+
+    /**
+     * Shows/hides tabs based on the user's roles array.
+     * Sets the first visible tab as active.
+     * If no tabs are visible, replaces .admin-wrap with an access-denied message.
+     * Requirements: 3.1–3.8
+     */
+    function _applyTabVisibility(roles) {
+      var firstVisible = null;
+      document.querySelectorAll('.admin-tab').forEach(function (btn) {
+        var tab = btn.dataset.tab;
+        var allowed = TAB_PERMISSIONS[tab] || [];
+        var visible = roles.some(function (r) { return allowed.includes(r); });
+        btn.style.display = visible ? '' : 'none';
+        if (visible && !firstVisible) firstVisible = tab;
+      });
+
+      if (firstVisible) {
+        // Activate first visible tab
+        document.querySelectorAll('.admin-tab').forEach(function (b) { b.classList.remove('active'); });
+        document.querySelectorAll('.admin-panel').forEach(function (p) { p.classList.remove('active'); });
+        var activeBtn = document.querySelector('.admin-tab[data-tab="' + firstVisible + '"]');
+        var activePanel = document.getElementById('panel-' + firstVisible);
+        if (activeBtn) activeBtn.classList.add('active');
+        if (activePanel) activePanel.classList.add('active');
+      } else {
+        // No visible tabs — show access denied
+        var wrap = document.querySelector('.admin-wrap');
+        if (wrap) wrap.innerHTML = ACCESS_DENIED_HTML;
+      }
+    }
+
+    function initTabs() {
+      document.querySelectorAll('.admin-tab').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('.admin-tab').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          document.querySelectorAll('.admin-panel').forEach(function (p) { p.classList.remove('active'); });
+          document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+          // Lazy-load materials data on first visit
+          if (btn.dataset.tab === 'materials' || btn.dataset.tab === 'globalparams') {
+            AdminCosts.loadAll();
+          }
+        });
+      });
+    }
+
+    async function init() {
+      initTabs();
+      // admin-auth.js handles the session check and fires 'auth:login' when ready
+      document.addEventListener('auth:login', async function (e) {
+        var user = e.detail;
+        _applyTabVisibility(user.roles || []);
+        AdminCategories.initAddCategoryForm();
+        AdminProducts.init();
+        AdminOrders.init();
+        await AdminCategories.loadCategories();
+        await AdminProducts.loadProducts();
+        await AdminOrders.loadOrders();
+        await AdminCosts.loadAll();
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+  </script>
+</body>
+</html>

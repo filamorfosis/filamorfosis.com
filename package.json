@@ -1,0 +1,23 @@
+{
+  "name": "filamorfosis-store",
+  "version": "1.0.0",
+  "description": "Filamorfosis online store frontend",
+  "scripts": {
+    "test:design-system": "node tests/design-system.test.js",
+    "test:i18n":          "node tests/i18n.property.test.js",
+    "test:prices":        "node tests/product-price.property.test.js",
+    "test:toast":         "node tests/toast.property.test.js",
+    "test:whatsapp-fab":  "node tests/whatsapp-fab.test.js",
+    "test:cookie-consent": "node tests/cookie-consent.property.test.js",
+    "test:variant-price": "node tests/variant-price.property.test.js",
+    "test:search":        "node tests/search-autocomplete.property.test.js",
+    "test:cart":          "node tests/cart.property.test.js",
+    "test:order-timeline": "node tests/order-timeline.property.test.js",
+    "test:reorder":       "node tests/reorder.property.test.js",
+    "test:catalog-engine": "node tests/catalog-engine.property.test.js",
+    "test":               "node tests/design-system.test.js && node tests/i18n.property.test.js && node tests/product-price.property.test.js && node tests/toast.property.test.js && node tests/whatsapp-fab.test.js && node tests/cookie-consent.property.test.js && node tests/variant-price.property.test.js && node tests/search-autocomplete.property.test.js && node tests/cart.property.test.js && node tests/order-timeline.property.test.js && node tests/reorder.property.test.js && node tests/catalog-engine.property.test.js"
+  },
+  "devDependencies": {
+    "fast-check": "^3.22.0"
+  }
+}

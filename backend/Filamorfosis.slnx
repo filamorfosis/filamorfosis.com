@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Filamorfosis.API/Filamorfosis.API.csproj" />
+  <Project Path="Filamorfosis.Application/Filamorfosis.Application.csproj" />
+  <Project Path="Filamorfosis.Domain/Filamorfosis.Domain.csproj" />
+  <Project Path="Filamorfosis.Infrastructure/Filamorfosis.Infrastructure.csproj" />
+  <Project Path="Filamorfosis.Tests/Filamorfosis.Tests.csproj" />
+</Solution>

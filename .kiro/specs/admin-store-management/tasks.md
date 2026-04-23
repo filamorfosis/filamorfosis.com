@@ -1,0 +1,311 @@
+# Implementation Plan: Admin Store Management
+
+## Overview
+
+Implement the full Admin Store Management feature on top of the existing .NET 8 clean-architecture backend and vanilla-JS frontend. Work proceeds layer by layer: Domain → Application → Infrastructure → API → Frontend → Tests. Each task builds directly on the previous ones so no code is left orphaned.
+
+The existing `OrderStatus` enum uses `InProduction` where the design calls for `Preparing`. Tasks below treat this as a rename that must be applied consistently across the codebase.
+
+---
+
+## Tasks
+
+- [x] 1. Domain layer — new entities and entity extensions
+  - [x] 1.1 Add `AdminMfaSecret` entity to `Filamorfosis.Domain/Entities/`
+    - Fields: `Id`, `UserId`, `SecretBase32` (string, encrypted at rest), `IsConfirmed` (bool), `CreatedAt`, `User` nav property
+    - _Requirements: 1.8, 1.9, 1.10_
+  - [x] 1.2 Add `CategoryAttribute` entity to `Filamorfosis.Domain/Entities/`
+    - Fields: `Id`, `CategoryId`, `AttributeType` (string — "Type" | "Color" | "Size"), `Value`, `Category` nav property
+    - _Requirements: 2.6, 2.7_
+  - [x] 1.3 Add `Discount` entity to `Filamorfosis.Domain/Entities/`
+    - Fields: `Id`, `ProductId?`, `ProductVariantId?`, `DiscountType` (string — "Percentage" | "FixedAmount"), `Value` (decimal), `StartsAt?`, `EndsAt?`, `CreatedAt`, `Product?` and `Variant?` nav properties
+    - _Requirements: 4.1, 4.2_
+  - [x] 1.4 Extend `User` entity with `AdminMfaSecret? MfaSecret` navigation property
+    - _Requirements: 1.8_
+  - [x] 1.5 Extend `Category` entity with `ICollection<CategoryAttribute> Attributes` navigation property
+    - _Requirements: 2.1_
+  - [x] 1.6 Extend `ProductVariant` entity with `ICollection<Discount> Discounts` navigation property
+    - _Requirements: 4.4_
+  - [x] 1.7 Rename `OrderStatus.InProduction` to `OrderStatus.Preparing` across the entire solution
+    - Update the enum value in `OrderStatus.cs`
+    - Update all references in `AdminOrdersController.cs`, `OrdersController.cs`, any seeder, and test files
+    - _Requirements: 5.3, 5.4_
+
+- [x] 2. Application layer — new DTOs and request/response types
+  - [x] 2.1 Add MFA DTOs to `Filamorfosis.Application/DTOs/MfaDtos.cs`
+    - `AdminLoginRequest` (`Email`, `Password`)
+    - `AdminLoginResponse` (`MfaRequired: true`, `MfaToken: string`)
+    - `MfaSetupResponse` (`QrCodeUri`, `Secret`)
+    - `MfaVerifyRequest` (`MfaToken`, `TotpCode`)
+    - `MfaConfirmRequest` (`MfaToken`, `TotpCode`)
+    - _Requirements: 1.8, 1.9, 1.10, 1.12_
+  - [x] 2.2 Add Discount DTOs to `Filamorfosis.Application/DTOs/DiscountDtos.cs`
+    - `CreateDiscountRequest` (`DiscountType`, `Value`, `StartsAt?`, `EndsAt?`)
+    - `DiscountDto` (`Id`, `DiscountType`, `Value`, `StartsAt?`, `EndsAt?`, `CreatedAt`)
+    - _Requirements: 4.1, 4.2, 4.3_
+  - [x] 2.3 Add `CategoryAttributeDto`, `CreateCategoryAttributeRequest` to `Filamorfosis.Application/DTOs/CategoryDto.cs`
+    - `CategoryAttributeDto` (`Id`, `AttributeType`, `Value`)
+    - `CreateCategoryAttributeRequest` (`AttributeType`, `Value`)
+    - Extend `CategoryDto` with `List<CategoryAttributeDto> Attributes`
+    - _Requirements: 2.1, 2.6_
+  - [x] 2.4 Extend `UpdateCategoryRequest` in `AdminProductDtos.cs` with `Slug?` and `ImageUrl?` fields
+    - _Requirements: 2.3_
+  - [x] 2.5 Extend `ProductVariantDto` with `EffectivePrice` (decimal) field
+    - _Requirements: 4.4, 4.5, 4.6, 4.7_
+  - [x] 2.6 Add admin-specific `OrderSummaryDto` and `AdminOrderDetailDto` to `OrderDtos.cs`
+    - `AdminOrderSummaryDto`: adds `UserEmail` field to the existing summary shape
+    - `AdminOrderDetailDto`: extends `OrderDetailDto` with `UserEmail` and `DesignFileCount`
+    - Add `UpdateOrderStatusRequest` with `Status` string field (move from `AdminOrdersController.cs` to DTOs)
+    - _Requirements: 5.1, 5.2_
+  - [x] 2.7 Add `ComputeEffectivePrice` static helper to `Filamorfosis.Application/` (e.g., `DiscountCalculator.cs`)
+    - Implements the priority logic from the design: active discounts only, best reduction wins, Percentage and FixedAmount formulas, floor at 0
+    - _Requirements: 4.4, 4.5, 4.6, 4.7_
+  - [x] 2.8 Write unit tests for `ComputeEffectivePrice`
+    - Test: no active discounts → effectivePrice equals price
+    - Test: Percentage discount → `price * (1 - value/100)`
+    - Test: FixedAmount discount → `max(0, price - value)`
+    - Test: discount outside date range → treated as inactive
+    - Test: multiple active discounts → best reduction wins
+    - _Requirements: 4.4, 4.5, 4.6, 4.7_
+
+- [x] 3. Infrastructure layer — DbContext, migrations, TOTP service
+  - [x] 3.1 Register new entities in `FilamorfosisDbContext`
+    - Add `DbSet<AdminMfaSecret>`, `DbSet<CategoryAttribute>`, `DbSet<Discount>`
+    - Configure `AdminMfaSecret` → `User` one-to-one relationship with cascade delete
+    - Configure `CategoryAttribute` → `Category` one-to-many with cascade delete
+    - Configure `Discount` → `Product` and `Discount` → `ProductVariant` optional FK relationships
+    - Add index on `AdminMfaSecret.UserId`
+    - _Requirements: 1.8, 2.6, 4.1_
+  - [x] 3.2 Create EF Core migration for the new schema
+    - Run `dotnet ef migrations add AdminStoreManagement` from `Filamorfosis.Infrastructure`
+    - Verify the generated migration covers: `AdminMfaSecrets`, `CategoryAttributes`, `Discounts` tables, and the `OrderStatus` rename
+    - _Requirements: 1.8, 2.6, 4.1, 5.3_
+  - [x] 3.3 Add `ITotpService` interface and `OtpNetTotpService` implementation to `Filamorfosis.Infrastructure/Services/`
+    - Interface: `GenerateSecret() → string`, `GetQrCodeUri(email, secret) → string`, `ValidateCode(secret, code) → bool`
+    - Implementation uses `Otp.NET` NuGet package (RFC 6238, ±1 step window)
+    - Add `Otp.NET` package reference to `Filamorfosis.Infrastructure.csproj`
+    - _Requirements: 1.8, 1.9, 1.10_
+  - [x] 3.4 Add `DeleteAsync(key)` method to `IS3Service` and `NoOpS3Service`
+    - Required for the image delete endpoint
+    - _Requirements: 3.11_
+  - [x] 3.5 Register `ITotpService` → `OtpNetTotpService` in `Program.cs` DI container
+    - Add the `"mfa-verify"` fixed-window rate limiter (5 req/min/IP) to the existing rate limiter configuration in `Program.cs`
+    - _Requirements: 1.10_
+
+- [x] 4. API layer — AdminAuthController (MFA flow)
+  - [x] 4.1 Create `AdminAuthController` at `Filamorfosis.API/Controllers/AdminAuthController.cs`
+    - Route prefix: `/api/v1/auth/admin`
+    - `POST /login` — validate credentials via `UserManager`, check Admin role, return `{ mfaRequired: true, mfaToken }` (5-min JWT with `mfa_step: "pending"` claim, no admin access); apply `"login"` rate limiter
+    - `POST /mfa/setup` — requires valid `mfaToken` Bearer header; generate TOTP secret via `ITotpService`, store unconfirmed `AdminMfaSecret`, return `{ qrCodeUri, secret }`
+    - `POST /mfa/confirm` — requires `mfaToken`; validate TOTP code, mark `AdminMfaSecret.IsConfirmed = true`, issue full `access_token` + `refresh_token` with `mfa_verified: true` claim
+    - `POST /mfa/verify` — requires `mfaToken`; validate TOTP code with replay protection (store last-used code per user), issue full `access_token` + `refresh_token` with `mfa_verified: true` claim; apply `"mfa-verify"` rate limiter
+    - Extend `JwtService.GenerateAccessToken` to accept an optional `mfaVerified` bool and include the `mfa_verified` claim when true; add a `GenerateMfaToken(userId)` method for the 5-min intermediate token
+    - _Requirements: 1.4, 1.8, 1.9, 1.10, 1.11_
+  - [x] 4.2 Add `RequireMfaAttribute` authorization attribute to `Filamorfosis.API/`
+    - Checks `ClaimTypes.Role == "Admin"` AND `"mfa_verified" claim == "true"`
+    - Apply `[RequireMfa]` to `AdminCategoriesController`, `AdminProductsController`, `AdminOrdersController`
+    - _Requirements: 1.4, 1.5, 1.8, 1.11_
+  - [x] 4.3 Write integration tests for the MFA authentication flow
+    - Test: `POST /auth/admin/login` with valid Admin credentials returns `mfaRequired: true` and an `mfaToken`
+    - Test: `POST /auth/admin/login` with invalid credentials returns 401
+    - Test: calling any `/api/v1/admin/*` endpoint with only the `mfaToken` returns 403
+    - Test: `POST /auth/admin/mfa/setup` returns a valid `otpauth://totp/` URI — **Property 4**
+    - Test: `POST /auth/admin/mfa/confirm` with a valid TOTP code issues `access_token` with `mfa_verified` claim
+    - Test: `POST /auth/admin/mfa/verify` with a replayed TOTP code returns 422
+    - _Requirements: 1.8, 1.9, 1.10, 1.11_
+
+- [x] 5. API layer — AdminCategoriesController updates
+  - [x] 5.1 Update `AdminCategoriesController` to include `CategoryAttribute` data
+    - `GET /api/v1/admin/categories` — include `Attributes` in the response via `.Include(c => c.Attributes)`
+    - `POST /api/v1/admin/categories` — accept `imageUrl?` in `CreateCategoryRequest`; return full `CategoryDto` with attributes
+    - `PUT /api/v1/admin/categories/{id}` — accept `slug?` and `imageUrl?` in `UpdateCategoryRequest`
+    - `DELETE /api/v1/admin/categories/{id}` — check for active products; return 409 with Problem Details if any exist
+    - `POST /api/v1/admin/categories/{id}/attributes` — create `CategoryAttribute`, return `CategoryAttributeDto` with 201
+    - `DELETE /api/v1/admin/categories/{id}/attributes/{attributeId}` — remove attribute, return 204
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
+  - [x] 5.2 Write property test for category data round-trip — **Property 5**
+    - For any valid `{ slug, nameEs, nameEn }` payload, create then fetch and assert exact field match
+    - Tag: `// Feature: admin-store-management, Property 5: Category data round-trip`
+    - _Requirements: 2.2, 2.3_
+  - [x] 5.3 Write property test for category delete conflict — **Property 6**
+    - For any category with ≥1 active product, DELETE returns 409
+    - Tag: `// Feature: admin-store-management, Property 6: Category delete conflict`
+    - _Requirements: 2.5_
+
+- [x] 6. API layer — AdminProductsController updates
+  - [x] 6.1 Update `AdminProductsController` to include discounts and enforce variant delete conflict
+    - `GET /api/v1/admin/products` — add `categoryId` and `search` filter support; include `Discounts` on variants
+    - `GET /api/v1/admin/products/{id}` — include `Variants` with their `Discounts`; compute `EffectivePrice` per variant using `DiscountCalculator.ComputeEffectivePrice`
+    - `DELETE /api/v1/admin/products/{id}/variants/{variantId}` — check `OrderItems` referencing the variant; return 409 if any exist
+    - `DELETE /api/v1/admin/products/{id}/images` — accept `{ imageUrl }` body, remove from `Product.ImageUrls`, call `IS3Service.DeleteAsync(key)`
+    - _Requirements: 3.1, 3.3, 3.8, 3.9, 3.11, 4.4, 4.5, 4.6, 4.7_
+  - [x] 6.2 Write property test for product pagination invariant — **Property 7**
+    - For any `page` and `pageSize`, items returned ≤ pageSize and `totalCount` equals actual DB count
+    - Tag: `// Feature: admin-store-management, Property 7: Product pagination invariant`
+    - _Requirements: 3.1_
+  - [x] 6.3 Write property test for variant delete conflict — **Property 8**
+    - For any variant referenced by an OrderItem, DELETE returns 409
+    - Tag: `// Feature: admin-store-management, Property 8: Variant delete conflict`
+    - _Requirements: 3.9_
+
+- [x] 7. API layer — AdminDiscountsController (new)
+  - [x] 7.1 Create `AdminDiscountsController` at `Filamorfosis.API/Controllers/AdminDiscountsController.cs`
+    - Route prefix: `/api/v1/admin`
+    - `POST /products/{id}/discounts` — create product-level `Discount`; validate `endsAt > startsAt` (422 if not); return `DiscountDto` with 201
+    - `POST /products/{id}/variants/{variantId}/discounts` — create variant-level `Discount`; same validation; return `DiscountDto` with 201
+    - `DELETE /discounts/{discountId}` — remove discount, return 204
+    - Apply `[RequireMfa]` attribute
+    - _Requirements: 4.1, 4.2, 4.3, 4.10_
+  - [x] 7.2 Write property test for discount effectivePrice calculation — **Property 9**
+    - For any variant with an active Percentage discount, verify `effectivePrice = price * (1 - value/100)`
+    - For any variant with an active FixedAmount discount, verify `effectivePrice = max(0, price - value)`
+    - For any variant with no active discount (or expired), verify `effectivePrice = price`
+    - Tag: `// Feature: admin-store-management, Property 9: Discount effectivePrice calculation`
+    - _Requirements: 4.4, 4.5, 4.6, 4.7_
+
+- [x] 8. API layer — AdminOrdersController updates
+  - [x] 8.1 Update `AdminOrdersController` with full order management
+    - `GET /api/v1/admin/orders` — add `status` and `search` (by order ID or customer email) filter support; return `PagedResult<AdminOrderSummaryDto>` including `userEmail`
+    - `GET /api/v1/admin/orders/{orderId}` — return `AdminOrderDetailDto` with items, address, customer email, and design file count
+    - `PUT /api/v1/admin/orders/{orderId}/status` — implement the `AllowedTransitions` state machine (`Paid → Preparing → Shipped → Delivered`); return 422 with allowed next statuses on invalid transition; send SES email fire-and-forget when advancing to `Shipped`; update `Order.UpdatedAt`
+    - Apply `[RequireMfa]` attribute
+    - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
+  - [x] 8.2 Write property test for order status state machine — **Property 10**
+    - For each valid transition (`Paid→Preparing`, `Preparing→Shipped`, `Shipped→Delivered`), assert 200
+    - For each invalid transition (any other combination), assert 422
+    - Tag: `// Feature: admin-store-management, Property 10: Order status workflow state machine`
+    - _Requirements: 5.3, 5.4_
+  - [x] 8.3 Write property test for order status visibility to customer — **Property 11**
+    - After admin updates status, customer `GET /api/v1/orders/{id}` returns the updated status
+    - Tag: `// Feature: admin-store-management, Property 11: Order status visibility to customer`
+    - _Requirements: 5.8, 6.1_
+
+- [x] 9. API layer — authorization property tests
+  - [x] 9.1 Write property test for admin endpoint authorization — **Property 1**
+    - For any request to `/api/v1/admin/*` without a JWT cookie, assert 401
+    - Tag: `// Feature: admin-store-management, Property 1: Admin endpoint authorization`
+    - _Requirements: 1.4_
+  - [x] 9.2 Write property test for admin endpoint role enforcement — **Property 2**
+    - For any request to `/api/v1/admin/*` with a Customer-role JWT, assert 403
+    - Tag: `// Feature: admin-store-management, Property 2: Admin endpoint role enforcement`
+    - _Requirements: 1.5_
+  - [x] 9.3 Write property test for MFA enforcement on admin login — **Property 3**
+    - For valid Admin credentials, assert that using only the `mfaToken` on any `/api/v1/admin/*` endpoint returns 403
+    - Tag: `// Feature: admin-store-management, Property 3: MFA enforcement on admin login`
+    - _Requirements: 1.8, 1.10, 1.11_
+
+- [x] 10. Checkpoint — backend complete
+  - Ensure all backend tests pass: `dotnet test` from `backend/`
+  - Verify the new migration applies cleanly against a fresh SQLite database
+  - Ask the user if any questions arise before proceeding to the frontend
+
+- [x] 11. Frontend — shared infrastructure (`admin-api.js`, `admin-ui.js`)
+  - [x] 11.1 Create `assets/js/admin-api.js`
+    - `apiFetch(path, options)` wrapper: prepends `/api/v1`, adds `X-Requested-With: XMLHttpRequest`, reads RFC 7807 `detail` from non-2xx responses and throws an enriched error object
+    - Named functions for every admin endpoint: `adminGetCategories`, `adminCreateCategory`, `adminUpdateCategory`, `adminDeleteCategory`, `adminAddCategoryAttribute`, `adminDeleteCategoryAttribute`, `adminGetProducts`, `adminGetProduct`, `adminCreateProduct`, `adminUpdateProduct`, `adminDeleteProduct`, `adminCreateVariant`, `adminUpdateVariant`, `adminDeleteVariant`, `adminUploadImage`, `adminDeleteImage`, `adminCreateProductDiscount`, `adminCreateVariantDiscount`, `adminDeleteDiscount`, `adminGetOrders`, `adminGetOrder`, `adminUpdateOrderStatus`, `adminGetDesignFiles`
+    - _Requirements: 7.2_
+  - [x] 11.2 Create `assets/js/admin-ui.js`
+    - `toast(msg, ok)` — replaces the inline toast helper in `admin.html`
+    - `spin(btn, on)` — replaces the inline spin helper
+    - `confirm(msg)` — wraps `window.confirm` for destructive actions
+    - `renderPagination(containerId, state, onPageChange)` — renders Previous/Next controls
+    - `statusBadge(status)` — returns the color-coded badge HTML for all 8 `OrderStatus` values
+    - _Requirements: 7.3, 7.6, 7.7, 7.9, 5.13_
+
+- [x] 12. Frontend — `admin-auth.js` (MFA login + QR enrollment)
+  - [x] 12.1 Create `assets/js/admin-auth.js`
+    - `checkAdminSession()` — calls `GET /api/v1/users/me`; if 401 or non-Admin, shows the login modal; if Admin but `mfa_verified` missing, shows TOTP step; if fully authenticated, fires `auth:login` event
+    - Step 1 form handler: `POST /api/v1/auth/admin/login`; on success stores `mfaToken` in memory and advances to Step 2
+    - Step 2 TOTP handler: if `mfaEnabled` is false, calls `POST /api/v1/auth/admin/mfa/setup` first and renders QR code in `#mfa-setup-modal`; then `POST /api/v1/auth/admin/mfa/confirm` or `POST /api/v1/auth/admin/mfa/verify`; on success calls `location.reload()`
+    - Logout handler: `POST /api/v1/auth/logout`, then redirect to `index.html`
+    - Displays admin name in `#navbar-user-name` after successful auth
+    - _Requirements: 1.1, 1.2, 1.3, 1.6, 1.7, 1.12_
+  - [x] 12.2 Update `admin.html` to add the MFA login modal and QR setup modal markup
+    - `#login-modal` — two-step overlay: Step 1 (email + password), Step 2 (TOTP input)
+    - `#mfa-setup-modal` — QR code display + confirm code input
+    - Add `<script src="assets/js/admin-auth.js">` before the existing inline script
+    - Add `<script src="assets/js/admin-api.js">` and `<script src="assets/js/admin-ui.js">`
+    - _Requirements: 1.1, 1.12_
+
+- [x] 13. Frontend — `admin-categories.js`
+  - [x] 13.1 Create `assets/js/admin-categories.js`
+    - `loadCategories()` — calls `adminGetCategories()`, stores in module state, renders table and populates product category dropdowns
+    - `renderCategoriesTable()` — renders rows with slug, nameEs, nameEn, attribute count badge, Edit and Delete buttons
+    - Expandable row: shows `CategoryAttribute` items grouped by Type / Color / Size with Add and Delete per attribute
+    - Add Category form: fields for `slug`, `nameEs`, `nameEn`, `imageUrl`; calls `adminCreateCategory`
+    - Edit Category inline form: fields for `nameEs`, `nameEn`, `slug`, `imageUrl`; calls `adminUpdateCategory`
+    - Delete Category: confirmation prompt → `adminDeleteCategory`; shows inline 409 error if category has active products
+    - Add Attribute form per category: `attributeType` select + `value` input; calls `adminAddCategoryAttribute`
+    - Delete Attribute: calls `adminDeleteCategoryAttribute`
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11_
+  - [x] 13.2 Update `admin.html` categories panel to match the new structure
+    - Add attribute count column to the categories table header
+    - Add expandable attribute rows with grouped Type/Color/Size sections and Add Attribute inline form
+    - Add `<script src="assets/js/admin-categories.js">` replacing the inline categories logic
+    - _Requirements: 2.8, 2.9, 2.10_
+
+- [x] 14. Frontend — `admin-products.js`
+  - [x] 14.1 Create `assets/js/admin-products.js`
+    - Module state: `{ page, pageSize: 20, search, total, items }`
+    - `loadProducts()` — calls `adminGetProducts({ page, pageSize, search })`; renders paginated table via `renderPagination`
+    - `renderProductsTable()` — rows with titleEs, category, status badge, variant count, Edit and Delete buttons; search input wired to `state.search`
+    - Expandable product row: loads `adminGetProduct(id)` on first expand; renders variants sub-table (SKU, labelEs, price, effectivePrice, stock, availability, Edit/Delete), image thumbnails with Delete button, file input for image upload, and discount forms
+    - Add Product form: all fields from requirements; calls `adminCreateProduct`
+    - Edit Product inline form: calls `adminUpdateProduct`
+    - Delete Product: confirmation → `adminDeleteProduct`
+    - Add Variant inline form per product: calls `adminCreateVariant`; shows out-of-stock indicator when `stockQuantity === 0`
+    - Edit Variant inline form: calls `adminUpdateVariant`
+    - Delete Variant: confirmation → `adminDeleteVariant`; shows inline 409 error if variant is referenced by orders
+    - Image upload: multipart POST via `adminUploadImage`; refreshes thumbnail list on success
+    - Image delete: confirmation → `adminDeleteImage`; refreshes thumbnail list
+    - Add Discount form per product and per variant: `discountType` select, `value`, `startsAt`, `endsAt`; calls `adminCreateProductDiscount` or `adminCreateVariantDiscount`
+    - Delete Discount: `adminDeleteDiscount`
+    - _Requirements: 3.1, 3.12, 3.13, 3.14, 3.15, 3.16, 3.17, 4.8, 4.9, 7.9, 7.10_
+  - [x] 14.2 Update `admin.html` products panel to match the new structure
+    - Add search input and pagination controls to the products section
+    - Add variant count column to the products table header
+    - Add discount sub-section markup inside the expandable product row
+    - Replace inline products script with `<script src="assets/js/admin-products.js">`
+    - _Requirements: 3.12, 3.14, 3.16, 7.9, 7.10_
+
+- [x] 15. Frontend — `admin-orders.js` and Orders tab
+  - [x] 15.1 Create `assets/js/admin-orders.js`
+    - Module state: `{ page, pageSize: 20, status: '', search: '', total, items }`
+    - `loadOrders()` — calls `adminGetOrders({ page, pageSize, status, search })`; renders paginated table
+    - `renderOrdersTable()` — rows with truncated order ID, customer email, total (MXN), status badge (color-coded via `statusBadge()`), creation date, and "Ver detalle" button
+    - Order detail modal: calls `adminGetOrder(id)`; displays items, shipping address, customer email, payment status, and status advancement control
+    - Status advancement control: button labeled with next logical status ("Marcar como Preparando" / "Marcar como Enviado" / "Marcar como Entregado"); disabled when no further advancement is possible; calls `adminUpdateOrderStatus`; updates badge in-place and shows success toast
+    - Design files button: shown when `designFileCount > 0`; calls `adminGetDesignFiles(orderId)`; opens each presigned URL in a new tab
+    - Status filter dropdown and search input wired to module state
+    - _Requirements: 5.1, 5.2, 5.9, 5.10, 5.11, 5.12, 5.13, 5.14, 5.15, 7.11_
+  - [x] 15.2 Update `admin.html` to add the Orders tab
+    - Add "Pedidos" tab button to `.admin-tabs` (make it the first/default active tab)
+    - Add `#panel-orders` panel with filter bar (status dropdown, search input), orders table, and order detail modal markup
+    - Add `<script src="assets/js/admin-orders.js">`
+    - _Requirements: 5.9, 5.10, 5.11, 7.1_
+
+- [x] 16. Frontend — customer account order status labels
+  - [x] 16.1 Update `assets/js/store-i18n.js` (or equivalent i18n module) with translations for `Preparing`, `Shipped`, and `Delivered` in all six languages (ES, EN, DE, PT, JA, ZH)
+    - ES: "En Preparación", "Enviado", "Entregado"
+    - EN: "Preparing", "Shipped", "Delivered"
+    - DE, PT, JA, ZH: appropriate translations
+    - _Requirements: 6.3, 6.4, 6.5, 6.7_
+  - [x] 16.2 Update the customer order list rendering in `account.html` (or its JS module) to display the new status badges for `Preparing`, `Shipped`, and `Delivered` using the i18n labels
+    - _Requirements: 6.2, 6.3, 6.4, 6.5, 6.6_
+
+- [x] 17. Final checkpoint — full stack integration
+  - Ensure all backend tests pass: `dotnet test` from `backend/`
+  - Manually verify the admin panel loads, MFA login flow works end-to-end, and all tabs render correctly
+  - Ask the user if any questions arise before marking the feature complete
+
+---
+
+## Notes
+
+- Tasks marked with `*` are optional and can be skipped for a faster MVP
+- Property tests use `FsCheck` (already a dependency in `Filamorfosis.Tests.csproj`) with `MaxTest = 100` unless otherwise noted
+- Each property test file should carry the tag comment `// Feature: admin-store-management, Property N: <text>` for traceability
+- The `OrderStatus.InProduction → Preparing` rename (Task 1.7) must be completed before any API or test work that references order statuses
+- The `RequireMfaAttribute` (Task 4.2) replaces the plain `[Authorize(Roles = "Admin")]` on all three existing admin controllers — do not leave both attributes on the same controller
+- All error responses must follow the RFC 7807 Problem Details format already established in the codebase
+- Frontend JS files are loaded via `<script>` tags in `admin.html`; no bundler is used
