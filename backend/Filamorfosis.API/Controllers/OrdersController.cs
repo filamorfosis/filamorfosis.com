@@ -39,7 +39,7 @@ public class OrdersController(FilamorfosisDbContext db) : ControllerBase
 
         // Load user cart
         var cart = await db.Carts
-            .Include(c => c.Items).ThenInclude(i => i.Variant).ThenInclude(v => v.Product)
+            .Include(c => c.Items).ThenInclude(i => i.Variant).ThenInclude(v => v.Product).ThenInclude(p => p.Discounts)
             .Include(c => c.Items).ThenInclude(i => i.Variant).ThenInclude(v => v.Discounts)
             .Include(c => c.Items).ThenInclude(i => i.DesignFile)
             .FirstOrDefaultAsync(c => c.UserId == userId);
@@ -62,7 +62,7 @@ public class OrdersController(FilamorfosisDbContext db) : ControllerBase
             ProductTitleEn = i.Variant?.Product?.TitleEn ?? string.Empty,
             VariantLabelEs = i.Variant?.LabelEs ?? string.Empty,
             VariantLabelEn = i.Variant?.LabelEs ?? string.Empty,
-            UnitPrice = DiscountCalculator.ComputeEffectivePrice(i.Variant?.Price ?? 0, i.Variant?.Discounts ?? []),
+            UnitPrice = DiscountCalculator.ComputeEffectivePrice(i.Variant?.Price ?? 0, (i.Variant?.Discounts ?? []).Concat(i.Variant?.Product?.Discounts ?? [])),
             Quantity = i.Quantity,
             DesignFileId = i.DesignFileId
         }).ToList();

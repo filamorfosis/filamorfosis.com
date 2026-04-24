@@ -17,4 +17,5 @@ public class Product
     public Category Category { get; set; } = null!;
     public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
     public ICollection<ProductAttributeDefinition> AttributeDefinitions { get; set; } = new List<ProductAttributeDefinition>();
+    public ICollection<Discount> Discounts { get; set; } = new List<Discount>();
 }

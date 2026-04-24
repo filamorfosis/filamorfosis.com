@@ -28,6 +28,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
     {
         var query = db.Products
             .Include(p => p.Category)
+            .Include(p => p.Discounts)
             .Include(p => p.Variants)
                 .ThenInclude(v => v.Discounts)
             .Include(p => p.Variants)
@@ -98,6 +99,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
     {
         var p = await db.Products
             .Include(p => p.Category)
+            .Include(p => p.Discounts)
             .Include(p => p.Variants)
                 .ThenInclude(v => v.Discounts)
             .Include(p => p.Variants)
@@ -405,7 +407,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         IsActive = p.IsActive, CategoryId = p.CategoryId,
         CategoryNameEs = p.Category?.NameEs,
         CategoryNameEn = p.Category?.NameEn,
-        Variants = p.Variants.Select(v => MapVariant(v, stockService)).ToList(),
+        Variants = p.Variants.Select(v => MapVariant(v, stockService, p.Discounts)).ToList(),
         AttributeDefinitions = p.AttributeDefinitions
             .Select(pa => new AttributeDefinitionDto
             {
@@ -414,15 +416,27 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
                 CreatedAt = pa.AttributeDefinition.CreatedAt
             })
             .OrderBy(a => a.Name)
-            .ToList()
+            .ToList(),
+        Discounts = (p.Discounts ?? []).Select(d => new DiscountDto
+        {
+            Id = d.Id,
+            DiscountType = d.DiscountType,
+            Value = d.Value,
+            StartsAt = d.StartsAt,
+            EndsAt = d.EndsAt,
+            CreatedAt = d.CreatedAt
+        }).ToList()
     };
 
-    private static ProductVariantDto MapVariant(ProductVariant v, IStockService stockService) => new()
+    private static ProductVariantDto MapVariant(ProductVariant v, IStockService stockService, IEnumerable<Discount>? productDiscounts = null)
     {
+        var allDiscounts = v.Discounts.Concat(productDiscounts ?? []);
+        return new ProductVariantDto
+        {
         Id = v.Id, Sku = v.Sku,
         LabelEs = v.LabelEs,
         Price = v.Price,
-        EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts),
+        EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, allDiscounts),
         IsAvailable = v.IsAvailable,
         AcceptsDesignFile = v.AcceptsDesignFile,
         InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),
@@ -447,7 +461,8 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         MaterialUsages = v.MaterialUsages.ToDictionary(
             u => u.MaterialId.ToString(),
             u => u.Quantity)
-    };
+        };
+    }
 
     private async Task<IActionResult?> _validateMaterialUsages(Dictionary<string, decimal> usages)
     {

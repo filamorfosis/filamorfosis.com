@@ -40,7 +40,7 @@ public class CartController(FilamorfosisDbContext db) : ControllerBase
                 await db.SaveChangesAsync();
                 // Reload to get a fully tracked entity with navigation properties initialized
                 cart = await db.Carts
-                    .Include(c => c.Items).ThenInclude(i => i.Variant).ThenInclude(v => v.Product)
+                    .Include(c => c.Items).ThenInclude(i => i.Variant).ThenInclude(v => v.Product).ThenInclude(p => p.Discounts)
                     .Include(c => c.Items).ThenInclude(i => i.Variant).ThenInclude(v => v.Discounts)
                     .Include(c => c.Items).ThenInclude(i => i.DesignFile)
                     .FirstAsync(c => c.Id == cart.Id);
@@ -61,7 +61,7 @@ public class CartController(FilamorfosisDbContext db) : ControllerBase
                 return null;
 
             return await db.Carts
-                .Include(c => c.Items).ThenInclude(i => i.Variant).ThenInclude(v => v.Product)
+                .Include(c => c.Items).ThenInclude(i => i.Variant).ThenInclude(v => v.Product).ThenInclude(p => p.Discounts)
                 .Include(c => c.Items).ThenInclude(i => i.Variant).ThenInclude(v => v.Discounts)
                 .Include(c => c.Items).ThenInclude(i => i.DesignFile)
                 .FirstOrDefaultAsync(c => c.GuestToken == token);
@@ -235,7 +235,7 @@ public class CartController(FilamorfosisDbContext db) : ControllerBase
             ProductTitleEn = i.Variant?.Product?.TitleEn ?? string.Empty,
             VariantLabelEs = i.Variant?.LabelEs ?? string.Empty,
             VariantLabelEn = i.Variant?.LabelEs ?? string.Empty,
-            UnitPrice = DiscountCalculator.ComputeEffectivePrice(i.Variant?.Price ?? 0, i.Variant?.Discounts ?? []),
+            UnitPrice = DiscountCalculator.ComputeEffectivePrice(i.Variant?.Price ?? 0, (i.Variant?.Discounts ?? []).Concat(i.Variant?.Product?.Discounts ?? [])),
             OriginalPrice = i.Variant?.Price ?? 0,
             Quantity = i.Quantity,
             CustomizationNotes = i.CustomizationNotes,
@@ -243,6 +243,6 @@ public class CartController(FilamorfosisDbContext db) : ControllerBase
             DesignFileId = i.DesignFileId,
             DesignFileName = i.DesignFile?.FileName
         }).ToList(),
-        Total = cart.Items.Sum(i => DiscountCalculator.ComputeEffectivePrice(i.Variant?.Price ?? 0, i.Variant?.Discounts ?? []) * i.Quantity)
+        Total = cart.Items.Sum(i => DiscountCalculator.ComputeEffectivePrice(i.Variant?.Price ?? 0, (i.Variant?.Discounts ?? []).Concat(i.Variant?.Product?.Discounts ?? [])) * i.Quantity)
     };
 }

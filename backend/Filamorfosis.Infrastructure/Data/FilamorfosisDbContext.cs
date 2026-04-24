@@ -187,7 +187,7 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
         // Discount — optional FK to Product
         modelBuilder.Entity<Discount>()
             .HasOne(d => d.Product)
-            .WithMany()
+            .WithMany(p => p.Discounts)
             .HasForeignKey(d => d.ProductId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Cascade);

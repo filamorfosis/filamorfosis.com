@@ -17,4 +17,5 @@ public class ProductDetailDto
     public string? CategoryNameEn { get; set; }
     public List<ProductVariantDto> Variants { get; set; } = new();
     public List<AttributeDefinitionDto> AttributeDefinitions { get; set; } = new();
+    public List<DiscountDto> Discounts { get; set; } = new();
 }

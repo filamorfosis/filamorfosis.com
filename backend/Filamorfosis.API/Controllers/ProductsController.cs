@@ -20,6 +20,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
         [FromQuery] string? badge = null)
     {
         var query = db.Products
+            .Include(p => p.Discounts)
             .Include(p => p.Variants)
                 .ThenInclude(v => v.AttributeValues)
                     .ThenInclude(av => av.AttributeDefinition)
@@ -68,17 +69,17 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
             IsActive = p.IsActive,
             CategoryId = p.CategoryId,
             BasePrice = p.Variants.Where(v => v.IsAvailable).Any()
-                ? p.Variants.Where(v => v.IsAvailable).Min(v => DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts))
+                ? p.Variants.Where(v => v.IsAvailable).Min(v => DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(p.Discounts)))
                 : 0m,
             HasDiscount = p.Variants.Where(v => v.IsAvailable).Any(v =>
-                DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts) < v.Price),
+                DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(p.Discounts)) < v.Price),
             Variants = p.Variants.Select(v => new ProductVariantDto
             {
                 Id = v.Id,
                 Sku = v.Sku,
                 LabelEs = v.LabelEs,
                 Price = v.Price,
-                EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts),
+                EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(p.Discounts)),
                 IsAvailable = v.IsAvailable,
                 AcceptsDesignFile = v.AcceptsDesignFile,
                 InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),
@@ -104,6 +105,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
     public async Task<IActionResult> GetById(Guid id)
     {
         var product = await db.Products
+            .Include(p => p.Discounts)
             .Include(p => p.Variants)
                 .ThenInclude(v => v.AttributeValues)
                     .ThenInclude(av => av.AttributeDefinition)
@@ -142,7 +144,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
                 Sku = v.Sku,
                 LabelEs = v.LabelEs,
                 Price = v.Price,
-                EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts),
+                EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(product.Discounts)),
                 IsAvailable = v.IsAvailable,
                 AcceptsDesignFile = v.AcceptsDesignFile,
                 InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),

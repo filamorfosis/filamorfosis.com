@@ -398,10 +398,11 @@
                   stockBorder = 'rgba(100,116,139,0.35)';
                 }
                 
-                // Compute effective price from discounts
+                // Compute effective price from variant + product discounts
                 const now = new Date();
                 let effectivePrice = v.price ?? 0;
-                (v.discounts || []).forEach(function(d) {
+                const allDiscounts = (v.discounts || []).concat(product.discounts || []);
+                allDiscounts.forEach(function(d) {
                   const starts = d.startsAt ? new Date(d.startsAt) : null;
                   const ends   = d.endsAt   ? new Date(d.endsAt)   : null;
                   const active = (!starts || starts <= now) && (!ends || ends >= now);
@@ -413,7 +414,7 @@
                 const discountCell = hasDiscount
                   ? `<span style="color:#fb923c;font-weight:700">$${fmt(effectivePrice)}</span>
                      <span style="color:#64748b;font-size:1rem;text-decoration:line-through;margin-left:4px">$${fmt(v.price)}</span>`
-                  : `<span style="color:#475569;font-size:1rem">—</span>`;
+                  : `<span style="color:#e2e8f0">$${fmt(v.price ?? 0)}</span>`;
                 return `<tr>
                   <td>${esc(v.labelEs || v.label || '—')}</td>
                   <td style="font-family:monospace;font-size:1rem;color:#a5b4fc">${esc(v.sku || '—')}</td>
@@ -493,6 +494,7 @@
         <div class="form-error admin-form-full" id="pedit-err"></div>
       </form>
       ${variantsHtml}
+      ${product ? `<div id="prod-discounts-body"></div>` : ''}
       <div class="form-actions" style="margin-top:20px">
         <button type="submit" form="prod-edit-form" class="btn-admin btn-admin-primary" id="pedit-save-btn">
           <i class="fas fa-save"></i> Guardar producto
@@ -505,6 +507,9 @@
     // Wire the form submit
     const form = document.getElementById('prod-edit-form');
     if (form) form.addEventListener('submit', saveProductModal);
+
+    // Render product-level discounts
+    if (product) _renderProductDiscounts(product);
   }
 
   // -- Task 4.2 — saveProductModal -------------------------------------------
@@ -656,7 +661,9 @@
 
   function _addMaterialUsageRow() {
     const list  = _filteredMaterials();
-    const first = list[0];
+    const usedIds = new Set(_materialUsageRows.map(r => r.materialId));
+    const first = list.find(m => !usedIds.has(m.id));
+    if (!first) return; // all materials already in use — safety guard
     _materialUsageRows.push({
       materialId: first ? first.id : '',
       baseCost:   first ? (first.baseCost || 0) : 0,
@@ -691,32 +698,7 @@
     _materialUsageRows[idx].name       = mat ? mat.name : '';
     _materialUsageRows[idx].quantity   = qty;
 
-    // Update live line cost
-    const lineCostEl = document.getElementById('vmod-mat-cost-' + idx);
-    if (lineCostEl) {
-      lineCostEl.textContent = '$' + fmt(_materialUsageRows[idx].baseCost * qty);
-    }
-
-    // Update stock badge for the newly selected material
-    const stockEl = document.querySelector('#vmod-mat-sel-' + idx)
-      ?.closest('tr')
-      ?.querySelector('.vmod-stock-badge');
-    if (stockEl) {
-      const stock    = mat ? (mat.stockQuantity ?? 0) : null;
-      const stockTxt = stock === null ? '—' : String(stock);
-      const stockClr = stock === null ? '#64748b'
-                     : stock <= 0    ? '#f87171'
-                     : stock <= 5    ? '#eab308'
-                     :                 '#22c55e';
-      const stockBg  = stock === null ? 'rgba(100,116,139,0.12)'
-                     : stock <= 0    ? 'rgba(248,113,113,0.12)'
-                     : stock <= 5    ? 'rgba(234,179,8,0.12)'
-                     :                 'rgba(34,197,94,0.12)';
-      stockEl.textContent = stockTxt;
-      stockEl.style.color = stockClr;
-      stockEl.style.background = stockBg;
-    }
-
+    _renderMaterialUsagesTable();
     _updatePricePreview();
   }
 
@@ -728,9 +710,11 @@
     const emptyEl  = document.getElementById('vmod-material-usages-empty');
     if (!tbody) return;
 
+    const addBtn = document.getElementById('vmod-add-material-btn');
     if (!_materialUsageRows.length) {
       if (table)   table.style.display = 'none';
       if (emptyEl) emptyEl.style.display = '';
+      if (addBtn)  addBtn.removeAttribute('disabled');
       return;
     }
 
@@ -738,11 +722,12 @@
     if (emptyEl) emptyEl.style.display = 'none';
 
     const list = _filteredMaterials();
+    const usedIds = new Set(_materialUsageRows.map(r => r.materialId));
 
     tbody.innerHTML = _materialUsageRows.map((row, idx) => {
       const lineCost = row.baseCost * row.quantity;
 
-      const opts = list.map(m =>
+      const opts = list.filter(m => !usedIds.has(m.id) || m.id === row.materialId).map(m =>
         '<option value="' + esc(m.id) + '"' + (m.id === row.materialId ? ' selected' : '') + '>' +
           esc(m.name) + (m.sizeLabel ? ' — ' + esc(m.sizeLabel) : '') +
         '</option>'
@@ -794,6 +779,14 @@
         '</td>' +
         '</tr>';
     }).join('');
+
+    if (addBtn) {
+      if (_materialUsageRows.length >= list.length) {
+        addBtn.setAttribute('disabled', 'disabled');
+      } else {
+        addBtn.removeAttribute('disabled');
+      }
+    }
   }
 
     // -- Task 5.3 ï¿½ _updatePricePreview ---------------------------------------
@@ -919,6 +912,10 @@
 
     // Render discounts section
     _renderVariantDiscounts(productId, variantId, variant);
+
+    // Show hint for new variants (no discount form until saved)
+    const newVariantHint = document.getElementById('vmod-new-variant-hint');
+    if (newVariantHint) newVariantHint.style.display = variantId ? 'none' : '';
 
     // Update price preview
     _updatePricePreview();
@@ -1074,7 +1071,7 @@
           <i class="fas fa-plus"></i> Agregar
         </button>
         <div class="form-error admin-form-full" id="vmod-disc-err"></div>
-      </form>` : '<p style="color:#64748b;font-size:1rem">Guarda la variante primero para agregar descuentos.</p>'}`;
+      </form>` : ''}`;
   }
 
   async function _addVariantDiscount(event, productId, variantId) {
@@ -1128,6 +1125,124 @@
     }
   }
 
+  // -- Product-level discounts -----------------------------------------------
+
+  function _renderProductDiscounts(product) {
+    const container = document.getElementById('prod-discounts-body');
+    if (!container) return;
+
+    const discounts = (product && product.discounts) ? product.discounts : [];
+
+    const discountRows = discounts.length
+      ? discounts.map(d => {
+          const now = new Date();
+          const starts = d.startsAt ? new Date(d.startsAt) : null;
+          const ends = d.endsAt ? new Date(d.endsAt) : null;
+          const isActive = (!starts || starts <= now) && (!ends || ends >= now);
+          
+          const statusLabel = isActive ? 'Vigente' : 'Expirado';
+          const statusColor = isActive ? '#22c55e' : '#f87171';
+          const statusBg = isActive ? 'rgba(34,197,94,0.12)' : 'rgba(248,113,113,0.12)';
+          const statusBorder = isActive ? 'rgba(34,197,94,0.35)' : 'rgba(248,113,113,0.35)';
+          
+          return `
+          <tr>
+            <td>${esc(d.discountType || '—')}</td>
+            <td>${d.discountType === 'Percentage' ? esc(d.value) + '%' : '$' + fmt(d.value)}</td>
+            <td style="color:#94a3b8;font-size:1rem">${d.startsAt ? new Date(d.startsAt).toLocaleDateString('es-MX') : '—'}</td>
+            <td style="color:#94a3b8;font-size:1rem">${d.endsAt ? new Date(d.endsAt).toLocaleDateString('es-MX') : '—'}</td>
+            <td style="text-align:center">
+              <span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:1rem;font-weight:600;background:${statusBg};color:${statusColor};border:1px solid ${statusBorder}">
+                ${statusLabel}
+              </span>
+            </td>
+            <td>
+              <button class="btn-admin btn-admin-danger btn-admin-sm"
+                      onclick="AdminProducts._deleteProductDiscount('${esc(product.id)}','${esc(d.id)}')"
+                      title="Eliminar descuento">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>`;
+        }).join('')
+      : '<tr><td colspan="6" style="color:#64748b;font-size:1rem;padding:8px 0">Sin descuentos de producto.</td></tr>';
+
+    container.innerHTML = `
+      <hr style="border:none;border-top:1px solid rgba(139,92,246,0.15);margin:16px 0">
+      <div style="font-size:1rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">
+        <i class="fas fa-tag" style="color:#8b5cf6;margin-right:6px"></i>Descuentos de Producto
+      </div>
+      <table class="admin-table" style="font-size:1rem;margin-bottom:12px">
+        <thead><tr><th>Tipo</th><th>Valor</th><th>Desde</th><th>Hasta</th><th>Estado</th><th></th></tr></thead>
+        <tbody>${discountRows}</tbody>
+      </table>
+      <form id="prod-add-discount-form" class="admin-form"
+            style="grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end"
+            onsubmit="AdminProducts._addProductDiscount(event,'${esc(product.id)}')" novalidate>
+        <div class="form-field" style="margin:0">
+          <label style="font-size:1rem">Tipo</label>
+          <select id="prod-disc-type" class="inline-input">
+            <option value="Percentage">Porcentaje (%)</option>
+            <option value="Fixed">Fijo (MXN)</option>
+          </select>
+        </div>
+        <div class="form-field" style="margin:0">
+          <label style="font-size:1rem">Valor</label>
+          <input type="number" step="0.01" min="0" id="prod-disc-value" value="0" class="inline-input">
+        </div>
+        <div class="form-field" style="margin:0">
+          <label style="font-size:1rem">Desde</label>
+          <input type="date" id="prod-disc-starts" class="inline-input">
+        </div>
+        <div class="form-field" style="margin:0">
+          <label style="font-size:1rem">Hasta</label>
+          <input type="date" id="prod-disc-ends" class="inline-input">
+        </div>
+        <button type="submit" class="btn-admin btn-admin-primary btn-admin-sm" style="margin-bottom:0">
+          <i class="fas fa-plus"></i> Agregar
+        </button>
+        <div class="form-error admin-form-full" id="prod-disc-err"></div>
+      </form>`;
+  }
+
+  async function _addProductDiscount(event, productId) {
+    event.preventDefault();
+    const errEl = document.getElementById('prod-disc-err');
+    if (errEl) errEl.textContent = '';
+
+    const discountType = (document.getElementById('prod-disc-type') || {}).value;
+    const value        = parseFloat((document.getElementById('prod-disc-value') || {}).value);
+    const startsAt     = (document.getElementById('prod-disc-starts') || {}).value || null;
+    const endsAt       = (document.getElementById('prod-disc-ends') || {}).value || null;
+
+    if (isNaN(value) || value < 0) {
+      if (errEl) errEl.textContent = 'El valor debe ser un número no negativo.';
+      return;
+    }
+
+    const btn = event.target.querySelector('button[type="submit"]');
+    spin(btn, true);
+    try {
+      await adminApi.adminCreateProductDiscount(productId, { discountType, value, startsAt, endsAt });
+      toast('Descuento de producto agregado');
+      await openEditProductModal(productId);
+    } catch (err) {
+      if (errEl) errEl.textContent = err.detail || 'Error al agregar el descuento.';
+      spin(btn, false);
+    }
+  }
+
+  async function _deleteProductDiscount(productId, discountId) {
+    if (!await adminConfirm('¿Eliminar este descuento de producto?', 'Eliminar Descuento')) return;
+    try {
+      await adminApi.adminDeleteDiscount(discountId);
+      toast('Descuento de producto eliminado');
+      await openEditProductModal(productId);
+    } catch (err) {
+      toast(err.detail || 'Error al eliminar el descuento.', false);
+    }
+  }
+
   // -- Public API ------------------------------------------------------------
 
   window.AdminProducts = {
@@ -1157,7 +1272,10 @@
     // Discounts
     _renderVariantDiscounts,
     _addVariantDiscount,
-    _deleteVariantDiscount
+    _deleteVariantDiscount,
+    _renderProductDiscounts,
+    _addProductDiscount,
+    _deleteProductDiscount
   };
 
 }(window));
