@@ -644,10 +644,19 @@
     }
   }
 
-  // -- Task 12.1 ï¿½ _addMaterialUsageRow -------------------------------------
+  // Returns materials filtered to the current product's category (or all if no category match)
+  function _filteredMaterials() {
+    const catId = _currentProduct && _currentProduct.categoryId;
+    if (!catId) return _materials;
+    const filtered = _materials.filter(m => m.categoryId === catId);
+    return filtered.length ? filtered : _materials;
+  }
+
+  // -- Task 12.1 — _addMaterialUsageRow -------------------------------------
 
   function _addMaterialUsageRow() {
-    const first = _materials[0];
+    const list  = _filteredMaterials();
+    const first = list[0];
     _materialUsageRows.push({
       materialId: first ? first.id : '',
       baseCost:   first ? (first.baseCost || 0) : 0,
@@ -666,7 +675,7 @@
     _updatePricePreview();
   }
 
-  // -- Task 12.1 ï¿½ _onMaterialUsageRowChange --------------------------------
+  // -- Task 12.1 — _onMaterialUsageRowChange --------------------------------
 
   function _onMaterialUsageRowChange(idx) {
     const matSelect = document.getElementById('vmod-mat-sel-' + idx);
@@ -688,10 +697,30 @@
       lineCostEl.textContent = '$' + fmt(_materialUsageRows[idx].baseCost * qty);
     }
 
+    // Update stock badge for the newly selected material
+    const stockEl = document.querySelector('#vmod-mat-sel-' + idx)
+      ?.closest('tr')
+      ?.querySelector('.vmod-stock-badge');
+    if (stockEl) {
+      const stock    = mat ? (mat.stockQuantity ?? 0) : null;
+      const stockTxt = stock === null ? '—' : String(stock);
+      const stockClr = stock === null ? '#64748b'
+                     : stock <= 0    ? '#f87171'
+                     : stock <= 5    ? '#eab308'
+                     :                 '#22c55e';
+      const stockBg  = stock === null ? 'rgba(100,116,139,0.12)'
+                     : stock <= 0    ? 'rgba(248,113,113,0.12)'
+                     : stock <= 5    ? 'rgba(234,179,8,0.12)'
+                     :                 'rgba(34,197,94,0.12)';
+      stockEl.textContent = stockTxt;
+      stockEl.style.color = stockClr;
+      stockEl.style.background = stockBg;
+    }
+
     _updatePricePreview();
   }
 
-  // -- Task 12.1 ï¿½ _renderMaterialUsagesTable -------------------------------
+    // -- Task 12.1 — _renderMaterialUsagesTable -------------------------------
 
   function _renderMaterialUsagesTable() {
     const table    = document.getElementById('vmod-material-usages-table');
@@ -708,46 +737,58 @@
     if (table)   table.style.display = '';
     if (emptyEl) emptyEl.style.display = 'none';
 
-    const matOptions = _materials.map(m =>
-      '<option value="' + esc(m.id) + '">' +
-        esc(m.name) + (m.sizeLabel ? ' ï¿½ ' + esc(m.sizeLabel) : '') +
-      '</option>'
-    ).join('');
+    const list = _filteredMaterials();
 
     tbody.innerHTML = _materialUsageRows.map((row, idx) => {
       const lineCost = row.baseCost * row.quantity;
-      // Build options with selected state
-      const opts = _materials.map(m =>
+
+      const opts = list.map(m =>
         '<option value="' + esc(m.id) + '"' + (m.id === row.materialId ? ' selected' : '') + '>' +
           esc(m.name) + (m.sizeLabel ? ' — ' + esc(m.sizeLabel) : '') +
         '</option>'
       ).join('');
 
-      return '<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">' +
-        '<td style="padding:6px 8px">' +
+      const selMat   = _materialsMap[row.materialId];
+      const stock    = selMat ? (selMat.stockQuantity ?? 0) : null;
+      const stockTxt = stock === null ? '—' : String(stock);
+      const stockClr = stock === null ? '#64748b'
+                     : stock <= 0    ? '#f87171'
+                     : stock <= 5    ? '#eab308'
+                     :                 '#22c55e';
+      const stockBg  = stock === null ? 'rgba(100,116,139,0.12)'
+                     : stock <= 0    ? 'rgba(248,113,113,0.12)'
+                     : stock <= 5    ? 'rgba(234,179,8,0.12)'
+                     :                 'rgba(34,197,94,0.12)';
+
+      return '<tr class="vmod-mat-row">' +
+        '<td class="vmod-mat-cell">' +
           '<select id="vmod-mat-sel-' + idx + '"' +
                   ' onchange="AdminProducts._onMaterialUsageRowChange(' + idx + ')"' +
-                  ' class="inline-select" style="min-width:160px">' +
+                  ' class="inline-select">' +
             opts +
           '</select>' +
         '</td>' +
-        '<td style="padding:6px 8px;text-align:right">' +
+        '<td class="vmod-mat-cell vmod-mat-cell--stock">' +
+          '<span class="vmod-stock-badge" style="color:' + stockClr + ';background:' + stockBg + '">' +
+            stockTxt +
+          '</span>' +
+        '</td>' +
+        '<td class="vmod-mat-cell vmod-mat-cell--qty">' +
           '<input type="number" step="0.001" min="0.001"' +
                  ' id="vmod-mat-qty-' + idx + '"' +
                  ' value="' + esc(String(row.quantity)) + '"' +
                  ' onchange="AdminProducts._onMaterialUsageRowChange(' + idx + ')"' +
                  ' oninput="AdminProducts._onMaterialUsageRowChange(' + idx + ')"' +
-                 ' class="inline-input-sm" style="width:80px">' +
+                 ' class="inline-input-sm">' +
         '</td>' +
-        '<td style="padding:6px 8px;text-align:right;color:#a78bfa;font-family:monospace;font-size:1rem;white-space:nowrap"' +
-            ' id="vmod-mat-cost-' + idx + '">' +
+        '<td class="vmod-mat-cell vmod-mat-cell--cost" id="vmod-mat-cost-' + idx + '">' +
           '$' + fmt(lineCost) +
         '</td>' +
-        '<td style="padding:6px 8px;text-align:center">' +
+        '<td class="vmod-mat-cell vmod-mat-cell--del">' +
           '<button type="button"' +
                   ' onclick="AdminProducts._removeMaterialUsageRow(' + idx + ')"' +
                   ' title="Eliminar fila"' +
-                  ' style="background:none;border:none;color:#f87171;cursor:pointer;font-size:1rem;padding:2px 6px">' +
+                  ' class="vmod-mat-del-btn">' +
             '<i class="fas fa-times"></i>' +
           '</button>' +
         '</td>' +
@@ -755,7 +796,7 @@
     }).join('');
   }
 
-  // -- Task 5.3 ï¿½ _updatePricePreview ---------------------------------------
+    // -- Task 5.3 ï¿½ _updatePricePreview ---------------------------------------
 
   function _updatePricePreview() {
     const productionCostEl = document.getElementById('vmod-production-cost');
