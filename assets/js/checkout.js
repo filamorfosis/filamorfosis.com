@@ -406,7 +406,7 @@
       // Add estimated delivery after total is set
       addEstimatedDelivery();
     } catch (err) {
-      console.error('Failed to load cart', err);
+      // cart load failed — UI remains empty
     }
   }
 
@@ -459,7 +459,7 @@
       await _loadAddresses();
       document.getElementById('new-address-details')?.removeAttribute('open');
     } catch (err) {
-      console.error('Failed to save address', err);
+      // address save failed — button re-enabled, user can retry
     } finally {
       btn.disabled = false;
     }

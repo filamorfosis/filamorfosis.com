@@ -81,7 +81,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
                 EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts),
                 IsAvailable = v.IsAvailable,
                 AcceptsDesignFile = v.AcceptsDesignFile,
-                InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => u.Material?.StockQuantity ?? 0)),
+                InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),
                 Attributes = v.AttributeValues.Select(a => new VariantAttributeValueDto
                 {
                     AttributeDefinitionId = a.AttributeDefinitionId,
@@ -145,7 +145,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
                 EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts),
                 IsAvailable = v.IsAvailable,
                 AcceptsDesignFile = v.AcceptsDesignFile,
-                InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => u.Material?.StockQuantity ?? 0)),
+                InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),
                 Discounts = v.Discounts.Select(d => new DiscountDto
                 {
                     Id = d.Id,

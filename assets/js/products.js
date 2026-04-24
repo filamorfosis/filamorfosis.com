@@ -170,7 +170,6 @@ async function loadProducts(reset) {
             if (empty) empty.style.display = 'block';
         }
     } catch (e) {
-        console.error('loadProducts error:', e);
         renderError(function() { loadProducts(reset); });
     }
 }
@@ -825,7 +824,7 @@ async function renderAll() {
         var catList = (cats && cats.items) ? cats.items : (Array.isArray(cats) ? cats : []);
         catList.forEach(function(c) { categorySlugToId[c.slug] = c.id; });
     } catch (e) {
-        console.warn('Could not fetch categories:', e);
+        // categories unavailable — continue without slug mapping
     }
 
     await loadProducts(true);

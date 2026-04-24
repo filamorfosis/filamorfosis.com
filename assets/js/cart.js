@@ -232,7 +232,6 @@
 
     } catch (err) {
       if (err.status === 401) window.FilamorfosisAuth?.showModal('login');
-      else console.error('Add to cart failed', err);
     }
   }
 
@@ -249,21 +248,21 @@
       }
       _cart = await updateCartItem(itemId, qty);
       _render();
-    } catch (err) { console.error('Update cart item failed', err); }
+    } catch (err) { /* update failed — UI unchanged */ }
   }
 
   async function removeItem(itemId) {
     try {
       _cart = await removeCartItem(itemId);
       _render();
-    } catch (err) { console.error('Remove cart item failed', err); }
+    } catch (err) { /* remove failed — UI unchanged */ }
   }
 
   async function uploadDesignFile(itemId, file) {
     try {
       await uploadDesign(itemId, file);
       await loadCart();
-    } catch (err) { console.error('Design upload failed', err); }
+    } catch (err) { /* upload failed silently */ }
   }
 
   // ── Drawer ─────────────────────────────────────────────────────────────────

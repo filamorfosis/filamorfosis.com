@@ -126,23 +126,10 @@
 
     tbody.innerHTML = items.map(p => {
       const variants = p.variants || [];
-      // Show "Revisar" if ANY variant is inactive OR any material has insufficient stock
-      const needsReview = variants.length > 0 && variants.some(v => {
-        // Check if variant is inactive
-        if (!v.isAvailable) return true;
-        
-        // Check if any material used by this variant has insufficient stock
-        if (v.materialUsages && typeof v.materialUsages === 'object') {
-          for (const materialId in v.materialUsages) {
-            const requiredQuantity = v.materialUsages[materialId];
-            const material = _materialsMap[materialId];
-            if (material && material.stockQuantity < requiredQuantity) {
-              return true;
-            }
-          }
-        }
-        return false;
-      });
+      // Show "Revisar" if ANY variant is unavailable or out of stock
+      const needsReview = variants.length > 0 && variants.some(v =>
+        !v.isAvailable || v.inStock === false
+      );
       let statusBg, statusColor, statusBorder, statusLabel;
       if (needsReview) {
         statusBg     = 'rgba(234,179,8,0.15)';
@@ -392,52 +379,23 @@
                 const aB = v.isAvailable ? 'rgba(34,197,94,0.12)' : 'rgba(248,113,113,0.12)';
                 const aD = v.isAvailable ? 'rgba(34,197,94,0.35)' : 'rgba(248,113,113,0.35)';
                 
-                // Check stock status for materials
-                let stockStatus = 'N/A';
-                let stockColor = '#64748b';
-                let stockBg = 'rgba(100,116,139,0.12)';
-                let stockBorder = 'rgba(100,116,139,0.35)';
-                
-                if (v.materialUsages && typeof v.materialUsages === 'object') {
-                  const materialIds = Object.keys(v.materialUsages);
-                  if (materialIds.length > 0) {
-                    let allInStock = true;
-                    let anyOutOfStock = false;
-                    let anyMaterialFound = false;
-                    
-                    for (const materialId of materialIds) {
-                      const requiredQuantity = v.materialUsages[materialId];
-                      const material = _materialsMap[materialId];
-                      if (material) {
-                        anyMaterialFound = true;
-                        // Check if available stock is less than required quantity
-                        if (material.stockQuantity < requiredQuantity) {
-                          anyOutOfStock = true;
-                          allInStock = false;
-                        }
-                      }
-                    }
-                    
-                    if (!anyMaterialFound) {
-                      // No materials found in cache - show "Revisar"
-                      stockStatus = 'Revisar';
-                      stockColor = '#eab308';
-                      stockBg = 'rgba(234,179,8,0.12)';
-                      stockBorder = 'rgba(234,179,8,0.35)';
-                    } else if (allInStock) {
-                      // All materials have sufficient stock
-                      stockStatus = 'Sí';
-                      stockColor = '#22c55e';
-                      stockBg = 'rgba(34,197,94,0.12)';
-                      stockBorder = 'rgba(34,197,94,0.35)';
-                    } else if (anyOutOfStock && anyMaterialFound) {
-                      // Some materials don't have sufficient stock
-                      stockStatus = 'No';
-                      stockColor = '#f87171';
-                      stockBg = 'rgba(248,113,113,0.12)';
-                      stockBorder = 'rgba(248,113,113,0.35)';
-                    }
-                  }
+                // Stock status — use server-computed inStock flag
+                let stockStatus, stockColor, stockBg, stockBorder;
+                if (v.inStock === true) {
+                  stockStatus = 'Sí';
+                  stockColor  = '#22c55e';
+                  stockBg     = 'rgba(34,197,94,0.12)';
+                  stockBorder = 'rgba(34,197,94,0.35)';
+                } else if (v.inStock === false) {
+                  stockStatus = 'No';
+                  stockColor  = '#f87171';
+                  stockBg     = 'rgba(248,113,113,0.12)';
+                  stockBorder = 'rgba(248,113,113,0.35)';
+                } else {
+                  stockStatus = 'N/A';
+                  stockColor  = '#64748b';
+                  stockBg     = 'rgba(100,116,139,0.12)';
+                  stockBorder = 'rgba(100,116,139,0.35)';
                 }
                 
                 // Compute effective price from discounts

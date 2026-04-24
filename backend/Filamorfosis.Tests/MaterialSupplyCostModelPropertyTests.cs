@@ -589,26 +589,30 @@ public class MaterialSupplyCostModelPropertyTests
     // Feature: material-supply-cost-model, Property 8: Variant stock is in-stock iff all material stock quantities are positive
     // Validates: Requirements 11.2, 11.3, 11.4, 11.5
     [Fact]
-    public void Property8_VariantStockIsInStockIffAllMaterialStockQuantitiesArePositive()
+    public void Property8_VariantStockIsInStockIffAllMaterialStockQuantitiesMeetRequired()
     {
         var stockService = new StockService();
 
-        var gen = Gen.Choose(0, 10).SelectMany(n =>
-            Gen.Choose(0, 100).ListOf(n));
+        // Property: inStock iff every (stock, required) pair has stock >= required
+        var gen = Gen.Choose(0, 5).SelectMany(n =>
+            Gen.Two(Gen.Choose(0, 10).Select(x => (decimal)x))
+               .Select(t => (stock: t.Item1, required: t.Item2))
+               .ListOf(n));
 
-        Prop.ForAll(Arb.From(gen), quantities =>
+        Prop.ForAll(Arb.From(gen), usages =>
         {
-            var expected = quantities.Count == 0 || quantities.All(q => q > 0);
-            var actual = stockService.IsVariantInStock(quantities);
+            var expected = usages.Count == 0 || usages.All(u => u.stock >= u.required);
+            var actual = stockService.IsVariantInStock(usages.Select(u => (u.stock, u.required)));
             return actual == expected;
         })
         .QuickCheckThrowOnFailure();
 
         // Edge cases
         Assert.True(stockService.IsVariantInStock([]));
-        Assert.True(stockService.IsVariantInStock([1, 2, 3]));
-        Assert.False(stockService.IsVariantInStock([1, 0, 3]));
-        Assert.False(stockService.IsVariantInStock([0]));
+        Assert.True(stockService.IsVariantInStock([(10m, 2m), (5m, 5m)]));   // exact match is in stock
+        Assert.False(stockService.IsVariantInStock([(1m, 2m)]));              // 1 < 2 = out of stock
+        Assert.False(stockService.IsVariantInStock([(0m, 1m)]));              // 0 < 1 = out of stock
+        Assert.True(stockService.IsVariantInStock([(5m, 0m)]));               // required=0 = in stock
     }
 
     // Feature: material-supply-cost-model, Property 9: CostParameter update propagates to all referencing materials

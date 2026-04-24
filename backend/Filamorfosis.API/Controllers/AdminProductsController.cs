@@ -425,7 +425,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts),
         IsAvailable = v.IsAvailable,
         AcceptsDesignFile = v.AcceptsDesignFile,
-        InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => u.Material?.StockQuantity ?? 0)),
+        InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),
         BaseCost = v.BaseCost,
         Profit = v.Profit,
         ManufactureTimeMinutes = v.ManufactureTimeMinutes,

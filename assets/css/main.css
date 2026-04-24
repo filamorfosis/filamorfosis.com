@@ -77,7 +77,7 @@ img {
     cursor: pointer;
     color: var(--white);
     font-weight: 700;
-    font-size: 13px;
+    font-size: 1rem;
     box-shadow: 0 4px 15px rgba(99, 102, 241, 0.5);
     transition: all 0.3s ease;
     letter-spacing: 0.5px;
@@ -89,12 +89,12 @@ img {
 }
 
 .lang-code-mobile {
-    font-size: 13px;
+    font-size: 1rem;
     font-weight: 700;
 }
 
 .lang-arrow-mobile {
-    font-size: 8px;
+    font-size: 1rem;
     transition: transform 0.3s ease;
 }
 
@@ -137,7 +137,7 @@ img {
     gap: 12px;
     cursor: pointer;
     color: var(--white);
-    font-size: 15px;
+    font-size: 1rem;
     font-weight: 500;
     border-radius: 10px;
     transition: all 0.2s ease;
@@ -170,7 +170,7 @@ img {
     cursor: pointer;
     color: var(--white);
     font-weight: 600;
-    font-size: 15px;
+    font-size: 1rem;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
@@ -192,7 +192,7 @@ img {
 }
 
 .lang-current .lang-arrow {
-    font-size: 10px;
+    font-size: 1rem;
     transition: transform 0.3s ease;
 }
 
@@ -233,7 +233,7 @@ img {
     gap: 12px;
     cursor: pointer;
     color: var(--white);
-    font-size: 15px;
+    font-size: 1rem;
     font-weight: 500;
     border-radius: 10px;
     transition: all 0.3s ease;
@@ -816,7 +816,7 @@ section {
 .service-badge {
     background: var(--gradient);
     color: #fff;
-    font-size: 15px;
+    font-size: 1rem;
     font-weight: 700;
     letter-spacing: 0.05em;
     padding: 6px 16px;
@@ -2839,7 +2839,7 @@ section {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.25);
     color: #fff;
-    font-size: 14px;
+    font-size: 1rem;
     font-weight: 500;
     padding: 5px 10px;
     border-radius: 8px;
@@ -5315,4 +5315,18 @@ body.service-bar-visible .showcase-service-info {
 /* -- Navbar menu always right-aligned -- */
 .navbar__menu {
     margin-left: auto;
+}
+
+/* ── Icon hover state (replaces JS .css() calls) ── */
+.service-icon,
+.equipment-badge {
+    transition: transform 0.3s ease;
+}
+.icon--hovered {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* ── Navbar toggle span base transitions (replaces JS .css() calls) ── */
+.navbar__toggle span {
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }

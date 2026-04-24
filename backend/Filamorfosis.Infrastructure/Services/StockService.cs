@@ -4,10 +4,10 @@ namespace Filamorfosis.Infrastructure.Services;
 
 public class StockService : IStockService
 {
-    public bool IsVariantInStock(IEnumerable<int> materialStockQuantities)
+    public bool IsVariantInStock(IEnumerable<(decimal stock, decimal required)> materialUsages)
     {
-        var quantities = materialStockQuantities.ToList();
-        if (quantities.Count == 0) return true;   // no materials = not stock-gated
-        return quantities.All(q => q > 0);
+        var usages = materialUsages.ToList();
+        if (usages.Count == 0) return true;   // no materials = not stock-gated
+        return usages.All(u => u.stock >= u.required);
     }
 }
