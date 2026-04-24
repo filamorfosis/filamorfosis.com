@@ -379,6 +379,11 @@
                 const aB = v.isAvailable ? 'rgba(34,197,94,0.12)' : 'rgba(248,113,113,0.12)';
                 const aD = v.isAvailable ? 'rgba(34,197,94,0.35)' : 'rgba(248,113,113,0.35)';
                 
+                // Row highlight based on pricing alert
+                const rowBg = v.pricingAlert === 'loss'      ? 'rgba(248,113,113,0.08)'
+                            : v.pricingAlert === 'breakeven' ? 'rgba(234,179,8,0.08)'
+                            : '';
+                
                 // Stock status — use server-computed inStock flag
                 let stockStatus, stockColor, stockBg, stockBorder;
                 if (v.inStock === true) {
@@ -411,11 +416,16 @@
                   else effectivePrice = Math.max(0, effectivePrice - d.value);
                 });
                 const hasDiscount = effectivePrice < (v.price ?? 0);
+                const alertIcon = v.pricingAlert === 'loss'
+                  ? ' <i class="fas fa-exclamation-circle" style="color:#f87171;margin-left:4px" title="Precio por debajo del costo — variante desactivada"></i>'
+                  : v.pricingAlert === 'breakeven'
+                  ? ' <i class="fas fa-exclamation-triangle" style="color:#eab308;margin-left:4px" title="Precio por debajo del punto de equilibrio — variante desactivada"></i>'
+                  : '';
                 const discountCell = hasDiscount
                   ? `<span style="color:#fb923c;font-weight:700">$${fmt(effectivePrice)}</span>
-                     <span style="color:#64748b;font-size:1rem;text-decoration:line-through;margin-left:4px">$${fmt(v.price)}</span>`
-                  : `<span style="color:#e2e8f0">$${fmt(v.price ?? 0)}</span>`;
-                return `<tr>
+                     <span style="color:#64748b;font-size:1rem;text-decoration:line-through;margin-left:4px">$${fmt(v.price)}</span>` + alertIcon
+                  : `<span style="color:#e2e8f0">$${fmt(v.price ?? 0)}</span>` + alertIcon;
+                return `<tr style="background:${rowBg}">
                   <td>${esc(v.labelEs || v.label || '—')}</td>
                   <td style="font-family:monospace;font-size:1rem;color:#a5b4fc">${esc(v.sku || '—')}</td>
                   <td style="text-align:center"><span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:1rem;font-weight:600;background:${aB};color:${aC};border:1px solid ${aD}">${v.isAvailable ? 'Sí' : 'No'}</span></td>
@@ -835,8 +845,25 @@
     }
 
     const hasDiscount = effectivePrice < basePrice;
+    const breakeven = productionCost * 1.16;
+    const belowBreakeven = effectivePrice < breakeven;
+
+    // Price preview colour: red if below break-even, orange if discounted, default otherwise
     previewEl.value = '$' + fmt(effectivePrice);
-    previewEl.style.color = hasDiscount ? '#fb923c' : '';
+    previewEl.style.color = belowBreakeven ? '#f87171' : hasDiscount ? '#fb923c' : '';
+
+    // Warning + save button state
+    const warningEl = document.getElementById('vmod-price-warning');
+    const saveBtn   = document.getElementById('var-edit-modal-save');
+    if (warningEl) warningEl.style.display = belowBreakeven ? '' : 'none';
+    if (saveBtn)   saveBtn.disabled = belowBreakeven;
+
+    // Break-even field
+    const breakevenEl = document.getElementById('vmod-breakeven-preview');
+    if (breakevenEl) {
+      breakevenEl.value = '$' + fmt(breakeven);
+      breakevenEl.style.color = belowBreakeven ? '#f87171' : '#64748b';
+    }
 
     // Show/hide discount line
     if (discountEl) {

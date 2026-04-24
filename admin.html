@@ -605,6 +605,13 @@
             <label>Precio final con IVA (MXN)</label>
             <input type="text" id="vmod-price-preview" readonly style="background:rgba(255,255,255,0.03);color:#a78bfa;cursor:default;font-weight:700" placeholder="—">
             <div id="vmod-discount-preview" style="display:none;font-size: 1rem;color:#64748b;margin-top:3px;text-decoration:line-through"></div>
+            <div id="vmod-price-warning" style="display:none;font-size:1rem;color:#f87171;margin-top:4px">
+              <i class="fas fa-exclamation-triangle"></i> El precio final es menor al costo de equilibrio. No se puede guardar.
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Costo de equilibrio (MXN)</label>
+            <input type="text" id="vmod-breakeven-preview" readonly style="background:rgba(255,255,255,0.03);color:#64748b;cursor:default" placeholder="—">
           </div>
           <!-- Dynamic attribute inputs injected here as a grid -->
           <div id="vmod-attributes-wrap" class="admin-form-full vmod-attrs-grid"></div>
@@ -614,7 +621,7 @@
         <div id="vmod-discounts-body"></div>
         <!-- Save / Cancel — below discounts -->
         <div class="form-actions" style="margin-top:20px">
-          <button type="submit" form="var-edit-modal-form" class="btn-admin btn-admin-primary btn-admin-sm">
+          <button type="submit" form="var-edit-modal-form" class="btn-admin btn-admin-primary btn-admin-sm" id="var-edit-modal-save">
             <i class="fas fa-save"></i> Guardar
           </button>
           <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" id="var-edit-modal-cancel">

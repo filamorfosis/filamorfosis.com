@@ -59,9 +59,13 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             .Take(pageSize)
             .ToListAsync();
 
+        var items = new List<ProductDetailDto>();
+        foreach (var p in products)
+            items.Add(await MapDetailAsync(p, stockService, db));
+
         return Ok(new PagedResult<ProductDetailDto>
         {
-            Items = products.Select(p => MapDetail(p, stockService)).ToList(),
+            Items = items,
             Page = page,
             PageSize = pageSize,
             TotalCount = total
@@ -91,7 +95,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         };
         db.Products.Add(product);
         await db.SaveChangesAsync();
-        return StatusCode(201, MapDetail(product, stockService));
+        return StatusCode(201, await MapDetailAsync(product, stockService, db));
     }
 
     [HttpGet("{id:guid}")]
@@ -112,7 +116,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
                 .ThenInclude(pa => pa.AttributeDefinition)
             .FirstOrDefaultAsync(p => p.Id == id);
 
-        return p is null ? NotFound() : Ok(MapDetail(p, stockService));
+        return p is null ? NotFound() : Ok(await MapDetailAsync(p, stockService, db));
     }
 
     [HttpPut("{id:guid}")]
@@ -147,7 +151,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         if (req.IsActive.HasValue) p.IsActive = req.IsActive.Value;
         p.Badge = req.Badge;
         await db.SaveChangesAsync();
-        return Ok(MapDetail(p, stockService));
+        return Ok(await MapDetailAsync(p, stockService, db));
     }
 
     [HttpDelete("{id:guid}")]
@@ -210,7 +214,8 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             .Include(pv => pv.AttributeValues).ThenInclude(av => av.AttributeDefinition)
             .Include(pv => pv.MaterialUsages).ThenInclude(u => u.Material)
             .FirstAsync(pv => pv.Id == v.Id);
-        return StatusCode(201, MapVariant(created, stockService));
+        var productDiscounts = await db.Discounts.Where(d => d.ProductId == id).ToListAsync();
+        return StatusCode(201, await MapVariantAsync(created, stockService, db, productDiscounts));
     }
 
     [HttpPut("{id:guid}/variants/{variantId:guid}")]
@@ -267,7 +272,8 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             .Include(pv => pv.AttributeValues).ThenInclude(av => av.AttributeDefinition)
             .Include(pv => pv.MaterialUsages).ThenInclude(u => u.Material)
             .FirstAsync(pv => pv.Id == v.Id);
-        return Ok(MapVariant(updated, stockService));
+        var productDiscounts = await db.Discounts.Where(d => d.ProductId == id).ToListAsync();
+        return Ok(await MapVariantAsync(updated, stockService, db, productDiscounts));
     }
 
     [HttpDelete("{id:guid}/variants/{variantId:guid}")]
@@ -397,8 +403,14 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         return (baseCost, price);
     }
 
-    private static ProductDetailDto MapDetail(Product p, IStockService stockService) => new()
+    private static async Task<ProductDetailDto> MapDetailAsync(Product p, IStockService stockService, FilamorfosisDbContext db) 
     {
+        var variantDtos = new List<ProductVariantDto>();
+        foreach (var v in p.Variants)
+            variantDtos.Add(await MapVariantAsync(v, stockService, db, p.Discounts));
+
+        return new ProductDetailDto
+        {
         Id = p.Id, Slug = p.Slug,
         TitleEs = p.TitleEs, TitleEn = p.TitleEn,
         DescriptionEs = p.DescriptionEs, DescriptionEn = p.DescriptionEn,
@@ -407,7 +419,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         IsActive = p.IsActive, CategoryId = p.CategoryId,
         CategoryNameEs = p.Category?.NameEs,
         CategoryNameEn = p.Category?.NameEn,
-        Variants = p.Variants.Select(v => MapVariant(v, stockService, p.Discounts)).ToList(),
+        Variants = variantDtos,
         AttributeDefinitions = p.AttributeDefinitions
             .Select(pa => new AttributeDefinitionDto
             {
@@ -426,23 +438,57 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             EndsAt = d.EndsAt,
             CreatedAt = d.CreatedAt
         }).ToList()
-    };
+        };
+    }
 
-    private static ProductVariantDto MapVariant(ProductVariant v, IStockService stockService, IEnumerable<Discount>? productDiscounts = null)
+    private static async Task<ProductVariantDto> MapVariantAsync(ProductVariant v, IStockService stockService, FilamorfosisDbContext db, IEnumerable<Discount>? productDiscounts = null)
     {
         var allDiscounts = v.Discounts.Concat(productDiscounts ?? []);
+        var effectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, allDiscounts);
+        
+        // Determine pricing alert and auto-deactivate if needed
+        string? pricingAlert = null;
+        var shouldDeactivate = false;
+        
+        if (effectivePrice < v.BaseCost)
+        {
+            pricingAlert = "loss";
+            shouldDeactivate = true;
+        }
+        else if (effectivePrice < v.BaseCost * 1.16m)
+        {
+            pricingAlert = "breakeven";
+            shouldDeactivate = true;
+        }
+        
+        // Persist deactivation to DB if needed
+        if (shouldDeactivate && v.IsAvailable)
+        {
+            v.IsAvailable = false;
+            v.WasAutoPaused = true;
+            await db.SaveChangesAsync();
+        }
+        else if (!shouldDeactivate && v.WasAutoPaused && !v.IsAvailable)
+        {
+            // Reactivate only if it was auto-paused by the pricing guard, not manually disabled
+            v.IsAvailable = true;
+            v.WasAutoPaused = false;
+            await db.SaveChangesAsync();
+        }
+        
         return new ProductVariantDto
         {
         Id = v.Id, Sku = v.Sku,
         LabelEs = v.LabelEs,
         Price = v.Price,
-        EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, allDiscounts),
+        EffectivePrice = effectivePrice,
         IsAvailable = v.IsAvailable,
         AcceptsDesignFile = v.AcceptsDesignFile,
         InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),
         BaseCost = v.BaseCost,
         Profit = v.Profit,
         ManufactureTimeMinutes = v.ManufactureTimeMinutes,
+        PricingAlert = pricingAlert,
         Attributes = v.AttributeValues.Select(a => new VariantAttributeValueDto
         {
             AttributeDefinitionId = a.AttributeDefinitionId,

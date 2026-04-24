@@ -9,6 +9,8 @@ public class ProductVariant
     public decimal Price { get; set; }
     public bool IsAvailable { get; set; }
     public bool AcceptsDesignFile { get; set; }
+    /// <summary>True when IsAvailable was set to false automatically by the pricing guard (effectivePrice below break-even).</summary>
+    public bool WasAutoPaused { get; set; }
     public int StockQuantity { get; set; }
     public int? WeightGrams { get; set; }
     public decimal BaseCost { get; set; } = 0;
