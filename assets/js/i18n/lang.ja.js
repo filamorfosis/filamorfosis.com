@@ -1,298 +1,333 @@
 // Language: ja
 // Filamorfosis i18n
-// ⚠️  ATTENTION: The original JA translations were corrupted in the source file.
-//    All values currently fall back to Spanish. Please replace each value with the correct JA translation.
 
 /* global FilamorfosisI18n */
 window.FilamorfosisI18n = window.FilamorfosisI18n || {};
 window.FilamorfosisI18n['ja'] = {
-            nav_home: 'Inicio', // TODO: translate to ja
-            nav_services: 'Servicios', // TODO: translate to ja
-            nav_equipment: 'Equipos', // TODO: translate to ja
-            nav_clients: 'Clientes', // TODO: translate to ja
-            nav_contact: 'Contacto', // TODO: translate to ja
-            hero_title: 'Tus Ideas. Tu Realidad.', // TODO: translate to ja
-            hero_subtitle: 'Elige tu producto, personal�zalo a tu gusto y rec�belo en casa. Productos �nicos hechos para ti  porque ser igual que todos no es una opci�n.', // TODO: translate to ja
-            hero_cta: 'Solicitar Cotizaci�n', // TODO: translate to ja
-            hero_cta_secondary: 'Explorar Servicios', // TODO: translate to ja
-            services_title: 'Servicios a tu Medida', // TODO: translate to ja
-            services_subtitle: 'Productos listos para personalizar  o dise�amos juntos algo �nico para ti.', // TODO: translate to ja
-            service_3d_title: 'Impresi�n 3D', // TODO: translate to ja
-            service_3d_desc: 'Dale vida a tus ideas con impresi�n multicolor y multimaterial. Desde prototipos hasta piezas funcionales que realmente funcionan.', // TODO: translate to ja
-            service_3d_feat1: 'Hasta 5 colores en una pieza', // TODO: translate to ja
-            service_3d_feat2: 'Materiales flexibles y resistentes', // TODO: translate to ja
-            service_3d_feat3: 'Precisi�n milim�trica', // TODO: translate to ja
-            service_3d_examples_title: '�Qu� puedes crear?', // TODO: translate to ja
-            service_3d_ex1: '<� Figuras y juguetes', // TODO: translate to ja
-            service_3d_ex2: '<� Decoraci�n del hogar', // TODO: translate to ja
-            service_3d_ex3: '=� Piezas de repuesto', // TODO: translate to ja
-            service_3d_ex4: '=� Accesorios tech', // TODO: translate to ja
-            service_3d_ex5: '<� Regalos personalizados', // TODO: translate to ja
-            service_uv_title: 'Impresi�n UV', // TODO: translate to ja
-            service_uv_desc: 'Personaliza casi cualquier superficie con colores vibrantes y duraderos. Tazas, vasos, madera, metal, vidrio y m�s.', // TODO: translate to ja
-            service_uv_feat1: 'Imprime en objetos cil�ndricos', // TODO: translate to ja
-            service_uv_feat2: 'Colores que no se desvanecen', // TODO: translate to ja
-            service_uv_feat3: 'Stickers resistentes al agua', // TODO: translate to ja
-            service_uv_examples_title: '�Qu� puedes personalizar?', // TODO: translate to ja
-            service_uv_ex1: ' Tazas y vasos t�rmicos', // TODO: translate to ja
-            service_uv_ex2: '<� Stickers UV DTF', // TODO: translate to ja
-            service_uv_ex3: '>� Magnetos personalizados', // TODO: translate to ja
-            service_uv_ex4: '>� Placas de madera', // TODO: translate to ja
-            service_uv_ex5: '<� Objetos decorativos', // TODO: translate to ja
-            service_laser_title: 'Corte L�ser', // TODO: translate to ja
-            service_laser_desc: 'Corta y graba con precisi�n quir�rgica. Perfecto para letreros, decoraci�n, regalos personalizados y m�s.', // TODO: translate to ja
-            service_laser_feat1: 'Cortes limpios y precisos', // TODO: translate to ja
-            service_laser_feat2: 'Grabados con detalles incre�bles', // TODO: translate to ja
-            service_laser_feat3: 'Madera, acr�lico, cuero y m�s', // TODO: translate to ja
-            service_laser_examples_title: '�Qu� podemos hacer?', // TODO: translate to ja
-            service_laser_ex1: '>� Letreros de madera', // TODO: translate to ja
-            service_laser_ex2: '= Accesorios de cuero', // TODO: translate to ja
-            service_laser_ex3: '=� Piezas de acr�lico', // TODO: translate to ja
-            service_laser_ex4: '<� Se�al�tica empresarial', // TODO: translate to ja
-            service_laser_ex5: '<� Regalos grabados', // TODO: translate to ja
-            service_engrave_title: 'Grabado L�ser', // TODO: translate to ja
-            service_engrave_desc: 'Grabado de alta precisi�n sobre madera, metal, vidrio, cuero y m�s. Personaliza cualquier superficie con detalle fotogr�fico.', // TODO: translate to ja
-            service_engrave_feat1: 'Detalle fotogr�fico y vectorial', // TODO: translate to ja
-            service_engrave_feat2: 'Permanente  no se borra ni desvanece', // TODO: translate to ja
-            service_engrave_feat3: 'Madera, metal, vidrio, cuero, piedra', // TODO: translate to ja
-            service_engrave_examples_title: '�Qu� podemos grabar?', // TODO: translate to ja
-            service_engrave_ex1: '<� Regalos personalizados', // TODO: translate to ja
-            service_engrave_ex2: '<� Trofeos y placas', // TODO: translate to ja
-            service_engrave_ex3: '= Llaveros y accesorios', // TODO: translate to ja
-            service_engrave_ex4: '<~ Botellas y vasos', // TODO: translate to ja
-            service_engrave_ex5: '=� Gadgets y electr�nicos', // TODO: translate to ja
-            service_scan_title: 'Escaneo 3D', // TODO: translate to ja
-            service_scan_desc: 'Convertimos objetos f�sicos en modelos digitales 3D. Ideal para replicar piezas, crear regalos personalizados o digitalizar recuerdos.', // TODO: translate to ja
-            service_scan_feat1: 'Escanea desde joyer�a hasta muebles', // TODO: translate to ja
-            service_scan_feat2: 'Captura color y textura real', // TODO: translate to ja
-            service_scan_feat3: 'Listo para imprimir en 3D', // TODO: translate to ja
-            service_scan_examples_title: '�Qu� puedes escanear?', // TODO: translate to ja
-            service_scan_ex1: '<� Figuras y esculturas', // TODO: translate to ja
-            service_scan_ex2: '=) Piezas y repuestos', // TODO: translate to ja
-            service_scan_ex3: '=d Bustos y retratos', // TODO: translate to ja
-            service_scan_ex4: '<� Objetos para replicar', // TODO: translate to ja
-            service_scan_ex5: '=� Partes de veh�culos', // TODO: translate to ja
-            equip_card6_title: 'Escaneo 3D', // TODO: translate to ja
-            equip_card6_desc: 'Digitalizamos cualquier objeto f�sico con alta precisi�n. Desde joyer�a peque�a hasta muebles y veh�culos, con color real incluido.', // TODO: translate to ja
-            equip_card6_feat1: 'Objetos desde 5cm hasta muebles completos', // TODO: translate to ja
-            equip_card6_feat2: 'Captura color y textura en 48 MP', // TODO: translate to ja
-            equip_card6_feat3: 'Archivo listo para imprimir en 3D', // TODO: translate to ja
-            service_photo_title: 'Impresi�n Fotogr�fica', // TODO: translate to ja
-            service_photo_desc: 'Tus recuerdos merecen la mejor calidad. Impresi�n profesional que hace justicia a tus momentos especiales.', // TODO: translate to ja
-            service_photo_feat1: 'Calidad profesional', // TODO: translate to ja
-            service_photo_feat2: 'Papel de primera calidad', // TODO: translate to ja
-            service_photo_feat3: 'Todos los tama�os', // TODO: translate to ja
-            service_photo_examples_title: '�Qu� imprimimos?', // TODO: translate to ja
-            service_photo_ex1: '=� Fotos familiares', // TODO: translate to ja
-            service_photo_ex2: '=� Cuadros decorativos', // TODO: translate to ja
-            service_photo_ex3: '=� Calendarios personalizados', // TODO: translate to ja
-            service_photo_ex4: '=� Material promocional', // TODO: translate to ja
-            service_photo_ex5: '<� Arte y posters', // TODO: translate to ja
-            equipment_title: '�Qu� Podemos Crear?', // TODO: translate to ja
-            equipment_subtitle: 'Tecnolog�a profesional para resultados excepcionales', // TODO: translate to ja
-            equip_card1_title: 'Impresi�n 3D de Alta Velocidad', // TODO: translate to ja
-            equip_card1_desc: 'Velocidades de hasta 300mm/s con calibraci�n autom�tica LIDAR, c�mara de impresi�n cerrada y soporte para materiales avanzados incluyendo fibra de carbono y pol�meros t�cnicos', // TODO: translate to ja
-            equip_card1_feat1: 'Tama�o: hasta 25cm x 25cm x 25cm', // TODO: translate to ja
-            equip_card1_feat2: 'Hasta 4 colores en una pieza', // TODO: translate to ja
-            equip_card1_feat3: 'Materiales: PLA, PETG, TPU flexible', // TODO: translate to ja
-            equip_card2_title: 'Impresi�n 3D Compacta', // TODO: translate to ja
-            equip_card2_desc: 'Sistema compacto con velocidades de hasta 500mm/s, calibraci�n autom�tica completa, compensaci�n activa de flujo y operaci�n silenciosa d48dB para proyectos peque�os y medianos', // TODO: translate to ja
-            equip_card2_feat1: 'Tama�o: hasta 18cm x 18cm x 18cm', // TODO: translate to ja
-            equip_card2_feat2: 'Multicolor disponible', // TODO: translate to ja
-            equip_card2_feat3: 'Materiales: PLA, PETG, TPU', // TODO: translate to ja
-            equip_card3_title: 'Impresi�n 3D Gran Formato', // TODO: translate to ja
-            equip_card3_desc: 'Sistema de cambio de herramientas con hasta 5 cabezales independientes para impresi�n multimaterial sin desperdicio, volumen de construcci�n de 360mm� y precisi�n de borde a borde', // TODO: translate to ja
-            equip_card3_feat1: 'Tama�o: hasta 36cm x 36cm x 36cm', // TODO: translate to ja
-            equip_card3_feat2: 'Hasta 5 colores/materiales', // TODO: translate to ja
-            equip_card3_feat3: 'Materiales: PLA, PETG, ABS, PA+CF', // TODO: translate to ja
-            equip_card4_title: 'Impresi�n UV Directa', // TODO: translate to ja
-            equip_card4_desc: 'Impresi�n directa en m�ltiples superficies (madera, metal, vidrio, acr�lico, cer�mica) con texturas 3D de hasta 5mm, millones de colores con 100% de precisi�n crom�tica y autoenfoque l�ser dual', // TODO: translate to ja
-            equip_card4_feat1: 'Imprime en objetos cil�ndricos (vasos, botellas)', // TODO: translate to ja
-            equip_card4_feat2: 'Stickers UV DTF resistentes', // TODO: translate to ja
-            equip_card4_feat3: 'Magnetos, placas y m�s', // TODO: translate to ja
-            equip_card5_title: 'Corte y Grabado L�ser', // TODO: translate to ja
-            equip_card5_desc: 'L�ser de 40W con �rea de trabajo de 400�400mm, velocidad de grabado de hasta 36000mm/min, capacidad de corte de 20mm en madera y 6mm en acr�lico, con modo de precisi�n para ensamblajes exactos', // TODO: translate to ja
-            equip_card5_feat1: '�rea: 40cm x 40cm', // TODO: translate to ja
-            equip_card5_feat2: 'Corta madera de 2cm de grosor', // TODO: translate to ja
-            equip_card5_feat3: 'Grabados super detallados', // TODO: translate to ja
-            materials_title: 'Materiales que Usamos', // TODO: translate to ja
-            materials_subtitle: 'Haz clic en cada material para conocer m�s detalles', // TODO: translate to ja
-            materials_toggle: 'Haz clic aqu� para conocer todos los filamentos y materiales que usamos', // TODO: translate to ja
-            mat_ideal_for: 'Ideal para', // TODO: translate to ja
-            mat_more_info: '=� Ver detalles t�cnicos', // TODO: translate to ja
-            mat_learn_more: '( Saber m�s', // TODO: translate to ja
-            mat_badge_eco: 'Eco', // TODO: translate to ja
-            mat_badge_tough: 'Duro', // TODO: translate to ja
-            mat_badge_flex: 'Flex', // TODO: translate to ja
-            mat_badge_heat: 'Calor', // TODO: translate to ja
-            mat_badge_pro: 'Pro', // TODO: translate to ja
-            eco_headline: 'Impresi�n Consciente con el Planeta', // TODO: translate to ja
-            eco_desc: 'Nuestro material principal, el PLA, es de origen vegetal  fabricado a partir de almid�n de ma�z y ca�a de az�car. Es biodegradable y una alternativa m�s verde a los pl�sticos tradicionales.', // TODO: translate to ja
-            modal_properties: 'Propiedades', // TODO: translate to ja
-            modal_advantages: 'Ventajas', // TODO: translate to ja
-            modal_applications: 'Aplicaciones', // TODO: translate to ja
-            modal_examples: 'Ejemplos de Uso', // TODO: translate to ja
-            modal_tech_btn: '=� Click aqu� para detalles t�cnicos del material', // TODO: translate to ja
-            tech_specifications: 'Especificaciones T�cnicas', // TODO: translate to ja
-            tech_mechanical: 'Propiedades Mec�nicas', // TODO: translate to ja
-            tech_thermal: 'Propiedades T�rmicas', // TODO: translate to ja
-            tech_physical: 'Propiedades F�sicas', // TODO: translate to ja
-            tech_durability: 'Durabilidad y Resistencia', // TODO: translate to ja
-            tech_recommendations: 'Recomendaciones de Uso', // TODO: translate to ja
-            material_pla: 'El m�s com�n. F�cil de usar, viene en muchos colores. Perfecto para decoraci�n y prototipos.', // TODO: translate to ja
-            material_pla_uses: 'Ideal para: Figuras, juguetes, decoraci�n, prototipos, organizadores', // TODO: translate to ja
-            material_petg: 'M�s fuerte y flexible que PLA. Resistente al agua. Ideal para objetos que se usan mucho.', // TODO: translate to ja
-            material_petg_uses: 'Ideal para: Botellas, contenedores, piezas mec�nicas, objetos de exterior', // TODO: translate to ja
-            material_tpu: 'S�per flexible como goma. Perfecto para fundas de tel�fono, juguetes blandos y piezas que se doblan.', // TODO: translate to ja
-            material_tpu_uses: 'Ideal para: Fundas de tel�fono, correas, sellos, juguetes flexibles', // TODO: translate to ja
-            material_abs: 'Muy resistente al calor. El mismo material de los LEGO. Ideal para piezas mec�nicas.', // TODO: translate to ja
-            material_abs_uses: 'Ideal para: Piezas de autos, carcasas, herramientas, piezas que aguantan calor', // TODO: translate to ja
-            material_pacf: 'El m�s fuerte. Tiene fibra de carbono. Para piezas que necesitan ser super resistentes.', // TODO: translate to ja
-            material_pacf_uses: 'Ideal para: Drones, piezas industriales, herramientas, soportes de carga', // TODO: translate to ja
-            use_cases_title: 'Ejemplos de lo que Creamos', // TODO: translate to ja
-            use_case_1_title: 'Juguetes y Figuras', // TODO: translate to ja
-            use_case_1_desc: 'Personajes de videojuegos, figuras coleccionables, juguetes personalizados', // TODO: translate to ja
-            use_case_2_title: 'Decoraci�n del Hogar', // TODO: translate to ja
-            use_case_2_desc: 'Macetas, l�mparas, organizadores, letreros personalizados, marcos', // TODO: translate to ja
-            use_case_3_title: 'Regalos Personalizados', // TODO: translate to ja
-            use_case_3_desc: 'Tazas con nombres, llaveros, placas grabadas, trofeos personalizados', // TODO: translate to ja
-            use_case_4_title: 'Piezas de Repuesto', // TODO: translate to ja
-            use_case_4_desc: 'Repuestos para electrodom�sticos, piezas de autos, componentes mec�nicos', // TODO: translate to ja
-            use_case_5_title: 'Accesorios Tech', // TODO: translate to ja
-            use_case_5_desc: 'Fundas de tel�fono, soportes para tablet, organizadores de cables', // TODO: translate to ja
-            use_case_6_title: 'Negocios y Oficina', // TODO: translate to ja
-            use_case_6_desc: 'Letreros, tarjeteros, sellos personalizados, displays para productos', // TODO: translate to ja
-            use_case_7_title: 'Stickers UV DTF', // TODO: translate to ja
-            use_case_7_desc: 'Calcoman�as resistentes al agua, stickers para laptops, autos, botellas', // TODO: translate to ja
-            use_case_8_title: 'Vasos y Tumblers', // TODO: translate to ja
-            use_case_8_desc: 'Vasos t�rmicos personalizados, botellas con dise�os, tazas con fotos', // TODO: translate to ja
-            use_case_9_title: 'Magnetos y Placas', // TODO: translate to ja
-            use_case_9_desc: 'Imanes para refrigerador, placas de identificaci�n, se�al�tica', // TODO: translate to ja
-            gallery_title: 'Galer�a de Proyectos', // TODO: translate to ja
-            gallery_subtitle: 'Algunos ejemplos de lo que hemos creado', // TODO: translate to ja
-            gallery_filter_all: 'Todos', // TODO: translate to ja
-            gallery_filter_3d: 'Impresi�n 3D', // TODO: translate to ja
-            gallery_filter_laser: 'Corte L�ser', // TODO: translate to ja
-            gallery_filter_engrave: 'Grabado L�ser', // TODO: translate to ja
-            gallery_filter_scan: 'Escaneo 3D', // TODO: translate to ja
-            gallery_filter_uv: 'Impresi�n UV', // TODO: translate to ja
-            gallery_3d_1_caption: 'Personajes, figuras coleccionables y prototipos funcionales en PLA multicolor', // TODO: translate to ja
-            gallery_3d_2: 'Piezas Funcionales', // TODO: translate to ja
-            gallery_3d_2_caption: 'Repuestos, herramientas y componentes mec�nicos en PETG y ABS', // TODO: translate to ja
-            gallery_3d_3: 'Decoraci�n', // TODO: translate to ja
-            gallery_3d_3_caption: 'Macetas, l�mparas, organizadores y objetos decorativos personalizados', // TODO: translate to ja
-            gallery_laser_1: 'Grabado en Madera', // TODO: translate to ja
-            gallery_laser_1_caption: 'Letreros, placas personalizadas y decoraci�n en madera natural', // TODO: translate to ja
-            gallery_laser_2: 'Grabado en Cuero', // TODO: translate to ja
-            gallery_laser_2_caption: 'Carteras, cinturones, llaveros y accesorios de cuero personalizados', // TODO: translate to ja
-            gallery_laser_3: 'Corte en Acr�lico', // TODO: translate to ja
-            gallery_laser_3_caption: 'Letreros luminosos, displays y piezas decorativas en acr�lico', // TODO: translate to ja
-            gallery_uv_1: 'Tazas y Vasos', // TODO: translate to ja
-            gallery_uv_1_caption: 'Tumblers, tazas y botellas personalizadas con impresi�n UV rotativa', // TODO: translate to ja
-            gallery_uv_2: 'Stickers UV DTF', // TODO: translate to ja
-            gallery_uv_2_caption: 'Calcoman�as resistentes al agua para laptops, autos y m�s', // TODO: translate to ja
-            gallery_uv_3: 'Magnetos y Placas', // TODO: translate to ja
-            gallery_uv_3_caption: 'Imanes personalizados, placas de identificaci�n y se�al�tica UV', // TODO: translate to ja
-            gallery_note: '=� �Tienes un proyecto en mente? Cont�ctanos para una cotizaci�n personalizada', // TODO: translate to ja
-            gallery_cta_btn: 'Solicitar Cotizaci�n', // TODO: translate to ja
-            clients_title: 'Nuestros Clientes', // TODO: translate to ja
-            clients_subtitle: 'Empresas que conf�an en nosotros', // TODO: translate to ja
-            wa_subtitle: 'Normalmente responde en minutos', // TODO: translate to ja
-            wa_greeting: '�Est�s listo para llevar tu idea a la realidad? =�', // TODO: translate to ja
-            wa_placeholder: 'Escribe tu mensaje aqu�...', // TODO: translate to ja
-            wa_btn: 'Iniciar Chat �', // TODO: translate to ja
-            btl_eyebrow: 'De la idea a la realidad', // TODO: translate to ja
-            btl_title: 'Tu boceto se convierte en algo real', // TODO: translate to ja
-            btl_subtitle: 'No necesitas ser dise�ador. Si puedes dibujarlo, imaginarlo o describirlo  nosotros lo hacemos realidad.', // TODO: translate to ja
-            btl_before_label: 'Tu idea', // TODO: translate to ja
-            btl_before_title: 'Empieza con un boceto', // TODO: translate to ja
-            btl_before_desc: 'Un dibujo en papel, una foto de referencia, una descripci�n  cualquier punto de partida funciona.', // TODO: translate to ja
-            btl_step1: 'Dise�o 3D', // TODO: translate to ja
-            btl_step2: 'Impresi�n', // TODO: translate to ja
-            btl_step3: 'Acabado', // TODO: translate to ja
-            btl_after_label: 'Tu objeto real', // TODO: translate to ja
-            btl_after_title: 'Se vuelve realidad', // TODO: translate to ja
-            btl_after_desc: 'Un objeto f�sico, preciso y duradero  listo para usar, regalar o vender.', // TODO: translate to ja
-            btl_feat1: 'No necesitas saber dise�o 3D', // TODO: translate to ja
-            btl_feat2: 'Te asesoramos en cada paso', // TODO: translate to ja
-            btl_feat3: 'Entregas r�pidas', // TODO: translate to ja
-            btl_feat4: 'Desde 1 pieza hasta producci�n', // TODO: translate to ja
-            btl_cta: 'Cu�ntanos tu idea �', // TODO: translate to ja
-            moq_single: 'pieza m�nima', // TODO: translate to ja
-            moq_headline: 'Sin m�nimos. Sin excusas.', // TODO: translate to ja
-            moq_sub: '�Necesitas una sola pieza? La hacemos. �Necesitas 500? Tambi�n. T� decides cu�nto.', // TODO: translate to ja
-            moq_bulk: 'producci�n a escala', // TODO: translate to ja
-            contact_title: 'Cont�ctanos', // TODO: translate to ja
-            contact_subtitle: 'Cu�ntanos sobre tu proyecto y te responderemos pronto', // TODO: translate to ja
-            form_name: 'Nombre', // TODO: translate to ja
-            form_email: 'Email', // TODO: translate to ja
-            form_phone: 'Tel�fono', // TODO: translate to ja
-            form_service: 'Servicio de Inter�s', // TODO: translate to ja
-            form_select: 'Selecciona un servicio', // TODO: translate to ja
-            form_opt_3d: 'Impresi�n 3D', // TODO: translate to ja
-            form_opt_uv: 'Impresi�n UV', // TODO: translate to ja
-            form_opt_laser: 'Corte L�ser', // TODO: translate to ja
-            form_opt_engrave: 'Grabado L�ser', // TODO: translate to ja
-            form_opt_photo: 'Impresi�n Fotogr�fica', // TODO: translate to ja
-            form_opt_other: 'Otro', // TODO: translate to ja
-            form_message: 'Mensaje', // TODO: translate to ja
-            form_submit: 'Enviar Mensaje', // TODO: translate to ja
-            form_success: '�Mensaje enviado con �xito! Te contactaremos pronto.', // TODO: translate to ja
-            form_error: 'Hubo un error al enviar el mensaje. Por favor, intenta de nuevo.', // TODO: translate to ja
-            contact_email_label: 'Email', // TODO: translate to ja
-            contact_phone_label: 'Tel�fono', // TODO: translate to ja
-            contact_hours_label: 'Horario', // TODO: translate to ja
-            contact_hours: 'Lun - Vie: 9:00 - 18:00', // TODO: translate to ja
-            footer_rights: 'Todos los derechos reservados.', // TODO: translate to ja
-            cert_mexico: 'Producci�n en M�xico', // TODO: translate to ja
-            cert_materials: 'Materiales certificados', // TODO: translate to ja
-            cert_quality: 'Calidad garantizada', // TODO: translate to ja
-            nav_catalog: '=� Cat�logo', // TODO: translate to ja
-            hero_badge: 'Cat�logo Oficial 2025', // TODO: translate to ja
-            hero_title_1: 'Productos', // TODO: translate to ja
-            hero_title_2: 'Listos para Ordenar', // TODO: translate to ja
-            stat_products: 'Productos', // TODO: translate to ja
-            stat_min: 'Pieza m�nima', // TODO: translate to ja
-            stat_response: 'Respuesta', // TODO: translate to ja
-            empty_text: 'No se encontraron productos', // TODO: translate to ja
-            footer_note_cat: 'Precios en MXN. Sujetos a cambio sin previo aviso. Cotizaci�n final seg�n especificaciones.', // TODO: translate to ja
-            search_placeholder: 'Buscar producto...', // TODO: translate to ja
-            filter_all: 'Todos', // TODO: translate to ja
-            from_label: 'Desde', // TODO: translate to ja
-            see_details: 'Ver detalles', // TODO: translate to ja
-            cat_uv: 'Impresi�n UV', // TODO: translate to ja
-            cat_3d: 'Impresi�n 3D', // TODO: translate to ja
-            cat_laser: 'Corte L�ser', // TODO: translate to ja
-            cat_engrave: 'Grabado L�ser', // TODO: translate to ja
-            cat_photo: 'Fotograf�a', // TODO: translate to ja
-            products_count_one: 'producto disponible', // TODO: translate to ja
-            products_count_many: 'productos disponibles', // TODO: translate to ja
-            modal_variants: 'Variantes disponibles', // TODO: translate to ja
-            modal_features: 'Caracter�sticas', // TODO: translate to ja
-            modal_price_title: 'Tabla de Precios', // TODO: translate to ja
-            modal_flat: '=� Plano', // TODO: translate to ja
-            modal_relief: '<� Relieve hasta 1mm', // TODO: translate to ja
-            modal_variant_col: 'Variante / Tama�o', // TODO: translate to ja
-            legend_flat: 'Impresi�n plana  dise�o 2D est�ndar', // TODO: translate to ja
-            legend_relief: 'Relieve hasta 1mm  textura t�ctil 3D', // TODO: translate to ja
-            cta_quote: 'Cotizar ahora', // TODO: translate to ja
-            badge_hot: '=% Popular', // TODO: translate to ja
-            badge_new: '( Nuevo', // TODO: translate to ja
-            badge_promo: '<� Promo', // TODO: translate to ja
-            no_image: 'Vista previa pr�ximamente', // TODO: translate to ja
-            no_image_short: 'Sin imagen', // TODO: translate to ja
-            filter_gift: '<� Regalos', // TODO: translate to ja
-            filter_business: '=� Empresarial', // TODO: translate to ja
-            filter_popular: '=% Popular', // TODO: translate to ja
-            filter_new: '( Nuevo', // TODO: translate to ja
-            filter_budget: '=� Econ�mico', // TODO: translate to ja
-            filter_premium: '=� Premium', // TODO: translate to ja
-            filter_decor: '=� Decoraci�n', // TODO: translate to ja
-            filter_drinkware: ' Bebidas', // TODO: translate to ja
-            footer_trademark: 'Filamorfosis� es una marca registrada.', // TODO: translate to ja
-            'hero.shopNow': 'Explorar Productos', // TODO: translate to ja
-            'nav.store': 'Tienda', // TODO: translate to ja
-            'gallery.viewAll': 'Ver todos los productos �', // TODO: translate to ja
-            'service.viewProducts': 'Ver productos', // TODO: translate to ja
-            add_to_cart: 'Agregar al carrito', // TODO: translate to ja
-};
+            nav_home: 'ストア',
+            nav_services: 'パーソナライズサービス',
+            nav_equipment: '設備',
+            nav_clients: 'クライアント',
+            nav_contact: 'お問い合わせ',
+            nav_faq: 'よくある質問',
+            nav_about: '私たちについて',
+            nav_profile: 'マイプロフィール',
+            nav_profile_manage: 'プロフィール管理',
+            nav_logout: 'ログアウト',
+            hero_title: 'あなたのアイデア。あなたの現実。',
+            hero_subtitle: 'あなたの想像を層ごとに形にします。',
+            hero_cta: '見積もりを依頼',
+            hero_cta_secondary: 'サービスを見る',
+            services_title: 'オーダーメイドサービス',
+            services_subtitle: 'カスタマイズ可能な製品 — または一緒にユニークなものを作りましょう。',
+            service_3d_title: '3Dプリント',
+            service_3d_desc: 'マルチカラー・マルチマテリアルプリントでアイデアを形に。プロトタイプから機能部品まで。',
+            service_3d_feat1: '1つのパーツに最大5色',
+            service_3d_feat2: '柔軟で丈夫な素材',
+            service_3d_feat3: 'ミリ単位の精度',
+            service_3d_examples_title: '何が作れる？',
+            service_3d_ex1: '🎮 フィギュアとおもちゃ',
+            service_3d_ex2: '🏠 インテリア雑貨',
+            service_3d_ex3: '🔧 交換部品',
+            service_3d_ex4: '📱 テックアクセサリー',
+            service_3d_ex5: '🎁 パーソナライズギフト',
+            service_uv_title: 'UVプリント',
+            service_uv_desc: 'マグカップ、木材、金属、ガラスなどほぼあらゆる表面に鮮やかで長持ちするカラーでカスタマイズ。',
+            service_uv_feat1: '円筒形オブジェクトへの印刷',
+            service_uv_feat2: '色あせしないカラー',
+            service_uv_feat3: '耐水ステッカー',
+            service_uv_examples_title: '何がカスタマイズできる？',
+            service_uv_ex1: '☕ マグカップとサーモカップ',
+            service_uv_ex2: '🏷️ UV DTFステッカー',
+            service_uv_ex3: '🧲 カスタムマグネット',
+            service_uv_ex4: '🪵 木製プレート',
+            service_uv_ex5: '🎨 装飾品',
+            service_laser_title: 'レーザーカット',
+            service_laser_desc: '外科的精度でカット・彫刻。看板、装飾、パーソナライズギフトに最適。',
+            service_laser_feat1: 'クリーンで精密なカット',
+            service_laser_feat2: '驚くほど細かい彫刻',
+            service_laser_feat3: '木材、アクリル、革など',
+            service_laser_examples_title: '何が作れる？',
+            service_laser_ex1: '🪵 木製看板',
+            service_laser_ex2: '👜 レザーアクセサリー',
+            service_laser_ex3: '✨ アクリルパーツ',
+            service_laser_ex4: '🏢 企業サイン',
+            service_laser_ex5: '🎁 彫刻ギフト',
+            service_engrave_title: 'レーザー彫刻',
+            service_engrave_desc: '木材、金属、ガラス、革などへの高精度レーザー彫刻。写真品質のディテールで表面をパーソナライズ。',
+            service_engrave_feat1: '写真・ベクター品質のディテール',
+            service_engrave_feat2: '永久的 — 消えない',
+            service_engrave_feat3: '木材、金属、ガラス、革、石',
+            service_engrave_examples_title: '何が彫刻できる？',
+            service_engrave_ex1: '🎁 パーソナライズギフト',
+            service_engrave_ex2: '🏆 トロフィーとプレート',
+            service_engrave_ex3: '🔑 キーホルダーとアクセサリー',
+            service_engrave_ex4: '🍶 ボトルとグラス',
+            service_engrave_ex5: '📱 ガジェットと電子機器',
+            service_scan_title: '3Dスキャン',
+            service_scan_desc: '物理的なオブジェクトをデジタル3Dモデルに変換。部品の複製、パーソナライズギフト、思い出のデジタル化に最適。',
+            service_scan_feat1: 'ジュエリーから家具までスキャン',
+            service_scan_feat2: 'リアルな色とテクスチャを取得',
+            service_scan_feat3: '3Dプリント対応ファイル',
+            service_scan_examples_title: '何がスキャンできる？',
+            service_scan_ex1: '🎭 フィギュアと彫刻',
+            service_scan_ex2: '🔩 部品とスペアパーツ',
+            service_scan_ex3: '👤 バストと肖像',
+            service_scan_ex4: '📦 複製したいオブジェクト',
+            service_scan_ex5: '🚗 車両部品',
+            equip_card6_title: '3Dスキャン',
+            equip_card6_desc: '小さなジュエリーから家具・車両まで、リアルカラー付きで高精度にデジタル化。',
+            equip_card6_feat1: '5cmから家具サイズまで対応',
+            equip_card6_feat2: '48MPで色とテクスチャを取得',
+            equip_card6_feat3: '3Dプリント対応ファイル',
+            service_photo_title: '写真プリント',
+            service_photo_desc: '大切な思い出には最高の品質を。特別な瞬間にふさわしいプロフェッショナルプリント。',
+            service_photo_feat1: 'プロフェッショナル品質',
+            service_photo_feat2: 'プレミアム用紙',
+            service_photo_feat3: '全サイズ対応',
+            service_photo_examples_title: '何をプリントする？',
+            service_photo_ex1: '👨‍👩‍👧 家族写真',
+            service_photo_ex2: '🖼️ 装飾アート',
+            service_photo_ex3: '📅 カスタムカレンダー',
+            service_photo_ex4: '📢 プロモーション素材',
+            service_photo_ex5: '🎨 アートとポスター',
+            equipment_title: '何が作れる？',
+            equipment_subtitle: '卓越した結果のためのプロフェッショナル技術',
+            equip_card1_title: '高速3Dプリント',
+            equip_card1_desc: '自動LIDARキャリブレーション付き最大300mm/sの速度、カーボンファイバーを含む高度素材対応',
+            equip_card1_feat1: 'サイズ: 最大25cm x 25cm x 25cm',
+            equip_card1_feat2: '1パーツに最大4色',
+            equip_card1_feat3: '素材: PLA、PETG、フレキシブルTPU',
+            equip_card2_title: 'コンパクト3Dプリント',
+            equip_card2_desc: '最大500mm/sのコンパクトシステム、静音動作≤48dB',
+            equip_card2_feat1: 'サイズ: 最大18cm x 18cm x 18cm',
+            equip_card2_feat2: 'マルチカラー対応',
+            equip_card2_feat3: '素材: PLA、PETG、TPU',
+            equip_card3_title: '大型3Dプリント',
+            equip_card3_desc: '最大5つの独立ヘッドによるマルチマテリアル印刷システム',
+            equip_card3_feat1: 'サイズ: 最大36cm x 36cm x 36cm',
+            equip_card3_feat2: '最大5色/素材',
+            equip_card3_feat3: '素材: PLA、PETG、ABS、PA+CF',
+            equip_card4_title: 'ダイレクトUVプリント',
+            equip_card4_desc: '木材、金属、ガラス、アクリル、セラミックへの直接印刷、3Dテクスチャ対応',
+            equip_card4_feat1: '円筒形オブジェクトへの印刷',
+            equip_card4_feat2: '耐久UV DTFステッカー',
+            equip_card4_feat3: 'マグネット、プレートなど',
+            equip_card5_title: 'レーザーカット＆彫刻',
+            equip_card5_desc: '400×400mm作業エリア、最大36000mm/minの彫刻速度を持つ40Wレーザー',
+            equip_card5_feat1: 'エリア: 40cm x 40cm',
+            equip_card5_feat2: '2cm厚の木材をカット',
+            equip_card5_feat3: '超精細彫刻',
+            materials_title: '使用素材',
+            materials_subtitle: '各素材をクリックして詳細を確認',
+            materials_toggle: 'こちらをクリックして全フィラメントと素材を確認',
+            mat_ideal_for: '最適用途',
+            mat_more_info: '🔬 技術詳細を見る',
+            mat_learn_more: '👉 詳しく見る',
+            mat_badge_eco: 'エコ',
+            mat_badge_tough: '強靭',
+            mat_badge_flex: 'フレックス',
+            mat_badge_heat: '耐熱',
+            mat_badge_pro: 'プロ',
+            eco_headline: '地球に優しいプリント',
+            eco_desc: '主素材のPLAはトウモロコシデンプンとサトウキビから作られた植物由来素材。生分解性で従来プラスチックよりエコ。',
+            modal_properties: '特性',
+            modal_advantages: '利点',
+            modal_applications: '用途',
+            modal_examples: '使用例',
+            modal_tech_btn: '🔬 素材の技術詳細はこちら',
+            tech_specifications: '技術仕様',
+            tech_mechanical: '機械的特性',
+            tech_thermal: '熱的特性',
+            tech_physical: '物理的特性',
+            tech_durability: '耐久性と耐性',
+            tech_recommendations: '使用推奨事項',
+            material_pla: '最も一般的。使いやすく多色展開。装飾やプロトタイプに最適。',
+            material_pla_uses: '最適用途: フィギュア、おもちゃ、装飾、プロトタイプ、オーガナイザー',
+            material_petg: 'PLAより強く柔軟。耐水性。よく使うものに最適。',
+            material_petg_uses: '最適用途: ボトル、容器、機械部品、屋外用品',
+            material_tpu: 'ゴムのように超柔軟。スマホケース、柔らかいおもちゃ、曲がる部品に最適。',
+            material_tpu_uses: '最適用途: スマホケース、ストラップ、スタンプ、柔軟なおもちゃ',
+            material_abs: '非常に耐熱性が高い。LEGOと同じ素材。機械部品に最適。',
+            material_abs_uses: '最適用途: 車部品、ケーシング、工具、耐熱部品',
+            material_pacf: '最強素材。カーボンファイバー入り。超強度が必要な部品に。',
+            material_pacf_uses: '最適用途: ドローン、産業部品、工具、荷重支持',
+            use_cases_title: '制作例',
+            use_case_1_title: 'おもちゃとフィギュア',
+            use_case_1_desc: 'ゲームキャラクター、コレクターフィギュア、カスタムおもちゃ',
+            use_case_2_title: 'インテリア装飾',
+            use_case_2_desc: '植木鉢、ランプ、オーガナイザー、カスタム看板、フレーム',
+            use_case_3_title: 'パーソナライズギフト',
+            use_case_3_desc: '名前入りマグカップ、キーホルダー、彫刻プレート、カスタムトロフィー',
+            use_case_4_title: '交換部品',
+            use_case_4_desc: '家電部品、車部品、機械コンポーネント',
+            use_case_5_title: 'テックアクセサリー',
+            use_case_5_desc: 'スマホケース、タブレットスタンド、ケーブルオーガナイザー',
+            use_case_6_title: 'ビジネスとオフィス',
+            use_case_6_desc: '看板、名刺ホルダー、カスタムスタンプ、商品ディスプレイ',
+            use_case_7_title: 'UV DTFステッカー',
+            use_case_7_desc: 'ラップトップ、車、ボトル用耐水デカール',
+            use_case_8_title: 'カップとタンブラー',
+            use_case_8_desc: 'カスタムサーモカップ、デザインボトル、写真入りマグカップ',
+            use_case_9_title: 'マグネットとプレート',
+            use_case_9_desc: '冷蔵庫マグネット、IDプレート、サイン',
+            gallery_title: 'プロジェクトギャラリー',
+            gallery_subtitle: '制作例の一部',
+            gallery_filter_all: 'すべて',
+            gallery_filter_3d: '3Dプリント',
+            gallery_filter_laser: 'レーザーカット',
+            gallery_filter_engrave: 'レーザー彫刻',
+            gallery_filter_scan: '3Dスキャン',
+            gallery_filter_uv: 'UVプリント',
+            gallery_3d_1_caption: 'マルチカラーPLAのキャラクター、コレクターフィギュア、機能プロトタイプ',
+            gallery_3d_2: '機能部品',
+            gallery_3d_2_caption: 'PETGとABSのスペアパーツ、工具、機械コンポーネント',
+            gallery_3d_3: '装飾',
+            gallery_3d_3_caption: '植木鉢、ランプ、オーガナイザー、カスタム装飾品',
+            gallery_laser_1: '木材彫刻',
+            gallery_laser_1_caption: '天然木の看板、カスタムプレート、装飾',
+            gallery_laser_2: '革彫刻',
+            gallery_laser_2_caption: 'カスタム財布、ベルト、キーホルダー、革アクセサリー',
+            gallery_laser_3: 'アクリルカット',
+            gallery_laser_3_caption: '発光看板、ディスプレイ、装飾アクリルパーツ',
+            gallery_uv_1: 'マグカップとグラス',
+            gallery_uv_1_caption: 'ロータリーUVプリントのカスタムタンブラー、マグカップ、ボトル',
+            gallery_uv_2: 'UV DTFステッカー',
+            gallery_uv_2_caption: 'ラップトップ、車などの耐水デカール',
+            gallery_uv_3: 'マグネットとプレート',
+            gallery_uv_3_caption: 'カスタムマグネット、IDプレート、UVサイン',
+            gallery_note: '💡 プロジェクトのご相談はお気軽に。個別見積もりをご提供します',
+            gallery_cta_btn: '見積もりを依頼',
+            clients_title: 'クライアント',
+            clients_subtitle: '信頼いただいている企業',
+            wa_subtitle: '通常数分以内に返信',
+            wa_greeting: 'アイデアを現実にする準備はできていますか？🚀',
+            wa_placeholder: 'メッセージを入力...',
+            wa_btn: 'チャットを開始 💬',
+            btl_eyebrow: 'アイデアから現実へ',
+            btl_title: 'スケッチが本物になる',
+            btl_subtitle: 'デザイナーである必要はありません。描けるか、想像できるか、説明できれば — 私たちが形にします。',
+            btl_before_label: 'あなたのアイデア',
+            btl_before_title: 'スケッチから始める',
+            btl_before_desc: '紙の絵、参考写真、説明文 — どんな出発点でも大丈夫。',
+            btl_step1: '3Dデザイン', btl_step2: 'プリント', btl_step3: '仕上げ',
+            btl_after_label: 'あなたの実物',
+            btl_after_title: '現実になる',
+            btl_after_desc: '精密で耐久性のある物理的なオブジェクト — 使う、贈る、売るために。',
+            btl_feat1: '3Dデザインの知識不要',
+            btl_feat2: '各ステップでサポート',
+            btl_feat3: '迅速な納品',
+            btl_feat4: '1個から量産まで',
+            btl_cta: 'アイデアを教えてください 💬',
+            moq_single: '最小1個',
+            moq_headline: '最小ロットなし。言い訳なし。',
+            moq_sub: '1個だけ必要？作ります。500個？もちろん。あなたが決めます。',
+            moq_bulk: '大量生産',
+            contact_title: 'お問い合わせ',
+            contact_subtitle: 'プロジェクトについてお聞かせください。すぐにご連絡します',
+            form_name: 'お名前',
+            form_email: 'メール',
+            form_phone: '電話番号',
+            form_service: 'ご希望のサービス',
+            form_select: 'サービスを選択',
+            form_opt_3d: '3Dプリント',
+            form_opt_uv: 'UVプリント',
+            form_opt_laser: 'レーザーカット',
+            form_opt_engrave: 'レーザー彫刻',
+            form_opt_photo: '写真プリント',
+            form_opt_other: 'その他',
+            form_message: 'メッセージ',
+            form_submit: '送信',
+            form_success: 'メッセージを送信しました！すぐにご連絡します。',
+            form_error: '送信エラーが発生しました。もう一度お試しください。',
+            contact_email_label: 'メール',
+            contact_phone_label: '電話番号',
+            contact_hours_label: '営業時間',
+            contact_hours: '月〜金: 9:00 - 18:00',
+            footer_rights: '全著作権所有。',
+            cert_mexico: 'メキシコ製',
+            cert_materials: '認定素材',
+            cert_quality: '品質保証',
+            nav_catalog: '🛍️ カタログ',
+            hero_badge: '公式カタログ 2025',
+            hero_title_1: '製品',
+            hero_title_2: '注文受付中',
+            stat_products: '製品',
+            stat_min: '最小1個',
+            stat_response: '返信',
+            stat_shipping_value: '無料',
+            stat_shipping: '配送 +$500',
+            empty_text: '製品が見つかりません',
+            footer_note_cat: '価格はMXN。予告なく変更される場合があります。最終見積もりは仕様による。',
+            search_placeholder: '製品を検索...',
+            filter_all: 'すべて',
+            from_label: '〜から',
+            see_details: '詳細を見る',
+            cat_uv: 'UVプリント',
+            cat_3d: '3Dプリント',
+            cat_laser: 'レーザーカット',
+            cat_engrave: 'レーザー彫刻',
+            cat_photo: '写真',
+            products_count_one: '製品あり',
+            products_count_many: '製品あり',
+            modal_variants: '利用可能なバリアント',
+            modal_features: '特徴',
+            modal_price_title: '価格表',
+            modal_flat: '🖨️ フラット',
+            modal_relief: '🏔️ レリーフ最大1mm',
+            modal_variant_col: 'バリアント / サイズ',
+            legend_flat: 'フラット印刷 — 標準2Dデザイン',
+            legend_relief: 'レリーフ最大1mm — 触覚3Dテクスチャ',
+            cta_quote: '今すぐ見積もり',
+            badge_hot: '🔥 人気',
+            badge_new: '✨ 新着',
+            badge_promo: '🎁 プロモ',
+            no_image: '近日公開',
+            no_image_short: '画像なし',
+            filter_gift: '🎁 ギフト',
+            filter_business: '🏢 ビジネス',
+            filter_popular: '🔥 人気',
+            filter_new: '✨ 新着',
+            filter_budget: '💰 お手頃',
+            filter_premium: '⭐ プレミアム',
+            filter_decor: '🎨 デコレーション',
+            filter_drinkware: '☕ ドリンクウェア',
+            footer_trademark: 'Filamorfosis®は登録商標です。',
+            'hero.shopNow': '製品を探す',
+            'nav.store': 'ストア',
+            'gallery.viewAll': 'すべての製品を見る →',
+            'service.viewProducts': '製品を見る',
+            add_to_cart: 'カートに追加',
+            hero_headline: 'あなたのアイデア。あなたの現実。',
+            hero_subheadline: 'メキシコ製のユニークな製品 — 3Dプリント、UV、レーザーなど。',
+            hero_cta_primary: '製品を探す',
+            trust_made_in_mexico: '🇲🇽 メキシコ製',
+            trust_min_order: '📦 最小1個',
+            trust_fast_shipping: '⚡ 迅速な配送',
+            badge_popular: '⭐ おすすめ',
+            error_load_products: '製品の読み込みエラー。もう一度お試しください。',
+            load_more: 'もっと見る',
+            retry: '再試行',
+            ver_detalles: '詳細を見る',
+            agregar_al_carrito: 'カートに追加',
+            agotado: '売り切れ',
+            no_disponible: '取り扱いなし',
+            back_to_catalog: '← カタログに戻る',
+            breadcrumb_home: 'ホーム',
+            cart_empty_cta: '商品を見る',
+            promo_banner_text: '🎉 $500 MXN以上のご注文で送料無料',
+            cart_total: '合計',
+            cart_add_success: 'カートに追加しました',
+            cart_add_error: 'カートへの追加に失敗しました',
+            coming_soon: 'もうすぐ',
+            cart_title: 'カート',
+            cart_checkout: 'チェックアウト',
+            cart_upload_design: 'デザインをアップロード',
+            cart_continue_shopping: '買い物を続ける',
+            cart_empty_message: 'カートは空です',
+            cart_shipping_note: '配送料はチェックアウト時に計算',
+            cart_trust_secure: '安全な支払い',
+            cart_trust_quality: '品質保証',
+            cart_trust_support: '24時間サポート',
+            cart_item_removed: 'アイテムを削除しました',
+        };

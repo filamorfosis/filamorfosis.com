@@ -32,7 +32,6 @@
         this.renderAdminUsersTable();
         this.renderStoreUsersTable();
       } catch (err) {
-        console.error('[AdminUsers] Load failed:', err);
         this.showError('admin-users-tbody', 6);
         this.showError('store-users-tbody', 5);
       }
@@ -309,7 +308,6 @@
         document.getElementById('add-admin-modal').style.display = 'none';
         await this.loadUsers();
       } catch (err) {
-        console.error('[AdminUsers] Add/edit admin failed:', err);
         errEl.textContent = err.detail || 'Error al guardar administrador';
       } finally {
         submitBtn.disabled = false;
@@ -366,7 +364,6 @@
         window.toast('Usuario promovido a administrador', true);
         await this.loadUsers();
       } catch (err) {
-        console.error('[AdminUsers] Promote failed:', err);
         window.toast(err.detail || 'Error al promover usuario', false);
       }
     },

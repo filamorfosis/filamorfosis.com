@@ -16,25 +16,25 @@
   <div class="cart-drawer__backdrop"></div>
   <div class="cart-drawer__panel card">
     <div class="cart-drawer__header">
-      <a href="#" class="cart-drawer__continue" id="cart-continue-link" aria-label="Seguir comprando">
-        <i class="fas fa-arrow-left"></i> Seguir comprando
+      <a href="#" class="cart-drawer__continue" id="cart-continue-link" data-t="cart_continue_shopping" aria-label="Seguir comprando">
+        <i class="fas fa-arrow-left"></i> <span data-t="cart_continue_shopping">Seguir comprando</span>
       </a>
-      <h2 data-t="cart.title">Carrito</h2>
+      <h2 data-t="cart_title">Carrito</h2>
       <button class="cart-drawer__close" aria-label="Cerrar carrito">&times;</button>
     </div>
     <div class="cart-drawer__items" id="cart-items-list"></div>
     <div class="cart-drawer__footer" id="cart-footer">
       <div class="cart-drawer__total">
-        <span data-t="cart.total">Total:</span>
+        <span data-t="cart_total">Total:</span>
         <strong id="cart-total-amount">$0 MXN</strong>
       </div>
-      <p class="cart-drawer__shipping-note">Envío calculado al confirmar</p>
+      <p class="cart-drawer__shipping-note" data-t="cart_shipping_note">Envío calculado al confirmar</p>
       <div class="cart-trust-badges">
-        <div class="cart-trust-badge"><i class="fas fa-lock"></i> <span>Pago seguro</span></div>
-        <div class="cart-trust-badge"><i class="fas fa-star"></i> <span>Producción garantizada</span></div>
-        <div class="cart-trust-badge"><i class="fas fa-headset"></i> <span>Soporte 24/7</span></div>
+        <div class="cart-trust-badge"><i class="fas fa-lock"></i> <span data-t="cart_trust_secure">Pago seguro</span></div>
+        <div class="cart-trust-badge"><i class="fas fa-star"></i> <span data-t="cart_trust_quality">Producción garantizada</span></div>
+        <div class="cart-trust-badge"><i class="fas fa-headset"></i> <span data-t="cart_trust_support">Soporte 24/7</span></div>
       </div>
-      <a href="checkout.html" class="btn-primary cart-drawer__checkout" id="cart-checkout-btn" data-t="cart.checkout">
+      <a href="checkout.html" class="btn-primary cart-drawer__checkout" id="cart-checkout-btn" data-t="cart_checkout">
         Proceder al pago
       </a>
     </div>
@@ -136,6 +136,11 @@
         setTimeout(function() { el.classList.remove('cart-badge--pulse'); }, 300);
       }
       el.textContent = count;
+      if (count === 0) {
+        el.classList.add('cart-badge--hidden');
+      } else {
+        el.classList.remove('cart-badge--hidden');
+      }
     });
 
     if (!list) return;
@@ -145,8 +150,8 @@
       list.innerHTML = `
         <div class="cart-empty-state">
           <i class="fas fa-shopping-cart" style="font-size:3rem;opacity:0.3;display:block;margin-bottom:16px"></i>
-          <p>Tu carrito está vacío</p>
-          <button class="btn-secondary cart-empty-cta" onclick="window.FilamorfosisCart.closeDrawer();if(window._spaNavigate)window._spaNavigate('#catalog');else window.location.hash='#catalog';">Ver productos</button>
+          <p data-t="cart_empty_message">Tu carrito está vacío</p>
+          <button class="btn-secondary cart-empty-cta" onclick="window.FilamorfosisCart.closeDrawer();if(window._spaNavigate)window._spaNavigate('#catalog');else window.location.hash='#catalog';" data-t="cart_empty_cta">Ver productos</button>
         </div>`;
       if (totalEl) totalEl.textContent = '$0 MXN';
       // Hide footer checkout button when empty
@@ -171,7 +176,7 @@
       const designLabel = item.acceptsDesignFile ? `
         <label class="cart-item__design-label">
           <i class="fas fa-paperclip"></i>
-          ${item.designFileName ? _esc(item.designFileName) : '<span data-t="cart.uploadDesign">Subir diseño</span>'}
+          ${item.designFileName ? _esc(item.designFileName) : '<span data-t="cart_upload_design">Subir diseño</span>'}
           <input type="file" data-design-upload data-item-id="${item.id}"
             accept=".png,.jpg,.jpeg,.svg,.pdf" style="display:none">
         </label>
@@ -242,7 +247,10 @@
         _cart = await removeCartItem(itemId);
         _render();
         if (window.Toast && window.Toast.show) {
-          window.Toast.show({ message: 'Artículo eliminado', type: 'info' });
+          const t = window.FilamorfosisI18n && window.FilamorfosisI18n[localStorage.getItem('preferredLanguage') || 'es']
+            ? (key) => window.FilamorfosisI18n[localStorage.getItem('preferredLanguage') || 'es'][key] || key
+            : (key) => key;
+          window.Toast.show({ message: t('cart_item_removed'), type: 'info' });
         }
         return;
       }

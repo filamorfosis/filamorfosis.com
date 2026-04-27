@@ -4714,11 +4714,11 @@ textarea:focus-visible {
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* -- Media slider ï¿½ 2 rows -- */
+/* -- Media slider — 1 row -- */
 .showcase-media-grid {
     position: relative;
     width: 100%;
-    height: 560px;
+    height: 300px;
     overflow: hidden;
     background: #0a0e1a;
     display: flex;
@@ -4726,20 +4726,13 @@ textarea:focus-visible {
     gap: 6px;
 }
 
-/* Each row is a scrolling track */
+/* Single scrolling track */
 .showcase-media-track {
     display: flex;
     flex: 1;
     min-height: 0;
-    animation: showcaseScroll 28s linear infinite;
+    animation: showcaseScroll 10s linear infinite;
     will-change: transform;
-}
-.showcase-media-track:nth-child(2) {
-    animation-duration: 22s;
-    animation-direction: reverse;
-}
-.showcase-media-track:nth-child(3) {
-    display: none; /* 3rd row hidden */
 }
 .showcase-media-track:hover,
 .showcase-media-track.paused {
@@ -4753,14 +4746,14 @@ textarea:focus-visible {
 
 .showcase-media-item {
     flex-shrink: 0;
-    width: 320px;
+    width: 400px;
     height: 100%;
     overflow: hidden;
     background: #0f172a;
     position: relative;
 }
 .showcase-media-item--wide {
-    width: 480px;
+    width: 500;
 }
 
 .showcase-media-item img,

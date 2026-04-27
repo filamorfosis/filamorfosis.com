@@ -1193,12 +1193,26 @@
         tError:        tError,
         /**
          * t(key) — translate a store key to the current language.
-         * Falls back to ES if the key is missing in the active language.
+         * Looks up storeKeys first, then window.FilamorfosisI18n lang files.
+         * Falls back to Spanish value — never returns the raw key string.
          */
         t: function (key) {
-            var lang = localStorage.getItem('preferredLanguage') || (window.currentLang) || 'es';
-            var tl   = storeKeys[lang] || storeKeys['es'];
-            return tl[key] !== undefined ? tl[key] : (storeKeys['es'][key] || key);
+            var lang   = localStorage.getItem('preferredLanguage') || (window.currentLang) || 'es';
+            var i18n   = window.FilamorfosisI18n || {};
+            var tl     = storeKeys[lang] || storeKeys['es'];
+            var tlLang = i18n[lang] || {};
+            var tlEs   = i18n['es'] || {};
+
+            // 1. Check storeKeys for active language
+            if (tl[key] !== undefined) { return tl[key]; }
+            // 2. Check FilamorfosisI18n for active language
+            if (tlLang[key] !== undefined) { return tlLang[key]; }
+            // 3. Fall back to storeKeys Spanish
+            if (storeKeys['es'][key] !== undefined) { return storeKeys['es'][key]; }
+            // 4. Fall back to FilamorfosisI18n Spanish
+            if (tlEs[key] !== undefined) { return tlEs[key]; }
+            // 5. Last resort: Spanish storeKeys value (never raw key)
+            return storeKeys['es'][key] || tlEs[key] || key;
         },
     };
 

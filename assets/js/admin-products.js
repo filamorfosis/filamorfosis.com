@@ -1,5 +1,5 @@
 /**
- * admin-products.js ï¿½ Products tab module for admin.html
+ * admin-products.js — Products tab module for admin.html
  *
  * Responsibilities:
  *   - loadProducts(params)            paginated product list with search
@@ -30,7 +30,7 @@
   // -- Module state ----------------------------------------------------------
   const state = {
     page: 1,
-    pageSize: 500,   // fetch all ï¿½ category filtering is client-side
+    pageSize: 500,   // fetch all — category filtering is client-side
     viewPage: 1,
     viewPageSize: 20,
     search: '',
@@ -58,7 +58,7 @@
     return Number(n ?? 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  // -- Task 3.1 ï¿½ loadProducts -----------------------------------------------
+  // -- Task 3.1 — loadProducts -----------------------------------------------
 
   async function loadProducts(params) {
     const tbody = document.getElementById('products-tbody');
@@ -108,7 +108,7 @@
     loadProducts();
   }
 
-  // -- Task 3.2 ï¿½ renderProductsTable ---------------------------------------
+  // -- Task 3.2 — renderProductsTable ---------------------------------------
 
   function renderProductsTable() {
     const tbody = document.getElementById('products-tbody');
@@ -221,7 +221,7 @@
     renderCategoryFilterButtons();
   }
 
-  // -- Task 3.3 ï¿½ init -------------------------------------------------------
+  // -- Task 3.3 — init -------------------------------------------------------
 
   function init() {
     // Add-product form toggle
@@ -598,7 +598,7 @@
     }
   }
 
-  // -- Task 4.3 ï¿½ deleteProduct ----------------------------------------------
+  // -- Task 4.3 — deleteProduct ----------------------------------------------
 
   async function deleteProduct(id) {
     if (!await adminConfirm('¿Eliminar este producto? Esta acción no se puede deshacer.', 'Eliminar Producto')) return;
@@ -631,7 +631,7 @@
     }
   }
 
-  // -- Task 12.1 ï¿½ _loadMaterialsCache --------------------------------------
+  // -- Task 12.1 — _loadMaterialsCache --------------------------------------
 
   async function _loadMaterialsCache() {
     try {
@@ -684,7 +684,7 @@
     _updatePricePreview();
   }
 
-  // -- Task 12.1 ï¿½ _removeMaterialUsageRow ----------------------------------
+  // -- Task 12.1 — _removeMaterialUsageRow ----------------------------------
 
   function _removeMaterialUsageRow(idx) {
     _materialUsageRows.splice(idx, 1);
@@ -799,7 +799,7 @@
     }
   }
 
-    // -- Task 5.3 ï¿½ _updatePricePreview ---------------------------------------
+    // -- Task 5.3 — _updatePricePreview ---------------------------------------
 
   function _updatePricePreview() {
     const productionCostEl = document.getElementById('vmod-production-cost');
@@ -808,10 +808,10 @@
     const discountEl       = document.getElementById('vmod-discount-preview');
     if (!previewEl) return;
 
-    // Sum material usages: S(baseCost ï¿½ quantity)
+    // Sum material usages: S(baseCost — quantity)
     const matCost = _materialUsageRows.reduce((sum, row) => sum + (row.baseCost * row.quantity), 0);
 
-    // Manufacture time ï¿½ electric cost per hour
+    // Manufacture time — electric cost per hour
     const minutes = parseFloat((document.getElementById('vmod-manufactureTimeMinutes') || {}).value) || 0;
     const globalParams = (typeof AdminCosts !== 'undefined' && AdminCosts.getGlobalParams)
       ? AdminCosts.getGlobalParams() : [];
@@ -885,7 +885,7 @@
     const el = document.getElementById(id);
     return el ? el.value.trim() : '';
   }
-  // -- Task 5.4 ï¿½ openEditVariantModal --------------------------------------
+  // -- Task 5.4 — openEditVariantModal --------------------------------------
 
   async function openEditVariantModal(productId, variantId) {
     const modal = document.getElementById('var-edit-modal');
@@ -950,7 +950,7 @@
     modal.style.display = 'flex';
   }
 
-  // -- Task 5.5 ï¿½ saveVariantModal -------------------------------------------
+  // -- Task 5.5 — saveVariantModal -------------------------------------------
 
   async function saveVariantModal(event) {
     event.preventDefault();
@@ -1019,7 +1019,7 @@
     }
   }
 
-  // -- Task 6.2 ï¿½ _renderVariantDiscounts -----------------------------------
+  // -- Task 6.2 — _renderVariantDiscounts -----------------------------------
 
   function _renderVariantDiscounts(productId, variantId, variant) {
     const container = document.getElementById('vmod-discounts-body');

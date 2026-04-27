@@ -279,16 +279,55 @@ describe('buildWaUrl() — URL construction', function () {
 });
 
 describe('initWhatsAppFAB() — DOM injection', function () {
-  var env = loadModule({ currentLang: 'es' });
-  env.exports.initWhatsAppFAB();
+  // Need to keep globals in place while calling initWhatsAppFAB
+  var mockDoc = createMockDOM();
+  var mockWin = { currentLang: 'es' };
+  var mockLS  = {
+    _store: {},
+    getItem:    function (k) { return this._store[k] || null; },
+    setItem:    function (k, v) { this._store[k] = v; },
+    removeItem: function (k) { delete this._store[k]; }
+  };
 
-  var fab = env.doc.body.querySelector('.whatsapp-fab');
+  var origDoc = global.document;
+  var origWin = global.window;
+  var origLS  = global.localStorage;
+  var origMod = global.module;
+
+  global.document   = mockDoc;
+  global.window     = mockWin;
+  global.localStorage = mockLS;
+  global.module = { exports: {} };
+
+  // Load the module
+  var src = require('fs').readFileSync(
+    require('path').join(__dirname, '..', 'assets', 'js', 'whatsapp-fab.js'),
+    'utf8'
+  );
+  new Function('require', 'module', 'exports', src)(
+    require,
+    global.module,
+    global.module.exports
+  );
+
+  var exports = global.module.exports;
+
+  // Now call initWhatsAppFAB while document is still mocked
+  exports.initWhatsAppFAB();
+
+  // Restore globals
+  global.document   = origDoc;
+  global.window     = origWin;
+  global.localStorage = origLS;
+  global.module     = origMod;
+
+  var fab = mockDoc.body.querySelector('.whatsapp-fab');
   assert(fab !== null, 'injects .whatsapp-fab element into <body>');
 
-  var btn = env.doc.body.querySelector('.whatsapp-fab__btn');
+  var btn = mockDoc.body.querySelector('.whatsapp-fab__btn');
   assert(btn !== null, 'injects .whatsapp-fab__btn anchor');
 
-  var ring = env.doc.body.querySelector('.whatsapp-fab__ring');
+  var ring = mockDoc.body.querySelector('.whatsapp-fab__ring');
   assert(ring !== null, 'injects .whatsapp-fab__ring pulse element');
 });
 

@@ -21,32 +21,54 @@
   }
 
   // ── i18n data ───────────────────────────────────
+  // Close button labels per language (not in global i18n)
+  var PROMO_CLOSE_I18N = {
+    es: 'Cerrar banner',
+    en: 'Close banner',
+    de: 'Banner schließen',
+    pt: 'Fechar banner',
+    ja: 'バナーを閉じる',
+    zh: '关闭横幅'
+  };
+
+  // Fallback messages used only when global i18n is not yet loaded
   var PROMO_I18N = {
     es: {
-      message: '🚀 ¡Envío gratis en pedidos mayores a $999 MXN! Usa el código FILA999',
+      message: '🎉 Envío gratis en pedidos mayores a $500 MXN',
       close:   'Cerrar banner'
     },
     en: {
-      message: '🚀 Free shipping on orders over $999 MXN! Use code FILA999',
+      message: '🎉 Free shipping on orders over $500 MXN',
       close:   'Close banner'
     },
     de: {
-      message: '🚀 Kostenloser Versand ab $999 MXN! Code: FILA999',
+      message: '🎉 Kostenloser Versand bei Bestellungen über $500 MXN',
       close:   'Banner schließen'
     },
     pt: {
-      message: '🚀 Frete grátis em pedidos acima de $999 MXN! Use o código FILA999',
+      message: '🎉 Frete grátis em pedidos acima de $500 MXN',
       close:   'Fechar banner'
     },
     ja: {
-      message: '🚀 $999 MXN以上のご注文で送料無料！コード: FILA999',
+      message: '🎉 $500 MXN以上のご注文で送料無料',
       close:   'バナーを閉じる'
     },
     zh: {
-      message: '🚀 订单满$999 MXN免运费！使用代码FILA999',
+      message: '🎉 订单满$500 MXN免运费',
       close:   '关闭横幅'
     }
   };
+
+  // ── Get promo message from global i18n or fallback ──
+  function getPromoMessage(lang) {
+    var globalI18n = (typeof window !== 'undefined' && window.FilamorfosisI18n) || {};
+    var tl = globalI18n[lang] || globalI18n['es'] || {};
+    if (tl['promo_banner_text']) {
+      return tl['promo_banner_text'];
+    }
+    var fallback = PROMO_I18N[lang] || PROMO_I18N['es'];
+    return fallback.message;
+  }
 
   // ── Banner CSS ──────────────────────────────────
   var BANNER_CSS = [
@@ -59,24 +81,12 @@
     '  background: var(--color-gradient-brand);',
     '  color: #fff;',
     '  text-align: center;',
-    '  padding: 10px 48px 10px 16px;',
-    '  font-size: var(--font-size-sm, 0.875rem);',
+    '  padding: 10px 16px;',
+    '  font-size: 1rem;',
     '  font-family: var(--font-family-body, Roboto, sans-serif);',
     '}',
     '#promo-banner.promo-banner--hiding {',
     '  animation: toast-out 0.3s ease forwards;',
-    '}',
-    '#promo-banner__close {',
-    '  position: absolute;',
-    '  right: 12px;',
-    '  top: 50%;',
-    '  transform: translateY(-50%);',
-    '  background: none;',
-    '  border: none;',
-    '  color: #fff;',
-    '  font-size: 1.2rem;',
-    '  cursor: pointer;',
-    '  padding: 4px 8px;',
     '}'
   ].join('\n');
 
@@ -96,67 +106,39 @@
 
   // ── Main init ────────────────────────────────────
   function initPromoBanner() {
-    // Skip if already dismissed this session
-    if (typeof sessionStorage !== 'undefined' &&
-        sessionStorage.getItem('promo_dismissed') === '1') {
-      return;
-    }
-
     // Avoid double-injection
     if (document.getElementById('promo-banner')) return;
 
     injectStyles();
 
     var lang = getLang();
-    var i18n = PROMO_I18N[lang] || PROMO_I18N['es'];
+    var message = getPromoMessage(lang);
 
     var banner = document.createElement('div');
     banner.id = 'promo-banner';
     banner.setAttribute('role', 'banner');
-    banner.setAttribute('aria-label', i18n.close);
+    banner.setAttribute('aria-label', 'Promotional banner');
 
     var msgSpan = document.createElement('span');
-    msgSpan.textContent = i18n.message;
-
-    var closeBtn = document.createElement('button');
-    closeBtn.id = 'promo-banner__close';
-    closeBtn.setAttribute('aria-label', i18n.close);
-    closeBtn.textContent = '×';
+    msgSpan.setAttribute('data-t', 'promo_banner_text');
+    msgSpan.textContent = message;
 
     banner.appendChild(msgSpan);
-    banner.appendChild(closeBtn);
     document.body.insertBefore(banner, document.body.firstChild);
 
     // Set CSS variable to banner height so navbar can shift down
     var height = banner.offsetHeight || 40;
     setBannerHeightVar(height + 'px');
-
-    // ── Close handler ──────────────────────────────
-    closeBtn.addEventListener('click', function () {
-      if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.setItem('promo_dismissed', '1');
-      }
-
-      banner.classList.add('promo-banner--hiding');
-
-      // Remove from DOM after animation completes
-      var ANIM_DURATION = 300;
-      setTimeout(function () {
-        if (banner.parentNode) {
-          banner.parentNode.removeChild(banner);
-        }
-        setBannerHeightVar('0px');
-      }, ANIM_DURATION);
-    });
   }
 
   // ── Public API ───────────────────────────────────
   if (typeof window !== 'undefined') {
     window.initPromoBanner = initPromoBanner;
     window.PromoBanner = {
-      init:        initPromoBanner,
-      getLang:     getLang,
-      PROMO_I18N:  PROMO_I18N
+      init:            initPromoBanner,
+      getLang:         getLang,
+      PROMO_I18N:      PROMO_I18N,
+      getPromoMessage: getPromoMessage
     };
   }
 
@@ -165,7 +147,8 @@
     module.exports = {
       initPromoBanner: initPromoBanner,
       getLang:         getLang,
-      PROMO_I18N:      PROMO_I18N
+      PROMO_I18N:      PROMO_I18N,
+      getPromoMessage: getPromoMessage
     };
   }
 

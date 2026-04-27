@@ -97,10 +97,36 @@
     '  animation: wa-pulse 2s ease-out infinite;',
     '  pointer-events: none;',
     '}',
+    /* Tooltip */
+    '.whatsapp-fab__tooltip {',
+    '  position: absolute;',
+    '  right: calc(100% + 12px);',
+    '  top: 50%;',
+    '  transform: translateY(-50%);',
+    '  background: #1e293b;',
+    '  color: #e2e8f0;',
+    '  font-size: 1rem;',
+    '  font-family: var(--font-family-body, Roboto, sans-serif);',
+    '  white-space: nowrap;',
+    '  padding: 6px 12px;',
+    '  border-radius: 8px;',
+    '  border: 1px solid rgba(255,255,255,0.1);',
+    '  box-shadow: 0 4px 16px rgba(0,0,0,0.4);',
+    '  pointer-events: none;',
+    '  opacity: 0;',
+    '  transition: opacity 0.2s ease;',
+    '}',
+    '.whatsapp-fab:hover .whatsapp-fab__tooltip,',
+    '.whatsapp-fab__btn:focus-visible ~ .whatsapp-fab__tooltip {',
+    '  opacity: 1;',
+    '}',
     /* Mobile override — raise above bottom nav */
     '@media (max-width: 768px) {',
     '  .whatsapp-fab {',
     '    bottom: 80px;',
+    '  }',
+    '  .whatsapp-fab__tooltip {',
+    '    display: none;',
     '  }',
     '}'
   ].join('\n');
@@ -125,6 +151,11 @@
     var i18n  = WA_I18N[lang] || WA_I18N['es'];
     var waUrl = buildWaUrl(lang);
 
+    // Get wa_subtitle from global i18n (falls back to lang-specific string)
+    var globalI18n = (typeof window !== 'undefined' && window.FilamorfosisI18n) || {};
+    var tl = globalI18n[lang] || globalI18n['es'] || {};
+    var waSubtitle = tl['wa_subtitle'] || i18n.ariaLabel;
+
     var wrapper = document.createElement('div');
     wrapper.innerHTML = [
       '<div class="whatsapp-fab">',
@@ -134,6 +165,7 @@
       '    <i class="fab fa-whatsapp" aria-hidden="true"></i>',
       '    <span class="whatsapp-fab__ring" aria-hidden="true"></span>',
       '  </button>',
+      '  <span class="whatsapp-fab__tooltip" aria-hidden="true" data-t="wa_subtitle">' + waSubtitle + '</span>',
       '</div>'
     ].join('');
 
@@ -145,17 +177,17 @@
       fabBtn.addEventListener('click', function () {
         var modal = document.getElementById('waModal');
         if (modal) {
-          modal.style.display = 'flex';
+          modal.classList.remove('wa-modal-overlay--hidden');
           var ph = (window.translations && window.translations[getLang()] && window.translations[getLang()].wa_placeholder) || 'Escribe tu mensaje...';
           var msgEl = document.getElementById('waMessage');
           if (msgEl) { msgEl.setAttribute('placeholder', ph); msgEl.value = ''; }
           var closeBtn = document.getElementById('waModalClose');
           if (closeBtn && !closeBtn._waBound) {
             closeBtn._waBound = true;
-            closeBtn.addEventListener('click', function () { modal.style.display = 'none'; });
+            closeBtn.addEventListener('click', function () { modal.classList.add('wa-modal-overlay--hidden'); });
           }
           modal.addEventListener('click', function (e) {
-            if (e.target === modal) modal.style.display = 'none';
+            if (e.target === modal) modal.classList.add('wa-modal-overlay--hidden');
           });
           var startBtn = document.getElementById('waStartChat');
           if (startBtn && !startBtn._waBound) {
@@ -164,7 +196,7 @@
               var msg = (document.getElementById('waMessage') || {}).value || '';
               if (!msg.trim()) msg = (window.translations && window.translations[getLang()] && window.translations[getLang()].wa_greeting) || '';
               window.open('https://wa.me/' + WA_PHONE + '?text=' + encodeURIComponent(msg), '_blank');
-              modal.style.display = 'none';
+              modal.classList.add('wa-modal-overlay--hidden');
             });
           }
         } else {

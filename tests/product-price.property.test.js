@@ -48,7 +48,7 @@ function formatDesdeLabel(minPrice) {
 
 /** A single product variant with a positive price and an availability flag. */
 const variantArb = fc.record({
-    price:       fc.float({ min: 0.01, max: 99999.99, noNaN: true }),
+    price:       fc.float({ min: Math.fround(0.01), max: Math.fround(99999.99), noNaN: true }),
     isAvailable: fc.boolean(),
 });
 
@@ -68,7 +68,7 @@ const productWithAvailableVariantArb = fc
 const productAllUnavailableArb = fc
     .array(
         fc.record({
-            price:       fc.float({ min: 0.01, max: 99999.99, noNaN: true }),
+            price:       fc.float({ min: Math.fround(0.01), max: Math.fround(99999.99), noNaN: true }),
             isAvailable: fc.constant(false),
         }),
         { minLength: 1, maxLength: 10 },

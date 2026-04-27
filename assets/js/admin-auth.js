@@ -264,7 +264,6 @@
 
   // ── MFA setup: generate secret + show QR ─────────────────────────────────
   async function _handleMfaSetup() {
-    console.log('[MFA Setup] Starting setup, mfaToken:', _mfaToken ? 'present' : 'MISSING');
     _setError('login-err-step2', '');
     const btn = document.getElementById('btn-trigger-mfa-setup');
     if (typeof spin === 'function' && btn) spin(btn, true);
@@ -275,8 +274,6 @@
         headers: { Authorization: `Bearer ${_mfaToken}` }
       });
 
-      console.log('[MFA Setup] Success, QR URI:', res.qrCodeUri);
-
       // Render QR code in the setup modal
       _renderQr('mfa-qr-container', res.qrCodeUri, res.secret);
       _showModal('mfa-setup-modal');
@@ -286,7 +283,6 @@
       if (step2Form) step2Form.dataset.mfaEnabled = 'false';
 
     } catch (err) {
-      console.error('[MFA Setup] Failed:', err);
       _setError('login-err-step2', err.detail || 'Error al configurar MFA');
     } finally {
       if (typeof spin === 'function' && btn) spin(btn, false);
@@ -319,7 +315,6 @@
         location.reload();
 
       } catch (err) {
-        console.error('MFA confirm error:', err);
         _setError('mfa-setup-err', err.detail || 'Código inválido');
         if (typeof spin === 'function') spin(btn, false);
       }
