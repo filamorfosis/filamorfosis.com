@@ -364,13 +364,8 @@
 
         <!-- Reviews Section -->
         <section class="reviews-section">
-          <style>
-            @media (max-width: 768px) {
-              .brand-story-grid { grid-template-columns: 1fr !important; }
-            }
-          </style>
           <div class="container">
-            <h2 class="section-title" data-translate="reviews.title" style="text-align:center;margin-bottom:2.5rem">Lo que dicen nuestros clientes</h2>
+            <h2 class="section-title reviews-section__title" data-translate="reviews.title">Lo que dicen nuestros clientes</h2>
           </div>
           <div class="reviews-marquee-wrap">
             <div class="reviews-marquee">
@@ -435,20 +430,20 @@
         </section>
 
         <!-- Certifications Section -->
-        <section style="background:#0f172a;padding:3rem 0;border-top:1px solid rgba(255,255,255,0.06)">
+        <section class="certifications-section">
           <div class="container">
-            <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:2rem;align-items:center">
-              <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;text-align:center">
-                <i class="fas fa-flag" style="font-size:1.5rem;color:#8b5cf6"></i>
-                <span style="font-size:1rem;color:#94a3b8;font-weight:600" data-translate="cert_mexico">Producción en México</span>
+            <div class="certifications-grid">
+              <div class="certification-item">
+                <i class="fas fa-flag certification-icon"></i>
+                <span class="certification-label" data-translate="cert_mexico">Producción en México</span>
               </div>
-              <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;text-align:center">
-                <i class="fas fa-certificate" style="font-size:1.5rem;color:#8b5cf6"></i>
-                <span style="font-size:1rem;color:#94a3b8;font-weight:600" data-translate="cert_materials">Materiales certificados</span>
+              <div class="certification-item">
+                <i class="fas fa-certificate certification-icon"></i>
+                <span class="certification-label" data-translate="cert_materials">Materiales certificados</span>
               </div>
-              <div style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;text-align:center">
-                <i class="fas fa-star" style="font-size:1.5rem;color:#8b5cf6"></i>
-                <span style="font-size:1rem;color:#94a3b8;font-weight:600" data-translate="cert_quality">Calidad garantizada</span>
+              <div class="certification-item">
+                <i class="fas fa-star certification-icon"></i>
+                <span class="certification-label" data-translate="cert_quality">Calidad garantizada</span>
               </div>
             </div>
           </div>
@@ -463,15 +458,15 @@
                     <p class="footer-trademark" data-translate="footer_trademark">
                         Filamorfosis® es una marca registrada.
                     </p>
-                    <div class="footer-contact" style="display:flex;flex-wrap:wrap;justify-content:center;gap:1.5rem;margin-top:1rem">
-                      <a href="https://wa.me/13152071586" target="_blank" rel="noopener" class="footer-contact-link" aria-label="WhatsApp" style="display:flex;align-items:center;gap:0.5rem;color:#94a3b8;text-decoration:none;font-size:1rem;transition:color 0.2s">
-                        <i class="fab fa-whatsapp" style="color:#25d366"></i> WhatsApp
+                    <div class="footer-contact">
+                      <a href="https://wa.me/13152071586" target="_blank" rel="noopener" class="footer-contact-link" aria-label="WhatsApp">
+                        <i class="fab fa-whatsapp footer-contact-icon footer-contact-icon--whatsapp"></i> WhatsApp
                       </a>
-                      <a href="mailto:contacto@filamorfosis.com" class="footer-contact-link" aria-label="Email" style="display:flex;align-items:center;gap:0.5rem;color:#94a3b8;text-decoration:none;font-size:1rem;transition:color 0.2s">
-                        <i class="fas fa-envelope" style="color:#8b5cf6"></i> Email
+                      <a href="mailto:contacto@filamorfosis.com" class="footer-contact-link" aria-label="Email">
+                        <i class="fas fa-envelope footer-contact-icon footer-contact-icon--email"></i> Email
                       </a>
-                      <a href="https://instagram.com/filamorfosis" target="_blank" rel="noopener" class="footer-contact-link" aria-label="Instagram" style="display:flex;align-items:center;gap:0.5rem;color:#94a3b8;text-decoration:none;font-size:1rem;transition:color 0.2s">
-                        <i class="fab fa-instagram" style="color:#ec4899"></i> Instagram
+                      <a href="https://instagram.com/filamorfosis" target="_blank" rel="noopener" class="footer-contact-link" aria-label="Instagram">
+                        <i class="fab fa-instagram footer-contact-icon footer-contact-icon--instagram"></i> Instagram
                       </a>
                     </div>
                 </div>
@@ -479,8 +474,6 @@
         </footer>
     </div>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="assets/vendors/particles.js/particles.js"></script>
-    <script src="assets/vendors/waterpipe/waterpipe.js"></script>
     <script src="Resources/Clients/clients.js"></script>
     <!-- Catalog core: CATEGORIES, translations, lang engine -->
     <script src="products/data/catalog.js"></script>

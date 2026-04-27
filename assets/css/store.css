@@ -42,6 +42,7 @@
 }
 
 .navbar__brand {
+  font-family: monospace;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -3560,5 +3561,92 @@ img:not([alt]) { outline: 2px solid red; } /* dev helper — remove in prod */
 
   .store-stat-label {
     font-size: 1rem;
+  }
+}
+
+
+/* ── Reviews Section Title ───────────────────────────────────────────── */
+.reviews-section__title {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+/* ── Certifications Section ───────────────────────────────────────────── */
+.certifications-section {
+  background: #0f172a;
+  padding: 3rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.certifications-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  align-items: center;
+}
+
+.certification-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.certification-icon {
+  font-size: 1.5rem;
+  color: #8b5cf6;
+}
+
+.certification-label {
+  font-size: 1rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* ── Footer Contact ───────────────────────────────────────────── */
+.footer-contact {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.footer-contact-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+
+.footer-contact-link:hover {
+  color: #fff;
+}
+
+.footer-contact-icon {
+  font-size: 1.125rem;
+}
+
+.footer-contact-icon--whatsapp {
+  color: #25d366;
+}
+
+.footer-contact-icon--email {
+  color: #8b5cf6;
+}
+
+.footer-contact-icon--instagram {
+  color: #ec4899;
+}
+
+/* ── Responsive: Brand Story Grid ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .brand-story-grid {
+    grid-template-columns: 1fr !important;
   }
 }
