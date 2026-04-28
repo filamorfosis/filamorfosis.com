@@ -6,6 +6,7 @@ public class ProductVariant
     public Guid ProductId { get; set; }
     public string Sku { get; set; } = string.Empty;
     public string LabelEs { get; set; } = string.Empty;
+    public string LabelEn { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public bool IsAvailable { get; set; }
     public bool AcceptsDesignFile { get; set; }

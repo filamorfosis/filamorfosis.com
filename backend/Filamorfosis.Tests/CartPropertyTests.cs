@@ -28,16 +28,16 @@ public class CartPropertyTests
         });
         client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
 
-        // Seed a category + product + variant
+        // Seed a process + product + variant
         Guid variantId = Guid.Empty;
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Categories.Add(new Category { Id = catId, Slug = "test", NameEs = "Test", NameEn = "Test" });
+            db.Processes.Add(new Process { Id = catId, Slug = "test", NameEs = "Test", NameEn = "Test" });
             var prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
-                Id = prodId, CategoryId = catId, Slug = "test-prod",
+                Id = prodId, ProcessId = catId, Slug = "test-prod",
                 TitleEs = "Prod", TitleEn = "Prod",
                 DescriptionEs = "D", DescriptionEn = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow

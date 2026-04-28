@@ -10,37 +10,36 @@ using Microsoft.EntityFrameworkCore;
 namespace Filamorfosis.API.Controllers;
 
 [ApiController]
-[Route("api/v1/admin/categories")]
+[Route("api/v1/admin/processes")]
 [Authorize(Roles = "Master,ProductManagement,PriceManagement")]
 [RequireMfa]
-public class AdminCategoriesController(FilamorfosisDbContext db, IPricingCalculatorService pricing) : ControllerBase
+public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculatorService pricing) : ControllerBase
 {
-    // GET /api/v1/admin/categories
+    // GET /api/v1/admin/processes
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var cats = await db.Categories
+        var processes = await db.Processes
             .Include(c => c.Attributes)
             .Where(c => c.IsActive)
             .ToListAsync();
 
-        var catIds = cats.Select(c => c.Id).ToList();
-        var catNames = cats.Select(c => c.NameEs).ToList();
+        var processIds = processes.Select(c => c.Id).ToList();
 
-        // Load cost parameters for all categories by ID
+        // Load cost parameters for all processes by ID
         var costParams = await db.CostParameters
-            .Include(p => p.Category)
-            .Where(p => catIds.Contains(p.CategoryId))
+            .Include(p => p.Process)
+            .Where(p => processIds.Contains(p.ProcessId))
             .OrderBy(p => p.Label)
             .ToListAsync();
 
-        var costParamsByCategory = costParams
-            .GroupBy(p => p.CategoryId)
+        var costParamsByProcess = costParams
+            .GroupBy(p => p.ProcessId)
             .ToDictionary(g => g.Key, g => g.Select(p => new CostParameterDto
             {
                 Id = p.Id,
-                CategoryId = p.CategoryId,
-                CategoryNameEs = p.Category.NameEs,
+                ProcessId = p.ProcessId,
+                ProcessNameEs = p.Process.NameEs,
                 Key = p.Key,
                 Label = p.Label,
                 Unit = p.Unit,
@@ -48,29 +47,29 @@ public class AdminCategoriesController(FilamorfosisDbContext db, IPricingCalcula
                 UpdatedAt = p.UpdatedAt
             }).ToList());
 
-        return Ok(cats.Select(c => new CategoryDto
+        return Ok(processes.Select(c => new ProcessDto
         {
             Id = c.Id,
             Slug = c.Slug,
             NameEs = c.NameEs,
             NameEn = c.NameEn,
             ImageUrl = c.ImageUrl,
-            ProductCount = db.Products.Count(p => p.CategoryId == c.Id && p.IsActive),
-            Attributes = c.Attributes.Select(a => new CategoryAttributeDto
+            ProductCount = db.Products.Count(p => p.ProcessId == c.Id && p.IsActive),
+            Attributes = c.Attributes.Select(a => new ProcessAttributeDto
             {
                 Id = a.Id,
                 AttributeType = a.AttributeType,
                 Value = a.Value
             }).ToList(),
-            CostParameters = costParamsByCategory.TryGetValue(c.Id, out var cp) ? cp : new()
+            CostParameters = costParamsByProcess.TryGetValue(c.Id, out var cp) ? cp : new()
         }));
     }
 
-    // POST /api/v1/admin/categories
+    // POST /api/v1/admin/processes
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateCategoryRequest req)
+    public async Task<IActionResult> Create([FromBody] CreateProcessRequest req)
     {
-        var cat = new Category
+        var process = new Process
         {
             Id = Guid.NewGuid(),
             Slug = req.Slug,
@@ -78,46 +77,46 @@ public class AdminCategoriesController(FilamorfosisDbContext db, IPricingCalcula
             NameEn = req.NameEn,
             ImageUrl = req.ImageUrl
         };
-        db.Categories.Add(cat);
+        db.Processes.Add(process);
         await db.SaveChangesAsync();
 
-        return StatusCode(201, new CategoryDto
+        return StatusCode(201, new ProcessDto
         {
-            Id = cat.Id,
-            Slug = cat.Slug,
-            NameEs = cat.NameEs,
-            NameEn = cat.NameEn,
-            ImageUrl = cat.ImageUrl,
+            Id = process.Id,
+            Slug = process.Slug,
+            NameEs = process.NameEs,
+            NameEn = process.NameEn,
+            ImageUrl = process.ImageUrl,
             ProductCount = 0,
-            Attributes = new List<CategoryAttributeDto>()
+            Attributes = new List<ProcessAttributeDto>()
         });
     }
 
-    // PUT /api/v1/admin/categories/{id}
+    // PUT /api/v1/admin/processes/{id}
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryRequest req)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateProcessRequest req)
     {
-        var cat = await db.Categories
+        var process = await db.Processes
             .Include(c => c.Attributes)
             .FirstOrDefaultAsync(c => c.Id == id);
-        if (cat is null) return NotFound();
+        if (process is null) return NotFound();
 
-        if (req.NameEs is not null) cat.NameEs = req.NameEs;
-        if (req.NameEn is not null) cat.NameEn = req.NameEn;
-        if (req.Slug is not null) cat.Slug = req.Slug;
-        if (req.ImageUrl is not null) cat.ImageUrl = req.ImageUrl;
+        if (req.NameEs is not null) process.NameEs = req.NameEs;
+        if (req.NameEn is not null) process.NameEn = req.NameEn;
+        if (req.Slug is not null) process.Slug = req.Slug;
+        if (req.ImageUrl is not null) process.ImageUrl = req.ImageUrl;
 
         await db.SaveChangesAsync();
 
-        return Ok(new CategoryDto
+        return Ok(new ProcessDto
         {
-            Id = cat.Id,
-            Slug = cat.Slug,
-            NameEs = cat.NameEs,
-            NameEn = cat.NameEn,
-            ImageUrl = cat.ImageUrl,
-            ProductCount = await db.Products.CountAsync(p => p.CategoryId == cat.Id && p.IsActive),
-            Attributes = cat.Attributes.Select(a => new CategoryAttributeDto
+            Id = process.Id,
+            Slug = process.Slug,
+            NameEs = process.NameEs,
+            NameEn = process.NameEn,
+            ImageUrl = process.ImageUrl,
+            ProductCount = await db.Products.CountAsync(p => p.ProcessId == process.Id && p.IsActive),
+            Attributes = process.Attributes.Select(a => new ProcessAttributeDto
             {
                 Id = a.Id,
                 AttributeType = a.AttributeType,
@@ -126,52 +125,52 @@ public class AdminCategoriesController(FilamorfosisDbContext db, IPricingCalcula
         });
     }
 
-    // DELETE /api/v1/admin/categories/{id}
+    // DELETE /api/v1/admin/processes/{id}
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var cat = await db.Categories.FirstOrDefaultAsync(c => c.Id == id);
-        if (cat is null) return NotFound();
+        var process = await db.Processes.FirstOrDefaultAsync(c => c.Id == id);
+        if (process is null) return NotFound();
 
         var activeProductCount = await db.Products
-            .CountAsync(p => p.CategoryId == id && p.IsActive);
+            .CountAsync(p => p.ProcessId == id && p.IsActive);
 
         if (activeProductCount > 0)
         {
             return Conflict(new ProblemDetails
             {
-                Type = "https://filamorfosis.com/errors/category-has-active-products",
-                Title = "Category has active products",
+                Type = "https://filamorfosis.com/errors/process-has-active-products",
+                Title = "Process has active products",
                 Status = 409,
-                Detail = $"Cannot delete category: {activeProductCount} active product{(activeProductCount == 1 ? "" : "s")} are assigned to it."
+                Detail = $"Cannot delete process: {activeProductCount} active product{(activeProductCount == 1 ? "" : "s")} are assigned to it."
             });
         }
 
-        cat.IsActive = false;
+        process.IsActive = false;
         await db.SaveChangesAsync();
 
-        return Ok(new { id = cat.Id, isActive = false });
+        return Ok(new { id = process.Id, isActive = false });
     }
 
-    // POST /api/v1/admin/categories/{id}/attributes
+    // POST /api/v1/admin/processes/{id}/attributes
     [HttpPost("{id:guid}/attributes")]
-    public async Task<IActionResult> AddAttribute(Guid id, [FromBody] CreateCategoryAttributeRequest req)
+    public async Task<IActionResult> AddAttribute(Guid id, [FromBody] CreateProcessAttributeRequest req)
     {
-        var cat = await db.Categories.FirstOrDefaultAsync(c => c.Id == id);
-        if (cat is null) return NotFound();
+        var process = await db.Processes.FirstOrDefaultAsync(c => c.Id == id);
+        if (process is null) return NotFound();
 
-        var attribute = new CategoryAttribute
+        var attribute = new ProcessAttribute
         {
             Id = Guid.NewGuid(),
-            CategoryId = id,
+            ProcessId = id,
             AttributeType = req.AttributeType,
             Value = req.Value
         };
 
-        db.CategoryAttributes.Add(attribute);
+        db.ProcessesAttributes.Add(attribute);
         await db.SaveChangesAsync();
 
-        return StatusCode(201, new CategoryAttributeDto
+        return StatusCode(201, new ProcessAttributeDto
         {
             Id = attribute.Id,
             AttributeType = attribute.AttributeType,
@@ -179,34 +178,34 @@ public class AdminCategoriesController(FilamorfosisDbContext db, IPricingCalcula
         });
     }
 
-    // DELETE /api/v1/admin/categories/{id}/attributes/{attributeId}
+    // DELETE /api/v1/admin/processes/{id}/attributes/{attributeId}
     [HttpDelete("{id:guid}/attributes/{attributeId:guid}")]
     public async Task<IActionResult> DeleteAttribute(Guid id, Guid attributeId)
     {
-        var attribute = await db.CategoryAttributes
-            .FirstOrDefaultAsync(a => a.Id == attributeId && a.CategoryId == id);
+        var attribute = await db.ProcessesAttributes
+            .FirstOrDefaultAsync(a => a.Id == attributeId && a.ProcessId == id);
 
         if (attribute is null) return NotFound();
 
-        db.CategoryAttributes.Remove(attribute);
+        db.ProcessesAttributes.Remove(attribute);
         await db.SaveChangesAsync();
 
         return NoContent();
     }
 
-    // GET /api/v1/admin/categories/{id}/cost-parameters
+    // GET /api/v1/admin/processes/{id}/cost-parameters
     [HttpGet("{id:guid}/cost-parameters")]
     public async Task<IActionResult> GetCostParameters(Guid id)
     {
-        if (!await db.Categories.AnyAsync(c => c.Id == id)) return NotFound();
+        if (!await db.Processes.AnyAsync(c => c.Id == id)) return NotFound();
 
         var parameters = await db.CostParameters
-            .Include(p => p.Category)
-            .Where(p => p.CategoryId == id)
+            .Include(p => p.Process)
+            .Where(p => p.ProcessId == id)
             .OrderBy(p => p.Label)
             .Select(p => new CostParameterDto
             {
-                Id = p.Id, CategoryId = p.CategoryId, CategoryNameEs = p.Category.NameEs,
+                Id = p.Id, ProcessId = p.ProcessId, ProcessNameEs = p.Process.NameEs,
                 Key = p.Key, Label = p.Label, Unit = p.Unit, Value = p.Value, UpdatedAt = p.UpdatedAt
             })
             .ToListAsync();
@@ -214,13 +213,13 @@ public class AdminCategoriesController(FilamorfosisDbContext db, IPricingCalcula
         return Ok(parameters);
     }
 
-    // POST /api/v1/admin/categories/{id}/cost-parameters
+    // POST /api/v1/admin/processes/{id}/cost-parameters
     [HttpPost("{id:guid}/cost-parameters")]
     [Authorize(Roles = "Master,PriceManagement")]
     public async Task<IActionResult> AddCostParameter(Guid id, [FromBody] CreateCostParameterRequest req)
     {
-        var cat = await db.Categories.FirstOrDefaultAsync(c => c.Id == id);
-        if (cat is null) return NotFound();
+        var process = await db.Processes.FirstOrDefaultAsync(c => c.Id == id);
+        if (process is null) return NotFound();
 
         if (string.IsNullOrWhiteSpace(req.Label))
             return BadRequest(new { detail = "El nombre del parámetro es requerido." });
@@ -230,14 +229,14 @@ public class AdminCategoriesController(FilamorfosisDbContext db, IPricingCalcula
             .Replace("/", "_per_").Replace("²", "2").Trim('_');
 
         var existing = await db.CostParameters
-            .FirstOrDefaultAsync(p => p.CategoryId == id && p.Key == key);
+            .FirstOrDefaultAsync(p => p.ProcessId == id && p.Key == key);
         if (existing is not null)
-            return Conflict(new { detail = $"Ya existe un parámetro con la clave '{key}' en esta categoría." });
+            return Conflict(new { detail = $"Ya existe un parámetro con la clave '{key}' en este proceso." });
 
         var param = new CostParameter
         {
             Id = Guid.NewGuid(),
-            CategoryId = id,
+            ProcessId = id,
             Key = key,
             Label = req.Label,
             Unit = req.Unit ?? string.Empty,
@@ -249,21 +248,21 @@ public class AdminCategoriesController(FilamorfosisDbContext db, IPricingCalcula
 
         return StatusCode(201, new CostParameterDto
         {
-            Id = param.Id, CategoryId = param.CategoryId, CategoryNameEs = cat.NameEs,
+            Id = param.Id, ProcessId = param.ProcessId, ProcessNameEs = process.NameEs,
             Key = param.Key, Label = param.Label, Unit = param.Unit, Value = param.Value, UpdatedAt = param.UpdatedAt
         });
     }
 
-    // PUT /api/v1/admin/categories/{id}/cost-parameters/{parameterId}
+    // PUT /api/v1/admin/processes/{id}/cost-parameters/{parameterId}
     [HttpPut("{id:guid}/cost-parameters/{parameterId:guid}")]
     [Authorize(Roles = "Master,PriceManagement")]
     public async Task<IActionResult> UpdateCostParameter(Guid id, Guid parameterId, [FromBody] UpdateCostParameterRequest req)
     {
-        var cat = await db.Categories.FirstOrDefaultAsync(c => c.Id == id);
-        if (cat is null) return NotFound();
+        var process = await db.Processes.FirstOrDefaultAsync(c => c.Id == id);
+        if (process is null) return NotFound();
 
         var param = await db.CostParameters
-            .FirstOrDefaultAsync(p => p.Id == parameterId && p.CategoryId == id);
+            .FirstOrDefaultAsync(p => p.Id == parameterId && p.ProcessId == id);
         if (param is null) return NotFound();
 
         if (req.Value < 0)
@@ -305,18 +304,18 @@ public class AdminCategoriesController(FilamorfosisDbContext db, IPricingCalcula
 
         return Ok(new CostParameterDto
         {
-            Id = param.Id, CategoryId = param.CategoryId, CategoryNameEs = cat.NameEs,
+            Id = param.Id, ProcessId = param.ProcessId, ProcessNameEs = process.NameEs,
             Key = param.Key, Label = param.Label, Unit = param.Unit, Value = param.Value, UpdatedAt = param.UpdatedAt
         });
     }
 
-    // DELETE /api/v1/admin/categories/{id}/cost-parameters/{parameterId}
+    // DELETE /api/v1/admin/processes/{id}/cost-parameters/{parameterId}
     [HttpDelete("{id:guid}/cost-parameters/{parameterId:guid}")]
     [Authorize(Roles = "Master,PriceManagement")]
     public async Task<IActionResult> DeleteCostParameter(Guid id, Guid parameterId)
     {
         var param = await db.CostParameters
-            .FirstOrDefaultAsync(p => p.Id == parameterId && p.CategoryId == id);
+            .FirstOrDefaultAsync(p => p.Id == parameterId && p.ProcessId == id);
         if (param is null) return NotFound();
 
         db.CostParameters.Remove(param);

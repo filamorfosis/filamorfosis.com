@@ -175,7 +175,7 @@ namespace Filamorfosis.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Processes");
                 });
 
             modelBuilder.Entity("Filamorfosis.Domain.Entities.CategoryAttribute", b =>
@@ -188,7 +188,7 @@ namespace Filamorfosis.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("CategoryId")
+                    b.Property<Guid>("ProcessId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Value")
@@ -197,9 +197,9 @@ namespace Filamorfosis.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("ProcessId");
 
-                    b.ToTable("CategoryAttributes");
+                    b.ToTable("ProcessesAttributes");
                 });
 
             modelBuilder.Entity("Filamorfosis.Domain.Entities.DesignFile", b =>
@@ -401,7 +401,7 @@ namespace Filamorfosis.Infrastructure.Migrations
                     b.Property<string>("Badge")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("CategoryId")
+                    b.Property<Guid>("ProcessId")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
@@ -440,7 +440,7 @@ namespace Filamorfosis.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("ProcessId");
 
                     b.ToTable("Products");
                 });
@@ -780,7 +780,7 @@ namespace Filamorfosis.Infrastructure.Migrations
                 {
                     b.HasOne("Filamorfosis.Domain.Entities.Category", "Category")
                         .WithMany("Attributes")
-                        .HasForeignKey("CategoryId")
+                        .HasForeignKey("ProcessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -864,7 +864,7 @@ namespace Filamorfosis.Infrastructure.Migrations
                 {
                     b.HasOne("Filamorfosis.Domain.Entities.Category", "Category")
                         .WithMany("Products")
-                        .HasForeignKey("CategoryId")
+                        .HasForeignKey("ProcessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

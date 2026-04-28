@@ -48,7 +48,7 @@ public class VariantAttributeBugConditionTests
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Categories.Add(new Category
+            db.Processes.Add(new Process
             {
                 Id = catId,
                 Slug = $"bug-cat-{Guid.NewGuid():N}",
@@ -58,7 +58,7 @@ public class VariantAttributeBugConditionTests
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
-                Id = prodId, CategoryId = catId,
+                Id = prodId, ProcessId = catId,
                 Slug = $"bug-prod-{Guid.NewGuid():N}",
                 TitleEs = "Producto Bug", TitleEn = "Bug Product",
                 DescriptionEs = "Desc", DescriptionEn = "Desc",
@@ -118,7 +118,7 @@ public class VariantAttributeBugConditionTests
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Categories.Add(new Category
+            db.Processes.Add(new Process
             {
                 Id = catId,
                 Slug = $"bug2-cat-{Guid.NewGuid():N}",
@@ -128,7 +128,7 @@ public class VariantAttributeBugConditionTests
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
-                Id = prodId, CategoryId = catId,
+                Id = prodId, ProcessId = catId,
                 Slug = $"bug2-prod-{Guid.NewGuid():N}",
                 TitleEs = "Producto Bug2", TitleEn = "Bug Product2",
                 DescriptionEs = "Desc", DescriptionEn = "Desc",
@@ -190,3 +190,4 @@ public class VariantAttributeBugConditionTests
         Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
     }
 }
+

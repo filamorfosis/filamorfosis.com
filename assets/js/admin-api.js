@@ -53,45 +53,45 @@
     return res.json();
   }
 
-  // ── Categories ────────────────────────────────────────────────────────────
+  // ── Processes ────────────────────────────────────────────────────────────
 
-  /** GET /api/v1/admin/categories — returns all categories with their attributes */
-  function adminGetCategories() {
-    return apiFetch('/admin/categories');
+  /** GET /api/v1/admin/processes — returns all processes with their attributes */
+  function adminGetProcesses() {
+    return apiFetch('/admin/processes');
   }
 
-  /** POST /api/v1/admin/categories — create a new category */
-  function adminCreateCategory(data) {
-    return apiFetch('/admin/categories', {
+  /** POST /api/v1/admin/processes — create a new process */
+  function adminCreateProcess(data) {
+    return apiFetch('/admin/processes', {
       method: 'POST',
       body: JSON.stringify(data)
     });
   }
 
-  /** PUT /api/v1/admin/categories/{id} — update an existing category */
-  function adminUpdateCategory(id, data) {
-    return apiFetch(`/admin/categories/${id}`, {
+  /** PUT /api/v1/admin/processes/{id} — update an existing process */
+  function adminUpdateProcess(id, data) {
+    return apiFetch(`/admin/processes/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
     });
   }
 
-  /** DELETE /api/v1/admin/categories/{id} — soft-delete a category */
-  function adminDeleteCategory(id) {
-    return apiFetch(`/admin/categories/${id}`, { method: 'DELETE' });
+  /** DELETE /api/v1/admin/processes/{id} — soft-delete a process */
+  function adminDeleteProcess(id) {
+    return apiFetch(`/admin/processes/${id}`, { method: 'DELETE' });
   }
 
-  /** POST /api/v1/admin/categories/{id}/attributes — add an attribute to a category */
-  function adminAddCategoryAttribute(categoryId, data) {
-    return apiFetch(`/admin/categories/${categoryId}/attributes`, {
+  /** POST /api/v1/admin/processes/{id}/attributes — add an attribute to a process */
+  function adminAddProcessAttribute(processId, data) {
+    return apiFetch(`/admin/processes/${processId}/attributes`, {
       method: 'POST',
       body: JSON.stringify(data)
     });
   }
 
-  /** DELETE /api/v1/admin/categories/{id}/attributes/{attributeId} — remove an attribute */
-  function adminDeleteCategoryAttribute(categoryId, attributeId) {
-    return apiFetch(`/admin/categories/${categoryId}/attributes/${attributeId}`, {
+  /** DELETE /api/v1/admin/processes/{id}/attributes/{attributeId} — remove an attribute */
+  function adminDeleteProcessAttribute(processId, attributeId) {
+    return apiFetch(`/admin/processes/${processId}/attributes/${attributeId}`, {
       method: 'DELETE'
     });
   }
@@ -374,33 +374,18 @@
     });
   }
 
-  // ── Category Cost Parameters ──────────────────────────────────────────────
+  // ── Process Cost Parameters ──────────────────────────────────────────────
 
-  /** GET /api/v1/admin/categories/{id}/cost-parameters */
-  function adminGetCategoryCostParameters(categoryId) {
-    return apiFetch(`/admin/categories/${categoryId}/cost-parameters`);
+  /** GET /api/v1/admin/cost-parameters — returns all cost parameters grouped by process */
+  function adminGetCostParameters() {
+    return apiFetch('/admin/cost-parameters');
   }
 
-  /** POST /api/v1/admin/categories/{id}/cost-parameters */
-  function adminAddCategoryCostParameter(categoryId, data) {
-    return apiFetch(`/admin/categories/${categoryId}/cost-parameters`, {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
-  }
-
-  /** PUT /api/v1/admin/categories/{id}/cost-parameters/{parameterId} */
-  function adminUpdateCategoryCostParameter(categoryId, parameterId, data) {
-    return apiFetch(`/admin/categories/${categoryId}/cost-parameters/${parameterId}`, {
+  /** PUT /api/v1/admin/cost-parameters/{processId}/{key} — upsert a cost parameter */
+  function adminUpsertProcessCostParameter(processId, key, data) {
+    return apiFetch(`/admin/cost-parameters/${processId}/${key}`, {
       method: 'PUT',
       body: JSON.stringify(data)
-    });
-  }
-
-  /** DELETE /api/v1/admin/categories/{id}/cost-parameters/{parameterId} */
-  function adminDeleteCategoryCostParameter(categoryId, parameterId) {
-    return apiFetch(`/admin/categories/${categoryId}/cost-parameters/${parameterId}`, {
-      method: 'DELETE'
     });
   }
 
@@ -428,13 +413,13 @@
   window.adminApi = {
     // core
     apiFetch,
-    // categories
-    adminGetCategories,
-    adminCreateCategory,
-    adminUpdateCategory,
-    adminDeleteCategory,
-    adminAddCategoryAttribute,
-    adminDeleteCategoryAttribute,
+    // processes
+    adminGetProcesses,
+    adminCreateProcess,
+    adminUpdateProcess,
+    adminDeleteProcess,
+    adminAddProcessAttribute,
+    adminDeleteProcessAttribute,
     // products
     adminGetProducts,
     adminGetProduct,
@@ -474,18 +459,14 @@
     // cost parameters
     adminGetCostParameters,
     adminUpsertCostParameter,
-    // category cost parameters
-    adminGetCategoryCostParameters,
-    adminAddCategoryCostParameter,
-    adminUpdateCategoryCostParameter,
-    adminDeleteCategoryCostParameter,
+    adminUpsertProcessCostParameter,
     // global parameters
     adminGetGlobalParameters,
     adminUpdateGlobalParameter
   };
 
   // Also expose each function directly on window so existing admin.html inline
-  // scripts that reference e.g. window.adminGetCategories continue to work.
+  // scripts that reference e.g. window.adminGetProcesses continue to work.
   Object.assign(window, window.adminApi);
 
 }(window));

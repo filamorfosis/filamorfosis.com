@@ -16,19 +16,19 @@ namespace Filamorfosis.API.Controllers;
 public class AdminCostParametersController(FilamorfosisDbContext db, IPricingCalculatorService pricing) : ControllerBase
 {
     // GET /api/v1/admin/cost-parameters
-    // Returns all parameters grouped by CategoryId
+    // Returns all parameters grouped by ProcessId
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
         var parameters = await db.CostParameters
-            .Include(p => p.Category)
-            .OrderBy(p => p.Category.NameEs)
+            .Include(p => p.Process)
+            .OrderBy(p => p.Process.NameEs)
             .ThenBy(p => p.Key)
             .Select(p => new CostParameterDto
             {
                 Id = p.Id,
-                CategoryId = p.CategoryId,
-                CategoryNameEs = p.Category.NameEs,
+                ProcessId = p.ProcessId,
+                ProcessNameEs = p.Process.NameEs,
                 Key = p.Key,
                 Label = p.Label,
                 Unit = p.Unit,
@@ -38,15 +38,15 @@ public class AdminCostParametersController(FilamorfosisDbContext db, IPricingCal
             .ToListAsync();
 
         var grouped = parameters
-            .GroupBy(p => p.CategoryId.ToString())
+            .GroupBy(p => p.ProcessId.ToString())
             .ToDictionary(g => g.Key, g => g.ToList());
 
         return Ok(grouped);
     }
 
-    // PUT /api/v1/admin/cost-parameters/{categoryId}/{key}
-    [HttpPut("{categoryId:guid}/{key}")]
-    public async Task<IActionResult> Upsert(Guid categoryId, string key, [FromBody] UpsertCostParameterRequest req)
+    // PUT /api/v1/admin/cost-parameters/{processId}/{key}
+    [HttpPut("{processId:guid}/{key}")]
+    public async Task<IActionResult> Upsert(Guid processId, string key, [FromBody] UpsertCostParameterRequest req)
     {
         if (req.Value < 0)
             return BadRequest(new ProblemDetails
@@ -57,19 +57,19 @@ public class AdminCostParametersController(FilamorfosisDbContext db, IPricingCal
                 Detail = "El valor del parámetro no puede ser negativo."
             });
 
-        var category = await db.Categories.FirstOrDefaultAsync(c => c.Id == categoryId);
-        if (category is null)
-            return NotFound(new ProblemDetails { Status = 404, Detail = "Categoría no encontrada." });
+        var process = await db.Processes.FirstOrDefaultAsync(c => c.Id == processId);
+        if (process is null)
+            return NotFound(new ProblemDetails { Status = 404, Detail = "Proceso no encontrado." });
 
         var parameter = await db.CostParameters
-            .FirstOrDefaultAsync(p => p.CategoryId == categoryId && p.Key == key);
+            .FirstOrDefaultAsync(p => p.ProcessId == processId && p.Key == key);
 
         if (parameter is null)
         {
             parameter = new CostParameter
             {
                 Id = Guid.NewGuid(),
-                CategoryId = categoryId,
+                ProcessId = processId,
                 Key = key,
                 Label = req.Label,
                 Unit = req.Unit,
@@ -119,8 +119,8 @@ public class AdminCostParametersController(FilamorfosisDbContext db, IPricingCal
         return Ok(new CostParameterDto
         {
             Id = parameter.Id,
-            CategoryId = parameter.CategoryId,
-            CategoryNameEs = category.NameEs,
+            ProcessId = parameter.ProcessId,
+            ProcessNameEs = process.NameEs,
             Key = parameter.Key,
             Label = parameter.Label,
             Unit = parameter.Unit,

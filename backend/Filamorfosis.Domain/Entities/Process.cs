@@ -1,6 +1,6 @@
 namespace Filamorfosis.Domain.Entities;
 
-public class Category
+public class Process
 {
     public Guid Id { get; set; }
     public string Slug { get; set; } = string.Empty;
@@ -9,5 +9,5 @@ public class Category
     public string? ImageUrl { get; set; }
     public bool IsActive { get; set; } = true;
     public ICollection<Product> Products { get; set; } = new List<Product>();
-    public ICollection<CategoryAttribute> Attributes { get; set; } = new List<CategoryAttribute>();
+    public ICollection<ProcessAttribute> Attributes { get; set; } = new List<ProcessAttribute>();
 }

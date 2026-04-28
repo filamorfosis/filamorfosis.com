@@ -22,11 +22,11 @@ public class BadgeValidationControllerTests
         Guid prodId = Guid.Empty;
         await factory.SeedAsync(async db =>
         {
-            var catId = db.Categories.First().Id;
+            var catId = db.Processes.First().Id;
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
-                Id = prodId, CategoryId = catId,
+                Id = prodId, ProcessId = catId,
                 Slug = $"badge-test-{Guid.NewGuid():N}",
                 TitleEs = "Test", TitleEn = "Test",
                 DescriptionEs = "D", DescriptionEn = "D",
@@ -57,11 +57,11 @@ public class BadgeValidationControllerTests
         Guid prodId = Guid.Empty;
         await factory.SeedAsync(async db =>
         {
-            var catId = db.Categories.First().Id;
+            var catId = db.Processes.First().Id;
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
-                Id = prodId, CategoryId = catId,
+                Id = prodId, ProcessId = catId,
                 Slug = $"badge-valid-{Guid.NewGuid():N}",
                 TitleEs = "Test", TitleEn = "Test",
                 DescriptionEs = "D", DescriptionEn = "D",

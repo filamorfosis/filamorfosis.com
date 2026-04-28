@@ -34,15 +34,15 @@ public static class FilamorfosisGenerators
     private static Gen<int> PositiveIntGen(int max = 100) =>
         Gen.Choose(1, max);
 
-    // ── Category ─────────────────────────────────────────────────────────────
+    // ── Process ─────────────────────────────────────────────────────────────
 
-    public static Gen<Category> CategoryGen() =>
+    public static Gen<Process> ProcessGen() =>
         NonEmptyStringGen(20).SelectMany(slug =>
         NonEmptyStringGen(30).SelectMany(nameEs =>
         NonEmptyStringGen(30).Select(nameEn =>
         {
             var id = Guid.NewGuid();
-            return new Category
+            return new Process
             {
                 Id       = id,
                 Slug     = $"{slug}-{id:N}",
@@ -52,7 +52,7 @@ public static class FilamorfosisGenerators
             };
         })));
 
-    public static Arbitrary<Category> CategoryArb() => Arb.From(CategoryGen());
+    public static Arbitrary<Process> ProcessArb() => Arb.From(ProcessGen());
 
     // ── ProductVariant ───────────────────────────────────────────────────────
 
@@ -78,7 +78,7 @@ public static class FilamorfosisGenerators
 
     // ── Product ──────────────────────────────────────────────────────────────
 
-    public static Gen<Product> ProductGen(Guid categoryId, int variantCount = 2) =>
+    public static Gen<Product> ProductGen(Guid processId, int variantCount = 2) =>
         NonEmptyStringGen(30).SelectMany(titleEs =>
         NonEmptyStringGen(30).SelectMany(titleEn =>
         Gen.Elements(true, false).Select(isActive =>
@@ -91,7 +91,7 @@ public static class FilamorfosisGenerators
             return new Product
             {
                 Id            = id,
-                CategoryId    = categoryId,
+                ProcessId    = processId,
                 Slug          = $"product-{id:N}",
                 TitleEs       = titleEs,
                 TitleEn       = titleEn,
@@ -190,7 +190,7 @@ public static class FilamorfosisGenerators
 /// </summary>
 public class FilamorfosisArbitraries
 {
-    public static Arbitrary<Category>     Category()  => FilamorfosisGenerators.CategoryArb();
+    public static Arbitrary<Process>     Process()  => FilamorfosisGenerators.ProcessArb();
     public static Arbitrary<Product>      Product()   => FilamorfosisGenerators.ProductArb();
     public static Arbitrary<Cart>         Cart()      => FilamorfosisGenerators.GuestCartArb();
 }

@@ -36,12 +36,12 @@ public class CartMergePropertyTests
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Categories.Add(new Category { Id = catId, Slug = $"merge-{catId:N}", NameEs = "Merge", NameEn = "Merge" });
+            db.Processes.Add(new Process { Id = catId, Slug = $"merge-{catId:N}", NameEs = "Merge", NameEn = "Merge" });
 
             var prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
-                Id = prodId, CategoryId = catId, Slug = $"merge-prod-{prodId:N}",
+                Id = prodId, ProcessId = catId, Slug = $"merge-prod-{prodId:N}",
                 TitleEs = "Merge Prod", TitleEn = "Merge Prod",
                 DescriptionEs = "D", DescriptionEn = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow

@@ -330,4 +330,11 @@ window.FilamorfosisI18n['en'] = {
             cart_trust_quality: 'Guaranteed production',
             cart_trust_support: '24/7 Support',
             cart_item_removed: 'Item removed',
+            cat_gifts: 'Gifts',
+            cat_drinkware: 'Mugs & Drinkware',
+            cat_business: 'Business',
+            cat_decor: 'Home Decor',
+            cat_events: 'Events',
+            cat_art: 'Art & Design',
+            cat_all: 'All',
         };

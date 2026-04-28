@@ -330,4 +330,11 @@ window.FilamorfosisI18n['pt'] = {
             cart_trust_quality: 'Produção garantida',
             cart_trust_support: 'Suporte 24/7',
             cart_item_removed: 'Item removido',
+            cat_gifts: 'Presentes',
+            cat_drinkware: 'Canecas e Copos',
+            cat_business: 'Empresarial',
+            cat_decor: 'Decoração',
+            cat_events: 'Eventos',
+            cat_art: 'Arte e Design',
+            cat_all: 'Todos',
         };

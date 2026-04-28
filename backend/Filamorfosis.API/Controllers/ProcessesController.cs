@@ -7,13 +7,13 @@ namespace Filamorfosis.API.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class CategoriesController(FilamorfosisDbContext db) : ControllerBase
+public class ProcessesController(FilamorfosisDbContext db) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var categories = await db.Categories
-            .Select(c => new CategoryDto
+        var processes = await db.Processes
+            .Select(c => new ProcessDto
             {
                 Id = c.Id,
                 Slug = c.Slug,
@@ -24,6 +24,6 @@ public class CategoriesController(FilamorfosisDbContext db) : ControllerBase
             })
             .ToListAsync();
 
-        return Ok(categories);
+        return Ok(processes);
     }
 }

@@ -180,7 +180,7 @@
     <div class="admin-tabs">
       <button class="admin-tab active" data-tab="orders"><i class="fas fa-shopping-bag"></i> Pedidos</button>
       <button class="admin-tab" data-tab="products"><i class="fas fa-box"></i> Productos</button>
-      <button class="admin-tab" data-tab="categories"><i class="fas fa-tags"></i> Categorías</button>
+      <button class="admin-tab" data-tab="categories"><i class="fas fa-tags"></i> Procesos</button>
       <button class="admin-tab" data-tab="users"><i class="fas fa-users"></i> Usuarios</button>
       <button class="admin-tab" data-tab="materials"><i class="fas fa-layer-group"></i> Materiales</button>
       <button class="admin-tab" data-tab="globalparams"><i class="fas fa-globe"></i> Parámetros Globales</button>
@@ -274,7 +274,7 @@
                 <input type="text" name="titleEs" required placeholder="Nombre en español">
               </div>
               <div class="form-field">
-                <label>Categoría</label>
+                <label>Procesamiento</label>
                 <select name="categoryId" id="add-product-category" data-category-select required>
                   <option value="">-- Seleccionar --</option>
                 </select>
@@ -333,7 +333,7 @@
             <thead>
               <tr>
                 <th>Título (ES)</th>
-                <th>Categoría</th>
+                <th>Proceso</th>
                 <th>Estado</th>
                 <th>Variantes</th>
                 <th>Acciones</th>
@@ -353,16 +353,16 @@
       <!-- Add Category -->
       <div class="admin-section">
         <div class="admin-section-title" style="justify-content:space-between">
-          <span><i class="fas fa-plus-circle"></i> Agregar Categoría</span>
+          <span><i class="fas fa-plus-circle"></i> Agregar Proceso</span>
           <button class="btn-admin btn-admin-primary" onclick="AdminCategories.openAddCategoryModal()">
-            <i class="fas fa-plus"></i> Nueva categoría
+            <i class="fas fa-plus"></i> Nuevo proceso
           </button>
         </div>
       </div>
 
       <!-- Categories table -->
       <div class="admin-section">
-        <div class="admin-section-title"><i class="fas fa-list"></i> Todas las categorías</div>
+        <div class="admin-section-title"><i class="fas fa-list"></i> Todos los procesos</div>
         <div class="admin-table-wrap">
           <table class="admin-table" id="categories-table">
             <thead>
@@ -650,7 +650,7 @@
             <thead>
               <tr>
                 <th>Nombre</th>
-                <th>Categoría</th>
+                <th>Procesamiento</th>
                 <th>Etiqueta de Tamaño</th>
                 <th>Ancho (cm)</th>
                 <th>Alto (cm)</th>
@@ -718,9 +718,9 @@
       </button>
       <div class="admin-modal-title">
         <i class="fas fa-tag" style="margin-right:8px"></i>
-        <span id="category-modal-title">Categoría</span>
+        <span id="category-modal-title">Proceso</span>
       </div>
-      <div class="admin-modal-subtitle" id="category-modal-subtitle">Completa los datos de la categoría</div>
+      <div class="admin-modal-subtitle" id="category-modal-subtitle">Completa los datos del proceso</div>
 
       <form id="category-modal-form" onsubmit="AdminCategories.saveCategoryModal(event)" novalidate>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -825,7 +825,7 @@
           <input type="text" id="mat-sizeLabel" placeholder="Ej. Acrílico transparente 20×30 cm">
         </div>
         <div class="modal-form-field">
-          <label for="mat-category">Categoría <span style="color:#f87171">*</span></label>
+          <label for="mat-category">Procesamiento <span style="color:#f87171">*</span></label>
           <select id="mat-category" class="modal-select" onchange="AdminCosts._onMatCategoryChange()">
             <option value="">-- Seleccionar --</option>
           </select>
@@ -879,7 +879,7 @@
                style="max-height:220px;overflow-y:auto;border:1px solid #334155;
                       border-radius:6px;padding:4px 6px;background:#0f172a">
             <div id="mat-supply-usages-empty" style="color:#94a3b8;font-size: 1rem;padding:10px 4px">
-              Selecciona una categoría para ver los parámetros disponibles.
+              Selecciona un procesamiento para ver los parámetros disponibles.
             </div>
           </div>
 

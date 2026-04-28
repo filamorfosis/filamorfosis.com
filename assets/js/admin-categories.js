@@ -19,13 +19,13 @@
 
   async function loadCategories() {
     try {
-      _categories = await adminApi.adminGetCategories();
+      _categories = await adminApi.adminGetProcesses();
       renderCategoriesTable();
       _populateCategoryDropdowns();
     } catch (e) {
       const tbody = document.getElementById('categories-tbody');
       if (tbody) tbody.innerHTML = `<tr><td colspan="3" style="color:#f87171;text-align:center">
-        <i class="fas fa-exclamation-triangle"></i> Error al cargar categorï¿½as</td></tr>`;
+        <i class="fas fa-exclamation-triangle"></i> Error al cargar procesos</td></tr>`;
     }
   }
 
@@ -47,7 +47,7 @@
     if (!tbody) return;
 
     if (!_categories.length) {
-      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#64748b;padding:24px">Sin categorï¿½as</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#64748b;padding:24px">Sin Procesos</td></tr>`;
       return;
     }
 
@@ -58,13 +58,13 @@
         <td style="white-space:nowrap">
           <button class="btn-admin btn-admin-secondary btn-admin-sm"
                   onclick="AdminCategories.openEditCategoryModal('${esc(c.id)}')"
-                  title="Editar categorï¿½a">
+                  title="Editar Proceso">
             <i class="fas fa-edit"></i> Editar
           </button>
           <button class="btn-admin btn-admin-danger btn-admin-sm"
                   onclick="AdminCategories.deleteCategory('${esc(c.id)}')"
                   id="cat-del-${esc(c.id)}"
-                  title="Eliminar categorï¿½a">
+                  title="Eliminar Proceso">
             <i class="fas fa-trash"></i>
           </button>
           <div class="form-error" id="cat-del-err-${esc(c.id)}" style="margin-top:4px"></div>
@@ -91,8 +91,8 @@
 
   function openAddCategoryModal() {
     _editingId = null;
-    document.getElementById('category-modal-title').textContent    = 'Nueva Categorï¿½a';
-    document.getElementById('category-modal-subtitle').textContent = 'Completa los datos de la nueva categorï¿½a';
+    document.getElementById('category-modal-title').textContent    = 'Nueva Proceso';
+    document.getElementById('category-modal-subtitle').textContent = 'Completa los datos de la nueva Proceso';
     document.getElementById('cat-modal-nameEs').value   = '';
     document.getElementById('cat-modal-nameEn').value   = '';
     document.getElementById('cat-modal-slug').value     = '';
@@ -107,7 +107,7 @@
     if (!cat) return;
     _editingId = id;
 
-    document.getElementById('category-modal-title').textContent    = 'Editar Categorï¿½a';
+    document.getElementById('category-modal-title').textContent    = 'Editar Proceso';
     document.getElementById('category-modal-subtitle').textContent = `Editando: ${cat.nameEs}`;
     document.getElementById('cat-modal-nameEs').value   = cat.nameEs   || '';
     document.getElementById('cat-modal-nameEn').value   = cat.nameEn   || '';
@@ -141,16 +141,16 @@
     spin(btn, true);
     try {
       if (_editingId) {
-        await adminApi.adminUpdateCategory(_editingId, data);
-        toast('Categorï¿½a actualizada');
+        await adminApi.adminUpdateProcess(_editingId, data);
+        toast('Proceso actualizado');
       } else {
-        await adminApi.adminCreateCategory(data);
-        toast('Categorï¿½a creada');
+        await adminApi.adminCreateProcess(data);
+        toast('Proceso creado');
       }
       closeCategoryModal();
       await loadCategories();
     } catch (err) {
-      errEl.textContent = err.detail || 'Error al guardar la categorï¿½a.';
+      errEl.textContent = err.detail || 'Error al guardar la Proceso.';
       spin(btn, false);
     }
   }
@@ -158,14 +158,14 @@
   // -- Delete ----------------------------------------------------------------
 
   async function deleteCategory(id) {
-    if (!await adminConfirm('ï¿½Eliminar esta categorï¿½a? Esta acciï¿½n no se puede deshacer.', 'Eliminar Categorï¿½a')) return;
+    if (!await adminConfirm('¿Eliminar este Proceso? Esta acciónn no se puede deshacer.', 'Eliminar Proceso')) return;
     const btn   = document.getElementById('cat-del-' + id);
     const errEl = document.getElementById('cat-del-err-' + id);
     spin(btn, true);
     errEl.textContent = '';
     try {
-      await adminApi.adminDeleteCategory(id);
-      toast('Categorï¿½a eliminada');
+      await adminApi.adminDeleteProcess(id);
+      toast('Proceso eliminado');
       await loadCategories();
     } catch (err) {
       if (err.status === 409) {
@@ -245,8 +245,10 @@
 
     spin(btn, true);
     try {
-      await adminApi.adminUpdateCategoryCostParameter(categoryId, paramId, { label, unit, value: val });
-      toast('Parï¿½metro guardado');
+      // Extract the key from the paramId (format: "processId:key")
+      const key = paramId.split(':')[1] || paramId;
+      await adminApi.adminUpsertProcessCostParameter(categoryId, key, { label, unit, value: val });
+      toast('Parámetro guardado');
       // Refresh materials table so BaseCost reflects the new cost parameter value
       if (typeof AdminCosts !== 'undefined' && AdminCosts.loadAll) {
         await AdminCosts.loadAll();
@@ -258,14 +260,9 @@
   }
 
   async function deleteCostParameterRow(categoryId, paramId) {
-    if (!await adminConfirm('ï¿½Eliminar este parï¿½metro de costo?', 'Eliminar Parï¿½metro')) return;
-    try {
-      await adminApi.adminDeleteCategoryCostParameter(categoryId, paramId);
-      toast('Parï¿½metro eliminado');
-      await _loadCostParamsList(categoryId);
-    } catch (err) {
-      toast(err.detail || 'Error al eliminar.', false);
-    }
+    // Note: The new API doesn't have a delete endpoint for cost parameters
+    // Cost parameters are upserted, not deleted
+    toast('La eliminación de parámetros de costo no está disponible. Use valor 0 para desactivar.', false);
   }
 
   async function addCostParameterRow() {

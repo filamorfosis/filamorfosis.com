@@ -23,11 +23,11 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
-        [FromQuery] Guid? categoryId = null,
+        [FromQuery] Guid? processId = null,
         [FromQuery] string? search = null)
     {
         var query = db.Products
-            .Include(p => p.Category)
+            .Include(p => p.Process)
             .Include(p => p.Discounts)
             .Include(p => p.Variants)
                 .ThenInclude(v => v.Discounts)
@@ -39,8 +39,8 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
                     .ThenInclude(u => u.Material)
             .AsQueryable();
 
-        if (categoryId.HasValue)
-            query = query.Where(p => p.CategoryId == categoryId.Value);
+        if (processId.HasValue)
+            query = query.Where(p => p.ProcessId == processId.Value);
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -86,7 +86,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         var product = new Product
         {
             Id = Guid.NewGuid(),
-            CategoryId = req.CategoryId,
+            ProcessId = req.ProcessId,
             Slug = req.TitleEs.ToLower().Replace(" ", "-"),
             TitleEs = req.TitleEs, TitleEn = req.TitleEn,
             DescriptionEs = req.DescriptionEs, DescriptionEn = req.DescriptionEn,
@@ -102,7 +102,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
     public async Task<IActionResult> GetById(Guid id)
     {
         var p = await db.Products
-            .Include(p => p.Category)
+            .Include(p => p.Process)
             .Include(p => p.Discounts)
             .Include(p => p.Variants)
                 .ThenInclude(v => v.Discounts)
@@ -146,7 +146,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         if (req.TitleEn is not null) p.TitleEn = req.TitleEn;
         if (req.DescriptionEs is not null) p.DescriptionEs = req.DescriptionEs;
         if (req.DescriptionEn is not null) p.DescriptionEn = req.DescriptionEn;
-        if (req.CategoryId.HasValue) p.CategoryId = req.CategoryId.Value;
+        if (req.ProcessId.HasValue) p.ProcessId = req.ProcessId.Value;
         if (req.Tags is not null) p.Tags = req.Tags;
         if (req.IsActive.HasValue) p.IsActive = req.IsActive.Value;
         p.Badge = req.Badge;
@@ -416,9 +416,9 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         DescriptionEs = p.DescriptionEs, DescriptionEn = p.DescriptionEn,
         Tags = p.Tags, ImageUrls = p.ImageUrls,
         Badge = p.Badge,
-        IsActive = p.IsActive, CategoryId = p.CategoryId,
-        CategoryNameEs = p.Category?.NameEs,
-        CategoryNameEn = p.Category?.NameEn,
+        IsActive = p.IsActive, ProcessId = p.ProcessId,
+        ProcessNameEs = p.Process?.NameEs,
+        ProcessNameEn = p.Process?.NameEn,
         Variants = variantDtos,
         AttributeDefinitions = p.AttributeDefinitions
             .Select(pa => new AttributeDefinitionDto

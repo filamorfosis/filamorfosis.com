@@ -1,4 +1,4 @@
-// Feature: online-store, Property 3: Category product count accuracy
+// Feature: online-store, Property 3: Process product count accuracy
 
 using System.Net.Http.Json;
 using Filamorfosis.Application.DTOs;
@@ -13,12 +13,12 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Filamorfosis.Tests;
 
 /// <summary>
-/// Property 3: Category product count accuracy
+/// Property 3: Process product count accuracy
 ///
 /// For any set of categories and products (some active, some inactive),
-/// the productCount returned for each category by GET /api/v1/categories
+/// the productCount returned for each Process by GET /api/v1/categories
 /// must equal the actual number of active (IsActive = true) products
-/// assigned to that category.
+/// assigned to that Process.
 ///
 /// Validates: Requirements 1.3
 /// </summary>
@@ -30,7 +30,7 @@ public class ProductCatalogPropertyTests
     /// Generates a non-empty list of 1–5 categories, each with 0–4 products
     /// where each product is independently active or inactive.
     /// </summary>
-    private static Gen<List<Category>> CategoriesWithProductsGen()
+    private static Gen<List<Process>> CategoriesWithProductsGen()
     {
         var boolGen = Gen.Elements(new[] { true, false });
 
@@ -62,19 +62,19 @@ public class ProductCatalogPropertyTests
                     return Gen.CollectToList(productGens).Select(products =>
                     {
                         var catId = Guid.NewGuid();
-                        var category = new Category
+                        var Process = new Process
                         {
                             Id = catId,
                             Slug = $"cat-{catId:N}",
                             NameEs = $"Categoría {i}",
-                            NameEn = $"Category {i}"
+                            NameEn = $"Process {i}"
                         };
                         foreach (var p in products)
                         {
-                            p.CategoryId = catId;
-                            category.Products.Add(p);
+                            p.ProcessId = catId;
+                            Process.Products.Add(p);
                         }
-                        return category;
+                        return Process;
                     });
                 })
             );
@@ -94,39 +94,39 @@ public class ProductCatalogPropertyTests
         );
     }
 
-    private static async Task<bool> RunPropertyAsync(List<Category> categories)
+    private static async Task<bool> RunPropertyAsync(List<Process> categories)
     {
         await using var factory = new FilamorfosisWebFactory();
 
         // Seed categories and their products
         await factory.SeedAsync(async db =>
         {
-            db.Categories.AddRange(categories);
+            db.Processes.AddRange(categories);
             // Products are owned via navigation; add them explicitly too
             foreach (var cat in categories)
                 db.Products.AddRange(cat.Products);
             await db.SaveChangesAsync();
         });
 
-        // Call GET /api/v1/categories
+        // Call GET /api/v1/processes
         var client = factory.CreateClient();
-        var response = await client.GetAsync("/api/v1/categories");
+        var response = await client.GetAsync("/api/v1/processes");
 
         if (!response.IsSuccessStatusCode)
             return false;
 
-        var dtos = await response.Content.ReadFromJsonAsync<List<CategoryDto>>();
+        var dtos = await response.Content.ReadFromJsonAsync<List<ProcessDto>>();
         if (dtos is null)
             return false;
 
-        // For every seeded category, verify productCount == count of active products
-        foreach (var category in categories)
+        // For every seeded Process, verify productCount == count of active products
+        foreach (var Process in categories)
         {
-            var dto = dtos.FirstOrDefault(d => d.Id == category.Id);
+            var dto = dtos.FirstOrDefault(d => d.Id == Process.Id);
             if (dto is null)
                 return false;
 
-            var expectedCount = category.Products.Count(p => p.IsActive);
+            var expectedCount = Process.Products.Count(p => p.IsActive);
             if (dto.ProductCount != expectedCount)
                 return false;
         }
@@ -134,3 +134,4 @@ public class ProductCatalogPropertyTests
         return true;
     }
 }
+

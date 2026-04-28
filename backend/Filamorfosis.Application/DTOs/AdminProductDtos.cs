@@ -6,7 +6,7 @@ public class CreateProductRequest
     public string TitleEn { get; set; } = string.Empty;
     public string DescriptionEs { get; set; } = string.Empty;
     public string DescriptionEn { get; set; } = string.Empty;
-    public Guid CategoryId { get; set; }
+    public Guid ProcessId { get; set; }
     public string[] Tags { get; set; } = [];
     public string? Badge { get; set; }
     public bool IsActive { get; set; } = true;
@@ -18,7 +18,7 @@ public class UpdateProductRequest
     public string? TitleEn { get; set; }
     public string? DescriptionEs { get; set; }
     public string? DescriptionEn { get; set; }
-    public Guid? CategoryId { get; set; }
+    public Guid? ProcessId { get; set; }
     public string[]? Tags { get; set; }
     public string? Badge { get; set; }
     public bool? IsActive { get; set; }
@@ -54,7 +54,7 @@ public class UpdateVariantRequest
     public Dictionary<string, decimal> MaterialUsages { get; set; } = new();
 }
 
-public class CreateCategoryRequest
+public class CreateProcessRequest
 {
     public string Slug { get; set; } = string.Empty;
     public string NameEs { get; set; } = string.Empty;
@@ -62,7 +62,7 @@ public class CreateCategoryRequest
     public string? ImageUrl { get; set; }
 }
 
-public class UpdateCategoryRequest
+public class UpdateProcessRequest
 {
     public string? NameEs { get; set; }
     public string? NameEn { get; set; }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -12,7 +12,7 @@ namespace Filamorfosis.Infrastructure.Migrations
         {
             migrationBuilder.AddColumn<bool>(
                 name: "IsActive",
-                table: "Categories",
+                table: "Processes",
                 type: "INTEGER",
                 nullable: false,
                 defaultValue: true);
@@ -29,7 +29,7 @@ namespace Filamorfosis.Infrastructure.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "IsActive",
-                table: "Categories");
+                table: "Processes");
 
             migrationBuilder.DropColumn(
                 name: "LastUsedTotpCode",

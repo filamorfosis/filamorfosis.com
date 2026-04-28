@@ -65,7 +65,7 @@ async function _parseError(res) {
 
 // ── Named helpers ─────────────────────────────────────────────────────────────
 
-window.getCategories = () => apiFetch('/categories');
+window.getProcesses = () => apiFetch('/processes');
 window.getProducts = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
   return apiFetch(`/products${qs ? '?' + qs : ''}`);
@@ -130,9 +130,9 @@ window.adminUploadImage = (productId, file) => {
     body: form
   }).then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)));
 };
-window.adminGetCategories = () => apiFetch('/admin/categories');
-window.adminCreateCategory = (data) => apiFetch('/admin/categories', { method: 'POST', body: JSON.stringify(data) });
-window.adminUpdateCategory = (id, data) => apiFetch(`/admin/categories/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+window.adminGetProcesses = () => apiFetch('/admin/processes');
+window.adminCreateProcess = (data) => apiFetch('/admin/processes', { method: 'POST', body: JSON.stringify(data) });
+window.adminUpdateProcess = (id, data) => apiFetch(`/admin/processes/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 window.adminGetOrders = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
   return apiFetch(`/admin/orders${qs ? '?' + qs : ''}`);

@@ -282,7 +282,7 @@
 
     if (!_currentCategoryParams.length) {
       container.innerHTML = '<div id="mat-supply-usages-empty" style="color:#475569;font-size:1rem;padding:8px 0">' +
-        (_getField('mat-category') ? 'Esta categoría no tiene parámetros de costo.' : 'Selecciona una categoría para ver los parámetros disponibles.') +
+        (_getField('mat-category') ? 'Este procesamiento no tiene parámetros de costo.' : 'Selecciona un procesamiento para ver los parámetros disponibles.') +
         '</div>';
       return;
     }
@@ -385,7 +385,7 @@
       return;
     }
     if (!categoryId) {
-      if (errEl) errEl.textContent = 'La categoría es requerida.';
+      if (errEl) errEl.textContent = 'El procesamiento es requerido.';
       return;
     }
 
@@ -590,7 +590,7 @@
     container.innerHTML =
       '<p style="color:#94a3b8;font-size:1rem;margin-bottom:12px">' +
         '<i class="fas fa-info-circle" style="color:#a78bfa;margin-right:6px"></i>' +
-        'El costo eléctrico aplica a todas las categorías (se asume 100W por máquina).' +
+        'El costo eléctrico aplica a todos los procesamientos (se asume 100W por máquina).' +
       '</p>' +
       '<table class="admin-table" style="width:100%">' +
         '<thead><tr><th>Parámetro</th><th>Valor</th><th>Acción</th></tr></thead>' +

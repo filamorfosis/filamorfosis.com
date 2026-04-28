@@ -17,17 +17,17 @@ public class AdminMaterialsController(
     FilamorfosisDbContext db,
     IPricingCalculatorService pricing) : ControllerBase
 {
-    // ── GET /api/v1/admin/materials?categoryId= ──────────────────────────────
+    // ── GET /api/v1/admin/materials?processId= ──────────────────────────────
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] Guid? categoryId)
+    public async Task<IActionResult> GetAll([FromQuery] Guid? processId)
     {
         var query = db.Materials
-            .Include(m => m.Category)
+            .Include(m => m.Process)
             .Include(m => m.SupplyUsages).ThenInclude(u => u.CostParameter)
             .AsQueryable();
 
-        if (categoryId.HasValue)
-            query = query.Where(m => m.CategoryId == categoryId.Value);
+        if (processId.HasValue)
+            query = query.Where(m => m.ProcessId == processId.Value);
 
         var materials = await query
             .OrderBy(m => m.Name)
@@ -41,7 +41,7 @@ public class AdminMaterialsController(
     public async Task<IActionResult> GetById(Guid id)
     {
         var material = await db.Materials
-            .Include(m => m.Category)
+            .Include(m => m.Process)
             .Include(m => m.SupplyUsages).ThenInclude(u => u.CostParameter)
             .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -79,14 +79,14 @@ public class AdminMaterialsController(
                 Detail = "El stock no puede ser negativo."
             });
 
-        var category = await db.Categories.FirstOrDefaultAsync(c => c.Id == req.CategoryId);
-        if (category is null)
+        var process = await db.Processes.FirstOrDefaultAsync(c => c.Id == req.ProcessId);
+        if (process is null)
             return BadRequest(new ProblemDetails
             {
                 Type = "https://filamorfosis.com/errors/validation",
                 Title = "Validation error",
                 Status = 400,
-                Detail = "Categoría no encontrada."
+                Detail = "Proceso no encontrado."
             });
 
         // Validate supply usages
@@ -106,8 +106,8 @@ public class AdminMaterialsController(
         {
             Id = Guid.NewGuid(),
             Name = req.Name,
-            CategoryId = req.CategoryId,
-            Category = category,
+            ProcessId = req.ProcessId,
+            Process = process,
             SizeLabel = req.SizeLabel,
             WidthCm = req.WidthCm,
             HeightCm = req.HeightCm,
@@ -144,7 +144,7 @@ public class AdminMaterialsController(
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMaterialRequest req)
     {
         var material = await db.Materials
-            .Include(m => m.Category)
+            .Include(m => m.Process)
             .Include(m => m.SupplyUsages).ThenInclude(u => u.CostParameter)
             .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -170,19 +170,19 @@ public class AdminMaterialsController(
             material.Name = req.Name;
         }
 
-        if (req.CategoryId.HasValue)
+        if (req.ProcessId.HasValue)
         {
-            var category = await db.Categories.FirstOrDefaultAsync(c => c.Id == req.CategoryId.Value);
-            if (category is null)
+            var process = await db.Processes.FirstOrDefaultAsync(c => c.Id == req.ProcessId.Value);
+            if (process is null)
                 return BadRequest(new ProblemDetails
                 {
                     Type = "https://filamorfosis.com/errors/validation",
                     Title = "Validation error",
                     Status = 400,
-                    Detail = "Categoría no encontrada."
+                    Detail = "Proceso no encontrado."
                 });
-            material.CategoryId = req.CategoryId.Value;
-            material.Category = category;
+            material.ProcessId = req.ProcessId.Value;
+            material.Process = process;
         }
 
         if (req.SizeLabel is not null) material.SizeLabel = req.SizeLabel;
@@ -351,8 +351,8 @@ public class AdminMaterialsController(
     {
         Id = m.Id,
         Name = m.Name,
-        CategoryId = m.CategoryId,
-        CategoryNameEs = m.Category.NameEs,
+        ProcessId = m.ProcessId,
+        ProcessNameEs = m.Process.NameEs,
         SizeLabel = m.SizeLabel,
         WidthCm = m.WidthCm,
         HeightCm = m.HeightCm,

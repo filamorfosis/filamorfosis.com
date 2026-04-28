@@ -14,8 +14,8 @@ public class MaterialDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public Guid CategoryId { get; set; }
-    public string CategoryNameEs { get; set; } = string.Empty;
+    public Guid ProcessId { get; set; }
+    public string ProcessNameEs { get; set; } = string.Empty;
     public string? SizeLabel { get; set; }
     public decimal? WidthCm { get; set; }
     public decimal? HeightCm { get; set; }
@@ -30,7 +30,7 @@ public class MaterialDto
 
 public record CreateMaterialRequest(
     string Name,
-    Guid CategoryId,
+    Guid ProcessId,
     string? SizeLabel,
     decimal? WidthCm,
     decimal? HeightCm,
@@ -43,7 +43,7 @@ public record CreateMaterialRequest(
 
 public record UpdateMaterialRequest(
     string? Name,
-    Guid? CategoryId,
+    Guid? ProcessId,
     string? SizeLabel,
     decimal? WidthCm,
     decimal? HeightCm,

@@ -470,7 +470,7 @@
           <input type="text" id="pedit-titleEs" value="${esc(product ? product.titleEs || product.title || '' : '')}" required placeholder="Nombre en español">
         </div>
         <div class="form-field">
-          <label>CATEGORÍA ${product ? '' : '<span class="req">*</span>'}</label>
+          <label>PROCESAMIENTO ${product ? '' : '<span class="req">*</span>'}</label>
           ${product
             ? `<div style="padding:8px 12px;border-radius:6px;background:rgba(255,255,255,0.04);
                            border:1px solid rgba(255,255,255,0.08);color:#e2e8f0;font-size:1rem;
@@ -555,7 +555,7 @@
       return;
     }
     if (!categoryId) {
-      if (errEl) errEl.textContent = 'La categoría es requerida.';
+      if (errEl) errEl.textContent = 'El procesamiento es requerido.';
       return;
     }
 

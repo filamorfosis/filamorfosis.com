@@ -1,5 +1,5 @@
-// Feature: admin-store-management, Property 5: Category data round-trip
-// Feature: admin-store-management, Property 6: Category delete conflict
+// Feature: admin-store-management, Property 5: Process data round-trip
+// Feature: admin-store-management, Property 6: Process delete conflict
 
 using System.Net;
 using System.Net.Http.Json;
@@ -13,10 +13,10 @@ using FsCheck.Xunit;
 namespace Filamorfosis.Tests;
 
 /// <summary>
-/// Property-based tests for the AdminCategoriesController.
+/// Property-based tests for the AdminProcessesController.
 /// Covers Properties 5 and 6 from the admin-store-management spec.
 /// </summary>
-public class AdminCategoryPropertyTests
+public class AdminProcessPropertyTests
 {
     // ── Generators ────────────────────────────────────────────────────────────
 
@@ -34,13 +34,13 @@ public class AdminCategoryPropertyTests
                .ArrayOf(len)
                .Select(chars => new string(chars.Select(c => (char)('a' + c)).ToArray())));
 
-    // ── Property 5: Category data round-trip ─────────────────────────────────
+    // ── Property 5: Process data round-trip ─────────────────────────────────
     // For any valid { slug, nameEs, nameEn } payload, create then fetch and assert
     // that the stored values exactly match the submitted values.
     // Validates: Requirements 2.2, 2.3
 
     [Property(MaxTest = 20)]
-    public Property CategoryCreate_RoundTrip_ExactFieldMatch()
+    public Property ProcessCreate_RoundTrip_ExactFieldMatch()
     {
         return Prop.ForAll(
             Arb.From(SlugGen()),
@@ -60,8 +60,8 @@ public class AdminCategoryPropertyTests
         var uniqueSlug = $"{slug}-{Guid.NewGuid():N}";
 
         // Create
-        var createResp = await client.PostAsJsonAsync("/api/v1/admin/categories",
-            new CreateCategoryRequest
+        var createResp = await client.PostAsJsonAsync("/api/v1/admin/processes",
+            new CreateProcessRequest
             {
                 Slug = uniqueSlug,
                 NameEs = nameEs,
@@ -71,14 +71,14 @@ public class AdminCategoryPropertyTests
 
         if (createResp.StatusCode != HttpStatusCode.Created) return false;
 
-        var created = await createResp.Content.ReadFromJsonAsync<CategoryDto>();
+        var created = await createResp.Content.ReadFromJsonAsync<ProcessDto>();
         if (created is null) return false;
 
-        // Fetch all categories and find the one we just created
-        var listResp = await client.GetAsync("/api/v1/admin/categories");
+        // Fetch all processes and find the one we just created
+        var listResp = await client.GetAsync("/api/v1/admin/processes");
         if (!listResp.IsSuccessStatusCode) return false;
 
-        var categories = await listResp.Content.ReadFromJsonAsync<List<CategoryDto>>();
+        var categories = await listResp.Content.ReadFromJsonAsync<List<ProcessDto>>();
         if (categories is null) return false;
 
         var fetched = categories.FirstOrDefault(c => c.Id == created.Id);
@@ -90,13 +90,13 @@ public class AdminCategoryPropertyTests
             && fetched.NameEn == nameEn;
     }
 
-    // ── Property 6: Category delete conflict ─────────────────────────────────
-    // For any category that has ≥1 active product assigned to it,
-    // DELETE /api/v1/admin/categories/{id} SHALL return 409 Conflict.
+    // ── Property 6: Process delete conflict ─────────────────────────────────
+    // For any process that has ≥1 active product assigned to it,
+    // DELETE /api/v1/admin/processes/{id} SHALL return 409 Conflict.
     // Validates: Requirements 2.5
 
     [Property(MaxTest = 10)]
-    public Property CategoryDelete_WithActiveProducts_Returns409()
+    public Property ProcessDelete_WithActiveProducts_Returns409()
     {
         return Prop.ForAll(
             Arb.From(Gen.Choose(1, 5)),   // number of active products (1–5)
@@ -110,13 +110,12 @@ public class AdminCategoryPropertyTests
         await using var factory = new FilamorfosisWebFactory();
         var client = await AdminPropertyTests.LoginAsAdminAsync(factory);
 
-        // Seed a category with the given number of active products directly via DB
+        // Seed a process with the given number of active products directly via DB
         Guid catId = Guid.Empty;
         await factory.SeedAsync(async db =>
         {
             catId = Guid.NewGuid();
-            db.Categories.Add(new Category
-            {
+            db.Processes.Add(new Process {
                 Id = catId,
                 Slug = $"conflict-cat-{Guid.NewGuid():N}",
                 NameEs = "CatConflicto",
@@ -129,7 +128,7 @@ public class AdminCategoryPropertyTests
                 db.Products.Add(new Product
                 {
                     Id = Guid.NewGuid(),
-                    CategoryId = catId,
+                    ProcessId = catId,
                     Slug = $"prod-{Guid.NewGuid():N}",
                     TitleEs = $"Producto {i}",
                     TitleEn = $"Product {i}",
@@ -146,7 +145,7 @@ public class AdminCategoryPropertyTests
         });
 
         // Attempt to delete the category — must return 409
-        var deleteResp = await client.DeleteAsync($"/api/v1/admin/categories/{catId}");
+        var deleteResp = await client.DeleteAsync($"/api/v1/admin/processes/{catId}");
         return deleteResp.StatusCode == HttpStatusCode.Conflict;
     }
 }

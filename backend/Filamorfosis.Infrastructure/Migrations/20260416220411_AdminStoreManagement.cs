@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -33,21 +33,21 @@ namespace Filamorfosis.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CategoryAttributes",
+                name: "ProcessesAttributes",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CategoryId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    ProcessId = table.Column<Guid>(type: "TEXT", nullable: false),
                     AttributeType = table.Column<string>(type: "TEXT", nullable: false),
                     Value = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CategoryAttributes", x => x.Id);
+                    table.PrimaryKey("PK_ProcessesAttributes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CategoryAttributes_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "Categories",
+                        name: "FK_ProcessesAttributes_Processes_ProcessId",
+                        column: x => x.ProcessId,
+                        principalTable: "Processes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -89,9 +89,9 @@ namespace Filamorfosis.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_CategoryAttributes_CategoryId",
-                table: "CategoryAttributes",
-                column: "CategoryId");
+                name: "IX_ProcessesAttributes_ProcessId",
+                table: "ProcessesAttributes",
+                column: "ProcessId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Discounts_ProductId",
@@ -111,7 +111,7 @@ namespace Filamorfosis.Infrastructure.Migrations
                 name: "AdminMfaSecrets");
 
             migrationBuilder.DropTable(
-                name: "CategoryAttributes");
+                name: "ProcessesAttributes");
 
             migrationBuilder.DropTable(
                 name: "Discounts");

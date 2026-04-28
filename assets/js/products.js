@@ -69,51 +69,26 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = { shouldShowUrgency };
 }
 
-
-/* ═══════════════════════════════════════════════
-   CURATED FILTERS
-   Defined in catalog.js — products.js uses the global.
-   ═══════════════════════════════════════════════ */
-// CURATED_FILTERS is defined in products/data/catalog.js
-
 /* ═══════════════════════════════════════════════
    SPA STATE
    ═══════════════════════════════════════════════ */
 var SPAState = {
-    categoryCache:    [],   // Category[] fetched once from GET /api/v1/categories
+    processCache:    [],   // Process[] fetched once from GET /api/v1/processes
     featuredHotCache: [],
     featuredNewCache: [],
-    activeCategoryId: null  // currently selected category strip card
+    activeProcessId: null  // currently selected process strip card
 };
 
 /* ═══════════════════════════════════════════════
    STATE
    ═══════════════════════════════════════════════ */
-let activeCategory  = 'uv';   // short ID from CATEGORIES
-let activeFilter    = 'all';
 let searchQuery     = '';
 let currentPage     = 1;
 let totalCount      = 0;
 let pageSize        = 20;
 let _searchDebounce = null;
 let _loadedProducts = [];     // accumulated across "load more" pages
-let categorySlugToId = {};    // maps API category slug → API GUID
-
-// Short-id → API slug mapping
-const CAT_SLUG_MAP = {
-    'uv':      'uv-printing',
-    '3d':      '3d-printing',
-    'laser':   'laser-cutting',
-    'engrave': 'laser-cutting',
-    'photo':   'photo-printing',
-};
-
-function getActiveCategoryId() {
-    // Category strip selection takes priority over tab-based selection
-    if (window._stripCategoryId) return window._stripCategoryId;
-    const slug = CAT_SLUG_MAP[activeCategory];
-    return slug ? categorySlugToId[slug] : undefined;
-}
+let processSlugToId = {};    // maps API process slug → API GUID
 
 /* ═══════════════════════════════════════════════
    SKELETON LOADING
@@ -139,9 +114,7 @@ function renderSkeletons(n) {
 async function fetchProducts(opts) {
     opts = opts || {};
     const params = { pageSize: pageSize };
-    if (opts.categoryId) params.categoryId = opts.categoryId;
-    if (opts.search)     params.search     = opts.search;
-    if (opts.badge)      params.badge      = opts.badge;
+    if (opts.search) params.search = opts.search;
     params.page = opts.page || 1;
     return window.getProducts(params);
 }
@@ -162,11 +135,8 @@ async function loadProducts(reset) {
     if (empty) empty.classList.add('cat-empty--hidden');
 
     const opts = { page: currentPage };
-    const catId = getActiveCategoryId();
-    if (catId) opts.categoryId = catId;
+    
     if (searchQuery) opts.search = searchQuery;
-    if (activeFilter === 'popular') opts.badge = 'hot';
-    else if (activeFilter === 'new') opts.badge = 'new';
 
     try {
         const result = await fetchProducts(opts);
@@ -245,88 +215,23 @@ function renderError(retryFn) {
    RENDER TABS
    ═══════════════════════════════════════════════ */
 function renderTabs() {
-    const el = document.getElementById('catTabs');
-    if (!el || typeof CATEGORIES === 'undefined') return;
-    el.innerHTML = CATEGORIES.map(c => `
-        <button class="cat-tab ${c.id === activeCategory ? 'active' : ''}" data-cat="${c.id}">
-            <span class="cat-tab-icon">${c.icon}</span>
-            <span class="cat-tab-label">${c.label}</span>
-        </button>
-    `).join('');
-    el.querySelectorAll('.cat-tab').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            activeCategory = btn.dataset.cat;
-            activeFilter   = 'all';
-            searchQuery    = '';
-            currentPage    = 1;
-            _loadedProducts = [];
-            const searchEl = document.getElementById('catSearch');
-            if (searchEl) searchEl.value = '';
-            renderTabs();
-            renderChips();
-            loadProducts(true);
-        });
-    });
+    // Tabs removed - function kept for compatibility
 }
 
 /* ═══════════════════════════════════════════════
    RENDER FILTER CHIPS
    ═══════════════════════════════════════════════ */
 function renderChips() {
-    const el = document.getElementById('catFilterChips');
-    if (!el || typeof CURATED_FILTERS === 'undefined') return;
-
-    // Collect unique tags from loaded products
-    var tagSet = {};
-    _loadedProducts.forEach(function(p) {
-        (p.tags || []).forEach(function(tag) {
-            if (tag) tagSet[tag.toLowerCase()] = tag;
-        });
-    });
-    var tagChips = Object.values(tagSet).sort().map(function(tag) {
-        var id = 'tag:' + tag.toLowerCase();
-        return { id: id, label: tag };
-    });
-
-    var curatedHtml = CURATED_FILTERS.map(function(f) {
-        return `<button class="cat-chip ${activeFilter === f.id ? 'active' : ''}" data-filter="${f.id}">${t(f.labelKey)}</button>`;
-    }).join('');
-
-    var tagHtml = tagChips.map(function(tc) {
-        return `<button class="cat-chip cat-chip--tag ${activeFilter === tc.id ? 'active' : ''}" data-filter="${tc.id}">
-            <i class="fas fa-tag" style="font-size:1rem;margin-right:3px;opacity:0.7"></i>${tc.label}
-        </button>`;
-    }).join('');
-
-    el.innerHTML = curatedHtml + (tagHtml ? '<span class="cat-chip-divider"></span>' + tagHtml : '');
-
-    const searchEl = document.getElementById('catSearch');
-    if (searchEl) searchEl.placeholder = t('search_placeholder');
-
-    el.querySelectorAll('.cat-chip').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            activeFilter = btn.dataset.filter;
-            renderChips();
-            if (activeFilter === 'popular' || activeFilter === 'new') {
-                currentPage = 1;
-                _loadedProducts = [];
-                loadProducts(true);
-            } else {
-                renderGrid();
-            }
-        });
-    });
+    // Filter chips removed - function kept for compatibility
 }
 
 /* ═══════════════════════════════════════════════
    RENDER SECTION HEADER
    ═══════════════════════════════════════════════ */
 function renderSectionHeader() {
-    const cat = (typeof CATEGORIES !== 'undefined') ? CATEGORIES.find(function(c) { return c.id === activeCategory; }) : null;
-    if (!cat) return;
     const titleEl = document.getElementById('catSectionTitle');
     const descEl  = document.getElementById('catSectionDesc');
-    if (titleEl) titleEl.textContent = cat.icon + ' ' + cat.label;
+    if (titleEl) titleEl.textContent = t('all_products') || 'Todos los Productos';
     const count = totalCount || _loadedProducts.length;
     if (descEl) descEl.textContent = count + ' ' + (count === 1 ? t('products_count_one') : t('products_count_many'));
 
@@ -339,32 +244,8 @@ function renderSectionHeader() {
    CLIENT-SIDE FILTER HELPER
    ═══════════════════════════════════════════════ */
 function _applyClientFilter(products) {
-    if (activeFilter === 'all' || activeFilter === 'popular' || activeFilter === 'new') {
-        return products;
-    }
-
-    // Tag-based filter (chip id starts with 'tag:')
-    if (activeFilter.startsWith('tag:')) {
-        var tag = activeFilter.slice(4).toLowerCase();
-        return products.filter(function(p) {
-            return (p.tags || []).some(function(t) { return t.toLowerCase() === tag; });
-        });
-    }
-
-    const filterObj = (typeof CURATED_FILTERS !== 'undefined')
-        ? CURATED_FILTERS.find(function(f) { return f.id === activeFilter; })
-        : null;
-    if (!filterObj) return products;
-    return products.filter(function(p) {
-        // Map API fields to what CURATED_FILTERS.match expects
-        const proxy = Object.assign({}, p, {
-            desc: p.descriptionEs || '',
-            tags: p.tags || [],
-            badge: p.badge || null,
-            pricing: p._pricing || null,
-        });
-        return filterObj.match(proxy);
-    });
+    // All filtering removed - return all products
+    return products;
 }
 
 
@@ -390,15 +271,13 @@ function renderGrid() {
     }
     if (empty) empty.classList.add('cat-empty--hidden');
 
-    // Find category label for a product by matching categoryId against categorySlugToId
-    function getCatLabel(categoryId) {
-        if (!categoryId || typeof CATEGORIES === 'undefined') return '';
-        for (var i = 0; i < CATEGORIES.length; i++) {
-            var c = CATEGORIES[i];
-            var slug = CAT_SLUG_MAP[c.id];
-            if (slug && categorySlugToId[slug] === categoryId) return c.label;
-        }
-        return '';
+    // Find process label for a product by matching processId against SPAState.processCache
+    function getProcessLabel(processId) {
+        if (!processId || !SPAState.processCache || !SPAState.processCache.length) return '';
+        var process = SPAState.processCache.find(function(c) { return c.id === processId; });
+        if (!process) return '';
+        var lang = window.currentLang || 'es';
+        return lang === 'es' ? process.nameEs : process.nameEn;
     }
 
     grid.innerHTML = prods.map(function(p, i) {
@@ -463,8 +342,8 @@ function renderGrid() {
             }
         }
 
-        // ── Category label ────────────────────────────────────────────────────
-        var catLabel = getCatLabel(p.categoryId);
+        // ── Process label ────────────────────────────────────────────────────
+        var processLabel = getProcessLabel(p.processId);
 
         // ── CTA button ────────────────────────────────────────────────────────────────────
         var ctaDisabled = !isAvailable ? ' disabled' : '';
@@ -476,7 +355,7 @@ function renderGrid() {
                 imageBadgesHtml +
             '</div>' +
             '<div class="cat-card-body">' +
-                '<div class="cat-card-category">' + catLabel + '</div>' +
+                '<div class="cat-card-category">' + processLabel + '</div>' +
                 '<div class="cat-card-title">' + pT(p, 'title') + '</div>' +
                 '<div class="cat-card-desc">' + (pT(p, 'desc') || '') + '</div>' +
                 '<div class="cat-card-price-row">' +
@@ -860,34 +739,29 @@ function whatsapp(title) {
     window.open('https://wa.me/13152071586?text=' + msg, '_blank');
 }
 
-// Expose setActiveCategory for URL param pre-selection
-window.setActiveCategory = function(catId) {
-    activeCategory = catId;
-    activeFilter   = 'all';
-    currentPage    = 1;
-    _loadedProducts = [];
-    renderTabs();
-    renderChips();
+// Expose setActiveCategory for compatibility (no-op now)
+window.setActiveCategory = function(useCaseId) {
+    // Filtering removed - function kept for compatibility
     loadProducts(true);
 };
 
 /* ═══════════════════════════════════════════════
-   CATEGORY STRIP
+   PROCESS STRIP
    ═══════════════════════════════════════════════ */
 
-// Resolve localized category name from current language
-function _catName(cat) {
+// Resolve localized process name from current language
+function _processName(process) {
     var lang = window.currentLang || 'es';
-    return lang === 'es' ? cat.nameEs : cat.nameEn;
+    return lang === 'es' ? process.nameEs : process.nameEn;
 }
 
-// Render the category strip from cached data (no extra API call)
-function _renderCategoryStripFromCache() {
+// Render the process strip from cached data (no extra API call)
+function _renderProcessStripFromCache() {
     var container = document.getElementById('category-strip');
     if (!container) return;
 
-    var cats = SPAState.categoryCache;
-    if (!cats || !cats.length) {
+    var processes = SPAState.processCache;
+    if (!processes || !processes.length) {
         container.classList.add('cat-strip--hidden');
         return;
     }
@@ -897,22 +771,22 @@ function _renderCategoryStripFromCache() {
     var listEl = container.querySelector('.cat-strip__list');
     if (!listEl) return;
 
-    listEl.innerHTML = cats.map(function(cat) {
-        var isActive = SPAState.activeCategoryId === cat.id;
+    listEl.innerHTML = processes.map(function(process) {
+        var isActive = SPAState.activeProcessId === process.id;
         var imgHtml;
-        if (cat.imageUrl) {
-            imgHtml = '<img src="' + resolveImageUrl(cat.imageUrl) + '" alt="' + _catName(cat) + '" loading="lazy" class="cat-strip__img">';
+        if (process.imageUrl) {
+            imgHtml = '<img src="' + resolveImageUrl(process.imageUrl) + '" alt="' + _processName(process) + '" loading="lazy" class="cat-strip__img">';
         } else {
             imgHtml = '<div class="cat-strip__img-placeholder" aria-hidden="true"></div>';
         }
         return '<li class="cat-strip__item" role="listitem">' +
             '<button class="cat-strip__card' + (isActive ? ' cat-strip__card--active' : '') + '" ' +
-                'data-cat-id="' + cat.id + '" ' +
+                'data-cat-id="' + process.id + '" ' +
                 'aria-pressed="' + isActive + '" ' +
-                'aria-label="Filtrar por categoría: ' + _catName(cat) + '">' +
+                'aria-label="Filtrar por proceso: ' + _processName(process) + '">' +
                 imgHtml +
-                '<span class="cat-strip__name">' + _catName(cat) + '</span>' +
-                '<span class="cat-strip__count" aria-label="' + (cat.productCount || 0) + ' productos">' + (cat.productCount || 0) + '</span>' +
+                '<span class="cat-strip__name">' + _processName(process) + '</span>' +
+                '<span class="cat-strip__count" aria-label="' + (process.productCount || 0) + ' productos">' + (process.productCount || 0) + '</span>' +
             '</button>' +
         '</li>';
     }).join('');
@@ -920,56 +794,56 @@ function _renderCategoryStripFromCache() {
     // Attach click handlers
     listEl.querySelectorAll('.cat-strip__card').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            window.filterByCategory(btn.dataset.catId);
+            window.filterByProcess(btn.dataset.catId);
         });
     });
 }
 
-// Fetch categories once, cache, then render
-async function renderCategoryStrip() {
+// Fetch processes once, cache, then render
+async function renderProcessStrip() {
     var container = document.getElementById('category-strip');
     if (!container) return;
 
     // Use cache if already populated
-    if (SPAState.categoryCache && SPAState.categoryCache.length) {
-        _renderCategoryStripFromCache();
+    if (SPAState.processCache && SPAState.processCache.length) {
+        _renderProcessStripFromCache();
         return;
     }
 
     try {
-        var result = await window.getCategories();
-        var cats = (result && result.items) ? result.items : (Array.isArray(result) ? result : []);
-        SPAState.categoryCache = cats;
+        var result = await window.getProcesses();
+        var processes = (result && result.items) ? result.items : (Array.isArray(result) ? result : []);
+        SPAState.processCache = processes;
         // Also populate slug→id map used by existing tab logic
-        cats.forEach(function(c) { categorySlugToId[c.slug] = c.id; });
+        processes.forEach(function(c) { processSlugToId[c.slug] = c.id; });
     } catch (e) {
-        // Category loading failed - render grid without filtering
-        SPAState.categoryCache = [];
+        // Process loading failed - render grid without filtering
+        SPAState.processCache = [];
     }
 
-    _renderCategoryStripFromCache();
+    _renderProcessStripFromCache();
 }
 
-// Filter the product grid by a category id; toggle active card
-window.filterByCategory = function(categoryId) {
-    // Toggle off if same category clicked again
-    if (SPAState.activeCategoryId === categoryId) {
-        SPAState.activeCategoryId = null;
+// Filter the product grid by a process id; toggle active card
+window.filterByProcess = function(processId) {
+    // Toggle off if same process clicked again
+    if (SPAState.activeProcessId === processId) {
+        SPAState.activeProcessId = null;
     } else {
-        SPAState.activeCategoryId = categoryId;
+        SPAState.activeProcessId = processId;
     }
 
     // Update active class on cards
     var listEl = document.querySelector('#category-strip .cat-strip__list');
     if (listEl) {
         listEl.querySelectorAll('.cat-strip__card').forEach(function(btn) {
-            var isActive = btn.dataset.catId === SPAState.activeCategoryId;
+            var isActive = btn.dataset.catId === SPAState.activeProcessId;
             btn.classList.toggle('cat-strip__card--active', isActive);
             btn.setAttribute('aria-pressed', String(isActive));
         });
     }
 
-    // Re-fetch product grid with selected category
+    // Re-fetch product grid with selected process
     currentPage = 1;
     _loadedProducts = [];
     activeFilter = 'all';
@@ -977,13 +851,12 @@ window.filterByCategory = function(categoryId) {
     var searchEl = document.getElementById('catSearch');
     if (searchEl) searchEl.value = '';
 
-    // Override getActiveCategoryId for this fetch
-    var _origGetActiveCategoryId = getActiveCategoryId;
-    if (SPAState.activeCategoryId) {
+    // Override getActiveProcessId for this fetch
+    if (SPAState.activeProcessId) {
         // Temporarily patch so loadProducts picks up the strip selection
-        window._stripCategoryId = SPAState.activeCategoryId;
+        window._stripProcessId = SPAState.activeProcessId;
     } else {
-        window._stripCategoryId = null;
+        window._stripProcessId = null;
     }
 
     loadProducts(true);
@@ -1120,21 +993,21 @@ if (typeof module !== 'undefined' && module.exports) {
    RENDER ALL — main init
    ═══════════════════════════════════════════════ */
 async function renderAll() {
-    renderTabs();
-    renderChips();
+    // renderTabs(); // Removed - tabs hidden
+    // renderChips(); // Removed - chips hidden
     renderSectionHeader();
 
-    // Fetch categories once — builds slug→id map AND populates category strip
-    await renderCategoryStrip();
+    // Fetch processes once — builds slug→id map AND populates process strip
+    await renderProcessStrip();
 
-    // If renderCategoryStrip already populated categorySlugToId, skip re-fetch
-    if (!Object.keys(categorySlugToId).length) {
+    // If renderProcessStrip already populated processSlugToId, skip re-fetch
+    if (!Object.keys(processSlugToId).length) {
         try {
-            var cats = await window.getCategories();
-            var catList = (cats && cats.items) ? cats.items : (Array.isArray(cats) ? cats : []);
-            catList.forEach(function(c) { categorySlugToId[c.slug] = c.id; });
+            var processes = await window.getProcesses();
+            var processList = (processes && processes.items) ? processes.items : (Array.isArray(processes) ? processes : []);
+            processList.forEach(function(c) { processSlugToId[c.slug] = c.id; });
         } catch (e) {
-            // categories unavailable — continue without slug mapping
+            // processes unavailable — continue without slug mapping
         }
     }
 

@@ -11,7 +11,7 @@ namespace Filamorfosis.Infrastructure.Data;
 public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> options)
     : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options)
 {
-    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Process> Processes => Set<Process>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<Cart> Carts => Set<Cart>();
@@ -23,7 +23,7 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<AdminMfaSecret> AdminMfaSecrets => Set<AdminMfaSecret>();
-    public DbSet<CategoryAttribute> CategoryAttributes => Set<CategoryAttribute>();
+    public DbSet<ProcessAttribute> ProcessesAttributes => Set<ProcessAttribute>();
     public DbSet<Discount> Discounts => Set<Discount>();
     public DbSet<AttributeDefinition> AttributeDefinitions => Set<AttributeDefinition>();
     public DbSet<ProductAttributeDefinition> ProductAttributeDefinitions => Set<ProductAttributeDefinition>();
@@ -38,26 +38,8 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
     {
         base.OnModelCreating(modelBuilder);
 
-        var jsonOptions = new JsonSerializerOptions();
-        var stringListConverter = new ValueConverter<string[], string>(
-            v => JsonSerializer.Serialize(v, jsonOptions),
-            v => JsonSerializer.Deserialize<string[]>(v, jsonOptions) ?? Array.Empty<string>());
-
-        var stringArrayComparer = new ValueComparer<string[]>(
-            (a, b) => a != null && b != null && a.SequenceEqual(b),
-            v => v.Aggregate(0, (acc, s) => HashCode.Combine(acc, s.GetHashCode())),
-            v => v.ToArray());
-
-        // Product: Tags and ImageUrls as JSON TEXT
-        modelBuilder.Entity<Product>()
-            .Property(p => p.Tags)
-            .HasConversion(stringListConverter, stringArrayComparer)
-            .HasColumnType("TEXT");
-
-        modelBuilder.Entity<Product>()
-            .Property(p => p.ImageUrls)
-            .HasConversion(stringListConverter, stringArrayComparer)
-            .HasColumnType("TEXT");
+        // Apply Product configuration
+        modelBuilder.ApplyConfiguration(new Configurations.ProductConfiguration());
 
         // OrderStatus as TEXT
         modelBuilder.Entity<Order>()
@@ -84,15 +66,10 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
             .HasForeignKey<Cart>(c => c.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<Category>()
+        modelBuilder.Entity<Process>()
             .HasMany(c => c.Products)
-            .WithOne(p => p.Category)
-            .HasForeignKey(p => p.CategoryId);
-
-        modelBuilder.Entity<Product>()
-            .HasMany(p => p.Variants)
-            .WithOne(v => v.Product)
-            .HasForeignKey(v => v.ProductId);
+            .WithOne(p => p.Process)
+            .HasForeignKey(p => p.ProcessId);
 
         modelBuilder.Entity<Cart>()
             .HasMany(c => c.Items)
@@ -177,11 +154,11 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
         modelBuilder.Entity<AdminMfaSecret>()
             .HasIndex(m => m.UserId);
 
-        // CategoryAttribute — many-to-one with Category, cascade delete
-        modelBuilder.Entity<CategoryAttribute>()
-            .HasOne(a => a.Category)
+        // ProcessAttribute — many-to-one with Process, cascade delete
+        modelBuilder.Entity<ProcessAttribute>()
+            .HasOne(a => a.Process)
             .WithMany(c => c.Attributes)
-            .HasForeignKey(a => a.CategoryId)
+            .HasForeignKey(a => a.ProcessId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Discount — optional FK to Product
@@ -245,11 +222,11 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
             .HasIndex(va => new { va.ProductId, va.VariantId, va.AttributeDefinitionId })
             .IsUnique();
 
-        // Material — FK to Category, index on Name
+        // Material — FK to Process, index on Name
         modelBuilder.Entity<Material>()
-            .HasOne(m => m.Category)
+            .HasOne(m => m.Process)
             .WithMany()
-            .HasForeignKey(m => m.CategoryId)
+            .HasForeignKey(m => m.ProcessId)
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Material>()
@@ -285,15 +262,15 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
         modelBuilder.Entity<VariantMaterialUsage>()
             .HasIndex(u => new { u.VariantId, u.MaterialId }).IsUnique();
 
-        // CostParameter — FK to Category, unique index on (CategoryId, Key)
+        // CostParameter — FK to Process, unique index on (ProcessId, Key)
         modelBuilder.Entity<CostParameter>()
-            .HasOne(cp => cp.Category)
+            .HasOne(cp => cp.Process)
             .WithMany()
-            .HasForeignKey(cp => cp.CategoryId)
+            .HasForeignKey(cp => cp.ProcessId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<CostParameter>()
-            .HasIndex(cp => new { cp.CategoryId, cp.Key })
+            .HasIndex(cp => new { cp.ProcessId, cp.Key })
             .IsUnique();
 
         // GlobalParameter — unique index on Key

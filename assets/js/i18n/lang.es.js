@@ -330,4 +330,11 @@ window.FilamorfosisI18n['es'] = {
             cart_trust_quality: 'Producción garantizada',
             cart_trust_support: 'Soporte 24/7',
             cart_item_removed: 'Artículo eliminado',
+            cat_gifts: 'Regalos',
+            cat_drinkware: 'Tazas y Vasos',
+            cat_business: 'Empresarial',
+            cat_decor: 'Decoración',
+            cat_events: 'Eventos',
+            cat_art: 'Arte y Diseño',
+            cat_all: 'Todos',
         };

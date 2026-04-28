@@ -1,4 +1,4 @@
-// Feature: cost-management-and-pricing, Property 11: GET /admin/materials returns records ordered by Name ascending; ?category=X returns only matching records still ordered by Name
+// Feature: cost-management-and-pricing, Property 11: GET /admin/materials returns records ordered by Name ascending; ?process=X returns only matching records still ordered by Name
 
 using System.Net;
 using System.Net.Http.Json;
@@ -20,7 +20,7 @@ public class AdminMaterialsControllerTests
 {
     // ── Generators ────────────────────────────────────────────────────────────
 
-    private static readonly string[] PrintingCategories =
+    private static readonly string[] PrintingProcesses =
         ["UV Printing", "3D Printing", "Laser Engraving", "Laser Cutting", "Photo Printing"];
 
     /// <summary>Generates a non-empty material name using letters a-z, 3–20 chars.</summary>
@@ -30,9 +30,9 @@ public class AdminMaterialsControllerTests
                .ArrayOf(len)
                .Select(chars => new string(chars.Select(c => (char)('a' + c)).ToArray())));
 
-    /// <summary>Generates one of the five valid printing categories.</summary>
-    private static Gen<string> CategoryGen() =>
-        Gen.Elements(PrintingCategories);
+    /// <summary>Generates one of the five valid printing processes.</summary>
+    private static Gen<string> ProcessGen() =>
+        Gen.Elements(PrintingProcesses);
 
     /// <summary>
     /// Generates a list of 2–8 (name, category) pairs for seeding materials.
@@ -41,7 +41,7 @@ public class AdminMaterialsControllerTests
     private static Gen<List<(string name, string category)>> MaterialListGen() =>
         Gen.Choose(2, 8).SelectMany(count =>
             MaterialNameGen().SelectMany(name =>
-            CategoryGen().Select(cat => (name, cat)))
+            ProcessGen().Select(cat => (name, cat)))
             .ListOf(count)
             .Select(items => items.ToList()));
 
@@ -68,8 +68,7 @@ public class AdminMaterialsControllerTests
             foreach (var (name, category) in materials)
             {
                 var catId = Guid.NewGuid();
-                db.Categories.Add(new Category
-                {
+                db.Processes.Add(new Process {
                     Id = catId,
                     Slug = $"mat-cat-{catId:N}",
                     NameEs = category,
@@ -79,7 +78,7 @@ public class AdminMaterialsControllerTests
                 {
                     Id = Guid.NewGuid(),
                     Name = $"{name}-{Guid.NewGuid():N}",
-                    CategoryId = catId,
+                    ProcessId = catId,
                     BaseCost = 10m,
                     CreatedAt = DateTime.UtcNow
                 });
@@ -103,65 +102,63 @@ public class AdminMaterialsControllerTests
         return true;
     }
 
-    // ── Property 11b: GET /admin/materials?category=X returns only matching records, ordered by Name ──
+    // ── Property 11b: GET /admin/materials?process=X returns only matching records, ordered by Name ──
     // Validates: Requirements 2.11
 
     [Property(MaxTest = 20)]
-    public Property MaterialList_CategoryFilter_ReturnsOnlyMatchingRecordsOrderedByName()
+    public Property MaterialList_ProcessFilter_ReturnsOnlyMatchingRecordsOrderedByName()
     {
         return Prop.ForAll(
             Arb.From(MaterialListGen()),
-            Arb.From(CategoryGen()),
-            (materials, filterCategory) =>
-                RunCategoryFilterPropertyAsync(materials, filterCategory).GetAwaiter().GetResult()
+            Arb.From(ProcessGen()),
+            (materials, filterProcess) =>
+                RunProcessFilterPropertyAsync(materials, filterProcess).GetAwaiter().GetResult()
         );
     }
 
-    private static async Task<bool> RunCategoryFilterPropertyAsync(
+    private static async Task<bool> RunProcessFilterPropertyAsync(
         List<(string name, string category)> materials,
-        string filterCategory)
+        string filterProcess)
     {
         await using var factory = new FilamorfosisWebFactory();
         var client = await AdminPropertyTests.LoginAsAdminAsync(factory);
 
-        // Track which names belong to the filter category
+        // Track which names belong to the filter process
         var expectedNames = new List<string>();
-        Guid? filterCategoryId = null;
+        Guid? filterProcessId = null;
 
         await factory.SeedAsync(async db =>
         {
-            // Create one Category entity per distinct category name
-            var categoryMap = new Dictionary<string, Guid>();
+            // Create one Process entity per distinct process name
+            var processMap = new Dictionary<string, Guid>();
             foreach (var (name, category) in materials)
             {
-                if (!categoryMap.ContainsKey(category))
+                if (!processMap.ContainsKey(category))
                 {
                     var catId = Guid.NewGuid();
-                    db.Categories.Add(new Category
-                    {
+                    db.Processes.Add(new Process {
                         Id = catId,
                         Slug = $"filt-cat-{catId:N}",
                         NameEs = category,
                         NameEn = category
                     });
-                    categoryMap[category] = catId;
+                    processMap[category] = catId;
                 }
             }
 
-            if (!categoryMap.ContainsKey(filterCategory))
+            if (!processMap.ContainsKey(filterProcess))
             {
                 var catId = Guid.NewGuid();
-                db.Categories.Add(new Category
-                {
+                db.Processes.Add(new Process {
                     Id = catId,
                     Slug = $"filt-cat-{catId:N}",
-                    NameEs = filterCategory,
-                    NameEn = filterCategory
+                    NameEs = filterProcess,
+                    NameEn = filterProcess
                 });
-                categoryMap[filterCategory] = catId;
+                processMap[filterProcess] = catId;
             }
 
-            filterCategoryId = categoryMap[filterCategory];
+            filterProcessId = processMap[filterProcess];
 
             foreach (var (name, category) in materials)
             {
@@ -170,28 +167,28 @@ public class AdminMaterialsControllerTests
                 {
                     Id = Guid.NewGuid(),
                     Name = uniqueName,
-                    CategoryId = categoryMap[category],
+                    ProcessId = processMap[category],
                     BaseCost = 10m,
                     CreatedAt = DateTime.UtcNow
                 });
 
-                if (category == filterCategory)
+                if (category == filterProcess)
                     expectedNames.Add(uniqueName);
             }
             await db.SaveChangesAsync();
         });
 
-        var resp = await client.GetAsync($"/api/v1/admin/materials?categoryId={filterCategoryId}");
+        var resp = await client.GetAsync($"/api/v1/admin/materials?ProcessId={filterProcessId}");
         if (!resp.IsSuccessStatusCode) return false;
 
         var result = await resp.Content.ReadFromJsonAsync<List<MaterialDto>>();
         if (result is null) return false;
 
-        // All returned records must belong to the filter category
-        if (result.Any(m => m.CategoryId != filterCategoryId))
+        // All returned records must belong to the filter process
+        if (result.Any(m => m.ProcessId != filterProcessId))
             return false;
 
-        // The count must match what we seeded for that category
+        // The count must match what we seeded for that process
         if (result.Count != expectedNames.Count)
             return false;
 

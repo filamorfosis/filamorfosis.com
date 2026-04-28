@@ -21,14 +21,14 @@ public class BadgeFilterTests
 
         await factory.SeedAsync(async db =>
         {
-            var catId = db.Categories.First().Id;
+            var catId = db.Processes.First().Id;
             // Seed products with different badges
             var badges = new string?[] { "hot", "new", "promo", "popular", null };
             foreach (var b in badges)
             {
                 db.Products.Add(new Product
                 {
-                    Id = Guid.NewGuid(), CategoryId = catId,
+                    Id = Guid.NewGuid(), ProcessId = catId,
                     Slug = $"badge-filter-{b ?? "null"}-{Guid.NewGuid():N}",
                     TitleEs = $"Product {b}", TitleEn = $"Product {b}",
                     DescriptionEs = "D", DescriptionEn = "D",

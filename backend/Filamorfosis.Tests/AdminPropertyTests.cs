@@ -133,7 +133,7 @@ public class AdminPropertyTests
         {
             ("GET", "/api/v1/admin/orders"),
             ("GET", "/api/v1/admin/products"),
-            ("GET", "/api/v1/admin/categories"),
+            ("GET", "/api/v1/admin/processes"),
         };
 
         foreach (var (method, path) in endpoints)
@@ -161,12 +161,12 @@ public class AdminPropertyTests
         await using var factory = new FilamorfosisWebFactory();
         var admin = await LoginAsAdminAsync(factory);
 
-        // Seed a category
+        // Seed a process
         Guid catId = Guid.Empty;
         await factory.SeedAsync(async db =>
         {
             catId = Guid.NewGuid();
-            db.Categories.Add(new Category { Id = catId, Slug = "admin-cat", NameEs = "Cat", NameEn = "Cat" });
+            db.Processes.Add(new Process { Id = catId, Slug = "admin-cat", NameEs = "Cat", NameEn = "Cat" });
             await db.SaveChangesAsync();
         });
 
@@ -175,7 +175,7 @@ public class AdminPropertyTests
         {
             TitleEs = "Producto Test", TitleEn = "Test Product",
             DescriptionEs = "Desc", DescriptionEn = "Desc",
-            CategoryId = catId, Tags = ["tag1"], IsActive = true
+            ProcessId = catId, Tags = ["tag1"], IsActive = true
         });
         if (createResp.StatusCode != HttpStatusCode.Created) return false;
 
@@ -219,11 +219,11 @@ public class AdminPropertyTests
         await factory.SeedAsync(async db =>
         {
             catId = Guid.NewGuid();
-            db.Categories.Add(new Category { Id = catId, Slug = "sc", NameEs = "S", NameEn = "S" });
+            db.Processes.Add(new Process { Id = catId, Slug = "sc", NameEs = "S", NameEn = "S" });
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
-                Id = prodId, CategoryId = catId, Slug = "sp",
+                Id = prodId, ProcessId = catId, Slug = "sp",
                 TitleEs = "P", TitleEn = "P", DescriptionEs = "D", DescriptionEn = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
@@ -282,11 +282,11 @@ public class AdminProductImagePropertyTests
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Categories.Add(new Category { Id = catId, Slug = $"img-cat-{Guid.NewGuid():N}", NameEs = "C", NameEn = "C" });
+            db.Processes.Add(new Process { Id = catId, Slug = $"img-cat-{Guid.NewGuid():N}", NameEs = "C", NameEn = "C" });
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
-                Id = prodId, CategoryId = catId, Slug = $"img-prod-{Guid.NewGuid():N}",
+                Id = prodId, ProcessId = catId, Slug = $"img-prod-{Guid.NewGuid():N}",
                 TitleEs = "P", TitleEn = "P", DescriptionEs = "D", DescriptionEn = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });

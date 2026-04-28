@@ -4,8 +4,8 @@ public class Material
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public Guid CategoryId { get; set; }
-    public Category Category { get; set; } = null!;
+    public Guid ProcessId { get; set; }
+    public Process Process { get; set; } = null!;
     public string? SizeLabel { get; set; }
     public decimal? WidthCm { get; set; }
     public decimal? HeightCm { get; set; }

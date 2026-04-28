@@ -96,42 +96,42 @@ public static class DbSeeder
             await db.SaveChangesAsync();
         }
 
-        // Seed categories if none exist
-        if (!await db.Categories.AnyAsync())
+        // Seed processes if none exist
+        if (!await db.Processes.AnyAsync())
         {
-            var categories = new[]
+            var processes = new[]
             {
-                new Category { Id = Guid.NewGuid(), Slug = "uv-printing",    NameEs = "Impresión UV",       NameEn = "UV Printing" },
-                new Category { Id = Guid.NewGuid(), Slug = "3d-printing",    NameEs = "Impresión 3D",       NameEn = "3D Printing" },
-                new Category { Id = Guid.NewGuid(), Slug = "laser-cutting",  NameEs = "Corte Láser",        NameEn = "Laser Cutting" },
-                new Category { Id = Guid.NewGuid(), Slug = "photo-printing", NameEs = "Impresión de Fotos", NameEn = "Photo Printing" },
-                new Category { Id = Guid.NewGuid(), Slug = "material",       NameEs = "Material",           NameEn = "Material" }
+                new Process { Id = Guid.NewGuid(), Slug = "uv-printing",    NameEs = "Impresión UV",       NameEn = "UV Printing" },
+                new Process { Id = Guid.NewGuid(), Slug = "3d-printing",    NameEs = "Impresión 3D",       NameEn = "3D Printing" },
+                new Process { Id = Guid.NewGuid(), Slug = "laser-cutting",  NameEs = "Corte Láser",        NameEn = "Laser Cutting" },
+                new Process { Id = Guid.NewGuid(), Slug = "photo-printing", NameEs = "Impresión de Fotos", NameEn = "Photo Printing" },
+                new Process { Id = Guid.NewGuid(), Slug = "material",       NameEs = "Material",           NameEn = "Material" }
             };
-            db.Categories.AddRange(categories);
+            db.Processes.AddRange(processes);
             await db.SaveChangesAsync();
 
-            // Seed Material category attributes
-            var materialCat = categories[4]; // "material" is index 4
+            // Seed Material process attributes
+            var materialProcess = processes[4]; // "material" is index 4
             var materials = new[] {
                 "Vidrio", "Madera", "Cerámica", "Metal", "Cuero",
                 "Acrílico", "Tela", "Plástico", "Papel", "Piedra",
                 "Bambú", "Corcho", "Aluminio", "Acero Inoxidable", "Cobre"
             };
-            db.CategoryAttributes.AddRange(materials.Select(m => new CategoryAttribute
+            db.ProcessesAttributes.AddRange(materials.Select(m => new ProcessAttribute
             {
                 Id = Guid.NewGuid(),
-                CategoryId = materialCat.Id,
+                ProcessId = materialProcess.Id,
                 AttributeType = "Type",
                 Value = m
             }));
             await db.SaveChangesAsync();
 
             // Seed one legacy product
-            var uvCategory = categories[0];
+            var uvProcess = processes[0];
             var product = new Product
             {
                 Id            = Guid.NewGuid(),
-                CategoryId    = uvCategory.Id,
+                ProcessId    = uvProcess.Id,
                 Slug          = "taza-personalizada-uv",
                 TitleEs       = "Taza Personalizada UV",
                 TitleEn       = "Custom UV Mug",
@@ -149,13 +149,13 @@ public static class DbSeeder
                 new ProductVariant
                 {
                     Id = Guid.NewGuid(), ProductId = product.Id,
-                    Sku = "UV-MUG-SM", LabelEs = "Taza Pequeña 300ml",
+                    Sku = "UV-MUG-SM", LabelEs = "Taza Pequeña 300ml", LabelEn = "Small Mug 300ml",
                     Price = 199.00m, IsAvailable = true, AcceptsDesignFile = true, StockQuantity = 50
                 },
                 new ProductVariant
                 {
                     Id = Guid.NewGuid(), ProductId = product.Id,
-                    Sku = "UV-MUG-LG", LabelEs = "Taza Grande 450ml",
+                    Sku = "UV-MUG-LG", LabelEs = "Taza Grande 450ml", LabelEn = "Large Mug 450ml",
                     Price = 249.00m, IsAvailable = true, AcceptsDesignFile = true, StockQuantity = 30
                 }
             );
@@ -201,8 +201,8 @@ public static class DbSeeder
 
     public static async Task SeedProductsAsync(FilamorfosisDbContext db)
     {
-        var uvCat     = await db.Categories.FirstOrDefaultAsync(c => c.Slug == "uv-printing");
-        var laserCat  = await db.Categories.FirstOrDefaultAsync(c => c.Slug == "laser-cutting");
+        var uvProcess     = await db.Processes.FirstOrDefaultAsync(c => c.Slug == "uv-printing");
+        var laserProcess  = await db.Processes.FirstOrDefaultAsync(c => c.Slug == "laser-cutting");
 
         var products = BuildProductDefinitions();
 
@@ -212,17 +212,17 @@ public static class DbSeeder
             if (await db.Products.AnyAsync(p => p.Slug == def.Slug))
                 continue;
 
-            var categoryId = def.CategorySlug == "uv-printing"
-                ? uvCat?.Id
-                : laserCat?.Id;
+            var processId = def.CategorySlug == "uv-printing"
+                ? uvProcess?.Id
+                : laserProcess?.Id;
 
-            if (categoryId is null)
-                continue; // category not found — skip
+            if (processId is null)
+                continue; // process not found — skip
 
             var product = new Product
             {
                 Id            = Guid.NewGuid(),
-                CategoryId    = categoryId.Value,
+                ProcessId    = processId.Value,
                 Slug          = def.Slug,
                 TitleEs       = def.Title,
                 TitleEn       = def.Title,
@@ -250,6 +250,7 @@ public static class DbSeeder
                     ProductId         = product.Id,
                     Sku               = $"{def.Slug}-{i}-F",
                     LabelEs           = $"{row.Variant} — Flat",
+                    LabelEn           = $"{row.Variant} — Flat",
                     Price             = flatPrice,
                     IsAvailable       = flatAvail,
                     AcceptsDesignFile = true
@@ -260,6 +261,7 @@ public static class DbSeeder
                     ProductId         = product.Id,
                     Sku               = $"{def.Slug}-{i}-R",
                     LabelEs           = $"{row.Variant} — Relieve",
+                    LabelEn           = $"{row.Variant} — Relief",
                     Price             = reliefPrice,
                     IsAvailable       = reliefAvail,
                     AcceptsDesignFile = true

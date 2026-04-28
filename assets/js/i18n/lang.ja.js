@@ -330,4 +330,11 @@ window.FilamorfosisI18n['ja'] = {
             cart_trust_quality: '品質保証',
             cart_trust_support: '24時間サポート',
             cart_item_removed: 'アイテムを削除しました',
+            cat_gifts: 'ギフト',
+            cat_drinkware: 'マグ＆ドリンクウェア',
+            cat_business: 'ビジネス',
+            cat_decor: 'ホームデコ',
+            cat_events: 'イベント',
+            cat_art: 'アート＆デザイン',
+            cat_all: 'すべて',
         };

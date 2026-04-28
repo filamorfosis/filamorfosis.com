@@ -15,9 +15,10 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
-        [FromQuery] Guid? categoryId = null,
+        [FromQuery] Guid? processId = null,
         [FromQuery] string? search = null,
-        [FromQuery] string? badge = null)
+        [FromQuery] string? badge = null,
+        [FromQuery] string? useCase = null)
     {
         var query = db.Products
             .Include(p => p.Discounts)
@@ -31,8 +32,12 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
                 .ThenInclude(v => v.Discounts)
             .Where(p => p.IsActive);
 
-        if (categoryId.HasValue)
-            query = query.Where(p => p.CategoryId == categoryId.Value);
+        if (processId.HasValue)
+            query = query.Where(p => p.ProcessId == processId.Value);
+
+        // For SQLite: UseCases is stored as JSON TEXT, so we need to use string operations
+        // We'll filter in-memory after fetching the data
+        var useCaseFilter = useCase;
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -47,58 +52,119 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
         if (!string.IsNullOrWhiteSpace(badge))
             query = query.Where(p => p.Badge == badge);
 
-        var totalCount = await query.CountAsync();
-
-        var products = await query
-            .OrderBy(p => p.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
-        var items = products.Select(p => new ProductSummaryDto
+        // Apply use-case filter in-memory (SQLite limitation)
+        if (!string.IsNullOrWhiteSpace(useCaseFilter))
         {
-            Id = p.Id,
-            Slug = p.Slug,
-            TitleEs = p.TitleEs,
-            TitleEn = p.TitleEn,
-            DescriptionEs = p.DescriptionEs,
-            DescriptionEn = p.DescriptionEn,
-            Tags = p.Tags,
-            ImageUrls = p.ImageUrls,
-            Badge = p.Badge,
-            IsActive = p.IsActive,
-            CategoryId = p.CategoryId,
-            BasePrice = p.Variants.Where(v => v.IsAvailable).Any()
-                ? p.Variants.Where(v => v.IsAvailable).Min(v => DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(p.Discounts)))
-                : 0m,
-            HasDiscount = p.Variants.Where(v => v.IsAvailable).Any(v =>
-                DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(p.Discounts)) < v.Price),
-            Variants = p.Variants.Select(v => new ProductVariantDto
+            var allProducts = await query.ToListAsync();
+            var filteredProducts = allProducts.Where(p => p.UseCases != null && p.UseCases.Contains(useCaseFilter));
+            var totalCount = filteredProducts.Count();
+            
+            var products = filteredProducts
+                .OrderBy(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var items = products.Select(p => new ProductSummaryDto
             {
-                Id = v.Id,
-                Sku = v.Sku,
-                LabelEs = v.LabelEs,
-                Price = v.Price,
-                EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(p.Discounts)),
-                IsAvailable = v.IsAvailable,
-                AcceptsDesignFile = v.AcceptsDesignFile,
-                InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),
-                Attributes = v.AttributeValues.Select(a => new VariantAttributeValueDto
+                Id = p.Id,
+                Slug = p.Slug,
+                TitleEs = p.TitleEs,
+                TitleEn = p.TitleEn,
+                DescriptionEs = p.DescriptionEs,
+                DescriptionEn = p.DescriptionEn,
+                Tags = p.Tags,
+                ImageUrls = p.ImageUrls,
+                Badge = p.Badge,
+                IsActive = p.IsActive,
+                ProcessId = p.ProcessId,
+                BasePrice = p.Variants.Where(v => v.IsAvailable).Any()
+                    ? p.Variants.Where(v => v.IsAvailable).Min(v => DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(p.Discounts)))
+                    : 0m,
+                HasDiscount = p.Variants.Where(v => v.IsAvailable).Any(v =>
+                    DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(p.Discounts)) < v.Price),
+                Variants = p.Variants.Select(v => new ProductVariantDto
                 {
-                    AttributeDefinitionId = a.AttributeDefinitionId,
-                    Name = a.AttributeDefinition.Name,
-                    Value = a.Value
+                    Id = v.Id,
+                    Sku = v.Sku,
+                    LabelEs = v.LabelEs,
+                    Price = v.Price,
+                    EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(p.Discounts)),
+                    IsAvailable = v.IsAvailable,
+                    AcceptsDesignFile = v.AcceptsDesignFile,
+                    InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),
+                    Attributes = v.AttributeValues.Select(a => new VariantAttributeValueDto
+                    {
+                        AttributeDefinitionId = a.AttributeDefinitionId,
+                        Name = a.AttributeDefinition.Name,
+                        Value = a.Value
+                    }).ToList()
                 }).ToList()
-            }).ToList()
-        }).ToList();
+            }).ToList();
 
-        return Ok(new PagedResult<ProductSummaryDto>
+            return Ok(new PagedResult<ProductSummaryDto>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            });
+        }
+        else
         {
-            Items = items,
-            Page = page,
-            PageSize = pageSize,
-            TotalCount = totalCount
-        });
+            var totalCount = await query.CountAsync();
+
+            var products = await query
+                .OrderBy(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var items = products.Select(p => new ProductSummaryDto
+            {
+                Id = p.Id,
+                Slug = p.Slug,
+                TitleEs = p.TitleEs,
+                TitleEn = p.TitleEn,
+                DescriptionEs = p.DescriptionEs,
+                DescriptionEn = p.DescriptionEn,
+                Tags = p.Tags,
+                ImageUrls = p.ImageUrls,
+                Badge = p.Badge,
+                IsActive = p.IsActive,
+                ProcessId = p.ProcessId,
+                BasePrice = p.Variants.Where(v => v.IsAvailable).Any()
+                    ? p.Variants.Where(v => v.IsAvailable).Min(v => DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(p.Discounts)))
+                    : 0m,
+                HasDiscount = p.Variants.Where(v => v.IsAvailable).Any(v =>
+                    DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(p.Discounts)) < v.Price),
+                Variants = p.Variants.Select(v => new ProductVariantDto
+                {
+                    Id = v.Id,
+                    Sku = v.Sku,
+                    LabelEs = v.LabelEs,
+                    Price = v.Price,
+                    EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(p.Discounts)),
+                    IsAvailable = v.IsAvailable,
+                    AcceptsDesignFile = v.AcceptsDesignFile,
+                    InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),
+                    Attributes = v.AttributeValues.Select(a => new VariantAttributeValueDto
+                    {
+                        AttributeDefinitionId = a.AttributeDefinitionId,
+                        Name = a.AttributeDefinition.Name,
+                        Value = a.Value
+                    }).ToList()
+                }).ToList()
+            }).ToList();
+
+            return Ok(new PagedResult<ProductSummaryDto>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount
+            });
+        }
     }
 
     [HttpGet("{id:guid}")]
@@ -137,7 +203,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
             ImageUrls = product.ImageUrls,
             Badge = product.Badge,
             IsActive = product.IsActive,
-            CategoryId = product.CategoryId,
+            ProcessId = product.ProcessId,
             Variants = product.Variants.Select(v => new ProductVariantDto
             {
                 Id = v.Id,

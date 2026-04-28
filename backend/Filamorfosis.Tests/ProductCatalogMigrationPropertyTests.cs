@@ -70,7 +70,7 @@ public class ProductCatalogMigrationPropertyTests
                 var product = new Product
                 {
                     Id            = Guid.NewGuid(),
-                    CategoryId    = Guid.NewGuid(),
+                    ProcessId    = Guid.NewGuid(),
                     Slug          = "test-product",
                     TitleEs       = "Test",
                     TitleEn       = "Test",
@@ -113,9 +113,9 @@ public class ProductCatalogMigrationPropertyTests
         await using var db = new FilamorfosisDbContext(options);
         await db.Database.EnsureCreatedAsync();
 
-        db.Categories.AddRange(
-            new Category { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "UV",    NameEn = "UV" },
-            new Category { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Laser", NameEn = "Laser" }
+        db.Processes.AddRange(
+            new Process { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "UV",    NameEn = "UV" },
+            new Process { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Laser", NameEn = "Laser" }
         );
         await db.SaveChangesAsync();
 
@@ -147,9 +147,9 @@ public class ProductCatalogMigrationPropertyTests
         await using var db = new FilamorfosisDbContext(options);
         await db.Database.EnsureCreatedAsync();
 
-        db.Categories.AddRange(
-            new Category { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "UV",    NameEn = "UV" },
-            new Category { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Laser", NameEn = "Laser" }
+        db.Processes.AddRange(
+            new Process { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "UV",    NameEn = "UV" },
+            new Process { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Laser", NameEn = "Laser" }
         );
         await db.SaveChangesAsync();
         await DbSeeder.SeedProductsAsync(db);
@@ -188,9 +188,9 @@ public class ProductCatalogMigrationPropertyTests
         await using var db = new FilamorfosisDbContext(options);
         await db.Database.EnsureCreatedAsync();
 
-        db.Categories.AddRange(
-            new Category { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "UV",    NameEn = "UV" },
-            new Category { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Laser", NameEn = "Laser" }
+        db.Processes.AddRange(
+            new Process { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "UV",    NameEn = "UV" },
+            new Process { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Laser", NameEn = "Laser" }
         );
         await db.SaveChangesAsync();
         await DbSeeder.SeedProductsAsync(db);
@@ -246,10 +246,9 @@ public class ProductCatalogMigrationPropertyTests
         await factory.SeedAsync(async db =>
         {
             // Ensure a category exists (startup seeder may have already added one)
-            if (!db.Categories.Any())
+            if (!db.Processes.Any())
             {
-                db.Categories.Add(new Category
-                {
+                db.Processes.Add(new Process {
                     Id     = Guid.NewGuid(),
                     Slug   = "uv-printing",
                     NameEs = "UV",
@@ -258,14 +257,14 @@ public class ProductCatalogMigrationPropertyTests
                 await db.SaveChangesAsync();
             }
 
-            var catId = db.Categories.First().Id;
+            var catId = db.Processes.First().Id;
             var badges = new string?[] { "hot", "new", "promo", "popular", null };
             foreach (var b in badges)
             {
                 db.Products.Add(new Product
                 {
                     Id            = Guid.NewGuid(),
-                    CategoryId    = catId,
+                    ProcessId    = catId,
                     Slug          = $"prop6-{b ?? "null"}-{Guid.NewGuid():N}",
                     TitleEs       = $"P {b}",
                     TitleEn       = $"P {b}",

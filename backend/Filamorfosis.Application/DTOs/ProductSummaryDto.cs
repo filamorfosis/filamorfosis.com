@@ -12,7 +12,7 @@ public class ProductSummaryDto
     public string[] ImageUrls { get; set; } = [];
     public string? Badge { get; set; }
     public bool IsActive { get; set; }
-    public Guid CategoryId { get; set; }
+    public Guid ProcessId { get; set; }
     public decimal BasePrice { get; set; }  // minimum effective (discounted) variant price
     public bool HasDiscount { get; set; }   // true if any available variant has an active discount
     public List<ProductVariantDto> Variants { get; set; } = new();

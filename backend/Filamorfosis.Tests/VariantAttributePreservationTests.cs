@@ -62,7 +62,7 @@ public class VariantAttributePreservationTests
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Categories.Add(new Category
+            db.Processes.Add(new Process
             {
                 Id = catId,
                 Slug = $"pres-cat-{Guid.NewGuid():N}",
@@ -71,7 +71,7 @@ public class VariantAttributePreservationTests
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
-                Id = prodId, CategoryId = catId,
+                Id = prodId, ProcessId = catId,
                 Slug = $"pres-prod-{Guid.NewGuid():N}",
                 TitleEs = "Preservation Product", TitleEn = "Preservation Product",
                 DescriptionEs = "D", DescriptionEn = "D",
@@ -140,7 +140,7 @@ public class VariantAttributePreservationTests
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Categories.Add(new Category
+            db.Processes.Add(new Process
             {
                 Id = catId,
                 Slug = $"dc-cat-{Guid.NewGuid():N}",
@@ -150,7 +150,7 @@ public class VariantAttributePreservationTests
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
-                Id = prodId, CategoryId = catId,
+                Id = prodId, ProcessId = catId,
                 Slug = $"dc-prod-{Guid.NewGuid():N}",
                 TitleEs = "P", TitleEn = "P",
                 DescriptionEs = "D", DescriptionEn = "D",
@@ -234,7 +234,7 @@ public class VariantAttributePreservationTests
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Categories.Add(new Category
+            db.Processes.Add(new Process
             {
                 Id = catId,
                 Slug = $"del-cat-{Guid.NewGuid():N}",
@@ -244,7 +244,7 @@ public class VariantAttributePreservationTests
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
-                Id = prodId, CategoryId = catId,
+                Id = prodId, ProcessId = catId,
                 Slug = $"del-prod-{Guid.NewGuid():N}",
                 TitleEs = "P", TitleEn = "P",
                 DescriptionEs = "D", DescriptionEn = "D",
@@ -283,7 +283,7 @@ public class VariantAttributePreservationTests
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Categories.Add(new Category
+            db.Processes.Add(new Process
             {
                 Id = catId,
                 Slug = $"sf-cat-{Guid.NewGuid():N}",
@@ -293,7 +293,7 @@ public class VariantAttributePreservationTests
             var prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
-                Id = prodId, CategoryId = catId,
+                Id = prodId, ProcessId = catId,
                 Slug = $"sf-prod-{Guid.NewGuid():N}",
                 TitleEs = "Producto Storefront", TitleEn = "Storefront Product",
                 DescriptionEs = "Descripción", DescriptionEn = "Description",
@@ -346,6 +346,7 @@ public class VariantAttributePreservationTests
         Assert.True(first.TryGetProperty("badge", out _), "Product must have 'badge'");
         Assert.True(first.TryGetProperty("basePrice", out _), "Product must have 'basePrice'");
         Assert.True(first.TryGetProperty("isActive", out _), "Product must have 'isActive'");
-        Assert.True(first.TryGetProperty("categoryId", out _), "Product must have 'categoryId'");
+        Assert.True(first.TryGetProperty("ProcessId", out _), "Product must have 'ProcessId'");
     }
 }
+

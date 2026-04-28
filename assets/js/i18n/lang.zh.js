@@ -330,4 +330,11 @@ window.FilamorfosisI18n['zh'] = {
             cart_trust_quality: '品质保证',
             cart_trust_support: '24/7客服',
             cart_item_removed: '商品已移除',
+            cat_gifts: '礼品',
+            cat_drinkware: '杯具',
+            cat_business: '商务',
+            cat_decor: '装饰',
+            cat_events: '活动',
+            cat_art: '艺术设计',
+            cat_all: '全部',
         };

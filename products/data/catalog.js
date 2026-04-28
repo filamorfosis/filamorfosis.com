@@ -451,11 +451,13 @@ const CURATED_FILTERS = [
 
 // ── CATEGORIES ──────────────────────────────────────────────────────────────
 const CATEGORIES = [
-    { id: 'uv',      label: 'Impresión UV',   icon: '🌈', color: '#f97316' },
-    { id: '3d',      label: 'Impresión 3D',   icon: '🖨️', color: '#6366f1' },
-    { id: 'laser',   label: 'Corte Láser',    icon: '✦',  color: '#22d3ee' },
-    { id: 'engrave', label: 'Grabado Láser',  icon: '🔆', color: '#a3e635' },
-    { id: 'photo',   label: 'Fotografía',     icon: '📸', color: '#a78bfa' },
+    { id: 'gifts',      label: 'cat_gifts',      icon: '🎁', color: '#f97316' },
+    { id: 'drinkware',  label: 'cat_drinkware',  icon: '☕', color: '#8b5cf6' },
+    { id: 'business',   label: 'cat_business',   icon: '🏢', color: '#3b82f6' },
+    { id: 'decor',      label: 'cat_decor',      icon: '🖼️', color: '#ec4899' },
+    { id: 'events',     label: 'cat_events',     icon: '🎉', color: '#f59e0b' },
+    { id: 'art',        label: 'cat_art',        icon: '🎨', color: '#10b981' },
+    { id: 'all',        label: 'cat_all',        icon: '📦', color: '#6b7280' },
 ];
 
 // ── PRODUCT DATA ─────────────────────────────────────────────────────────────

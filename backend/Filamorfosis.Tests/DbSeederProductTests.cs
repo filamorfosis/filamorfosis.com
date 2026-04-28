@@ -20,11 +20,11 @@ public class DbSeederProductTests
         return new FilamorfosisDbContext(options);
     }
 
-    private static async Task SeedCategoriesAsync(FilamorfosisDbContext db)
+    private static async Task SeedProcessesAsync(FilamorfosisDbContext db)
     {
-        db.Categories.AddRange(
-            new Category { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "Impresión UV",  NameEn = "UV Printing" },
-            new Category { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Corte Láser",   NameEn = "Laser Cutting" }
+        db.Processes.AddRange(
+            new Process { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "Impresión UV",  NameEn = "UV Printing" },
+            new Process { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Corte Láser",   NameEn = "Laser Cutting" }
         );
         await db.SaveChangesAsync();
     }
@@ -35,7 +35,7 @@ public class DbSeederProductTests
     public async Task SeedProductsAsync_SeedsAllProducts()
     {
         await using var db = CreateDb();
-        await SeedCategoriesAsync(db);
+        await SeedProcessesAsync(db);
 
         await DbSeeder.SeedProductsAsync(db);
 
@@ -50,7 +50,7 @@ public class DbSeederProductTests
     public async Task SeedProductsAsync_EachProductHasTwoVariantsPerPricingRow()
     {
         await using var db = CreateDb();
-        await SeedCategoriesAsync(db);
+        await SeedProcessesAsync(db);
 
         await DbSeeder.SeedProductsAsync(db);
 
@@ -72,7 +72,7 @@ public class DbSeederProductTests
     public async Task SeedProductsAsync_CotizarAndNA_SetUnavailableAndZeroPrice()
     {
         await using var db = CreateDb();
-        await SeedCategoriesAsync(db);
+        await SeedProcessesAsync(db);
 
         await DbSeeder.SeedProductsAsync(db);
 
@@ -136,7 +136,7 @@ public class DbSeederProductTests
     public async Task SeedProductsAsync_AllVariantsAcceptDesignFile()
     {
         await using var db = CreateDb();
-        await SeedCategoriesAsync(db);
+        await SeedProcessesAsync(db);
 
         await DbSeeder.SeedProductsAsync(db);
 
@@ -144,32 +144,32 @@ public class DbSeederProductTests
         Assert.All(allVariants, v => Assert.True(v.AcceptsDesignFile));
     }
 
-    // ── Task 7.7: Category mapping ───────────────────────────────────────────
+    // ── Task 7.7: Process mapping ───────────────────────────────────────────
 
     [Fact]
-    public async Task SeedProductsAsync_UvProductsLinkedToUvPrintingCategory()
+    public async Task SeedProductsAsync_UvProductsLinkedToUvPrintingProcess()
     {
         await using var db = CreateDb();
-        await SeedCategoriesAsync(db);
+        await SeedProcessesAsync(db);
 
         await DbSeeder.SeedProductsAsync(db);
 
-        var uvCatId = (await db.Categories.FirstAsync(c => c.Slug == "uv-printing")).Id;
+        var uvCatId = (await db.Processes.FirstAsync(c => c.Slug == "uv-printing")).Id;
         var uvProduct = await db.Products.FirstAsync(p => p.Slug == "uv-coaster");
-        Assert.Equal(uvCatId, uvProduct.CategoryId);
+        Assert.Equal(uvCatId, uvProduct.ProcessId);
     }
 
     [Fact]
-    public async Task SeedProductsAsync_EngraveProductsLinkedToLaserCuttingCategory()
+    public async Task SeedProductsAsync_EngraveProductsLinkedToLaserCuttingProcess()
     {
         await using var db = CreateDb();
-        await SeedCategoriesAsync(db);
+        await SeedProcessesAsync(db);
 
         await DbSeeder.SeedProductsAsync(db);
 
-        var laserCatId = (await db.Categories.FirstAsync(c => c.Slug == "laser-cutting")).Id;
+        var laserCatId = (await db.Processes.FirstAsync(c => c.Slug == "laser-cutting")).Id;
         var engraveProduct = await db.Products.FirstAsync(p => p.Slug == "engrave-wood");
-        Assert.Equal(laserCatId, engraveProduct.CategoryId);
+        Assert.Equal(laserCatId, engraveProduct.ProcessId);
     }
 
     // ── Task 7.7: Variant label convention ──────────────────────────────────
@@ -178,7 +178,7 @@ public class DbSeederProductTests
     public async Task SeedProductsAsync_VariantLabelsFollowConvention()
     {
         await using var db = CreateDb();
-        await SeedCategoriesAsync(db);
+        await SeedProcessesAsync(db);
 
         await DbSeeder.SeedProductsAsync(db);
 
@@ -199,7 +199,7 @@ public class DbSeederProductTests
     public async Task SeedProductsAsync_CalledTwice_NoDuplicateProducts()
     {
         await using var db = CreateDb();
-        await SeedCategoriesAsync(db);
+        await SeedProcessesAsync(db);
 
         await DbSeeder.SeedProductsAsync(db);
         await DbSeeder.SeedProductsAsync(db);
@@ -212,7 +212,7 @@ public class DbSeederProductTests
     public async Task SeedProductsAsync_CalledTwice_NoDuplicateVariants()
     {
         await using var db = CreateDb();
-        await SeedCategoriesAsync(db);
+        await SeedProcessesAsync(db);
 
         await DbSeeder.SeedProductsAsync(db);
         await DbSeeder.SeedProductsAsync(db);

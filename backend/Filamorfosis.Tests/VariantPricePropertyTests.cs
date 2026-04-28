@@ -126,36 +126,36 @@ public class VariantPricePropertyTests
 
         // Seed: Material (Laser Engraving), CostParameter, GlobalParameter
         var materialId = Guid.NewGuid();
-        var categoryId = Guid.NewGuid();
+        var ProcessId = Guid.NewGuid();
 
         await factory.SeedAsync(async db =>
         {
-            // Seed category
-            db.Categories.Add(new Category
+            // Seed Process
+            db.Processes.Add(new Process
             {
-                Id = categoryId,
-                Slug = $"cat-{categoryId:N}",
+                Id = ProcessId,
+                Slug = $"cat-{ProcessId:N}",
                 NameEs = "Categoría Test",
-                NameEn = "Test Category"
+                NameEn = "Test Process"
             });
 
-            // Seed material with the test category
+            // Seed material with the test Process
             db.Materials.Add(new Material
             {
                 Id = materialId,
                 Name = $"Material-{materialId:N}",
-                CategoryId = categoryId,
+                ProcessId = ProcessId,
                 BaseCost = 5.00m,
                 CreatedAt = DateTime.UtcNow
             });
 
-            // Seed CostParameter: electric_cost_per_hour = 10.00 for the test category
+            // Seed CostParameter: electric_cost_per_hour = 10.00 for the test Process
             // Use a unique ID per test run to avoid conflicts with seeded data
             var cpId = Guid.NewGuid();
             db.CostParameters.Add(new CostParameter
             {
                 Id = cpId,
-                CategoryId = categoryId,
+                ProcessId = ProcessId,
                 Key = $"electric_cost_per_hour_{cpId:N}",
                 Label = "Electric cost per hour (MXN/hr)",
                 Unit = "MXN/hr",
@@ -194,7 +194,7 @@ public class VariantPricePropertyTests
             titleEn = "Test Product",
             descriptionEs = "Descripción",
             descriptionEn = "Description",
-            categoryId,
+            ProcessId,
             tags = Array.Empty<string>(),
             isActive = true
         });
@@ -248,3 +248,4 @@ public class VariantPricePropertyTests
         return Math.Abs(returnedPrice - expectedPrice) < 0.001m;
     }
 }
+

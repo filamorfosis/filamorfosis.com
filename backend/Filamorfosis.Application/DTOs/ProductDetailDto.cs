@@ -12,9 +12,9 @@ public class ProductDetailDto
     public string[] ImageUrls { get; set; } = [];
     public string? Badge { get; set; }
     public bool IsActive { get; set; }
-    public Guid CategoryId { get; set; }
-    public string? CategoryNameEs { get; set; }
-    public string? CategoryNameEn { get; set; }
+    public Guid ProcessId { get; set; }
+    public string? ProcessNameEs { get; set; }
+    public string? ProcessNameEn { get; set; }
     public List<ProductVariantDto> Variants { get; set; } = new();
     public List<AttributeDefinitionDto> AttributeDefinitions { get; set; } = new();
     public List<DiscountDto> Discounts { get; set; } = new();

@@ -45,14 +45,14 @@ public class AdminProductPropertyTests
         await factory.SeedAsync(async db =>
         {
             // Find the category seeded by DbSeeder
-            var existingCatId = db.Categories.First().Id;
+            var existingCatId = db.Processes.First().Id;
 
             for (var i = 0; i < 15; i++)
             {
                 db.Products.Add(new Product
                 {
                     Id = Guid.NewGuid(),
-                    CategoryId = existingCatId,
+                    ProcessId = existingCatId,
                     Slug = $"pg-prod-{Guid.NewGuid():N}",
                     TitleEs = $"Producto {i}",
                     TitleEn = $"Product {i}",
@@ -118,8 +118,7 @@ public class AdminProductPropertyTests
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Categories.Add(new Category
-            {
+            db.Processes.Add(new Process {
                 Id = catId,
                 Slug = $"vc-cat-{Guid.NewGuid():N}",
                 NameEs = "VCat", NameEn = "VCat"
@@ -128,7 +127,7 @@ public class AdminProductPropertyTests
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
-                Id = prodId, CategoryId = catId,
+                Id = prodId, ProcessId = catId,
                 Slug = $"vc-prod-{Guid.NewGuid():N}",
                 TitleEs = "P", TitleEn = "P",
                 DescriptionEs = "D", DescriptionEn = "D",

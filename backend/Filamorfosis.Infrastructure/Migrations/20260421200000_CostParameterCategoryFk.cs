@@ -11,28 +11,28 @@ namespace Filamorfosis.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // 1. Add CategoryId column (nullable first)
+            // 1. Add ProcessId column (nullable first)
             migrationBuilder.AddColumn<Guid>(
-                name: "CategoryId",
+                name: "ProcessId",
                 table: "CostParameters",
                 type: "TEXT",
                 nullable: true);
 
-            // 2. Populate from Categories.NameEs match
+            // 2. Populate from Processes.NameEs match
             migrationBuilder.Sql(@"
                 UPDATE CostParameters
-                SET CategoryId = (
-                    SELECT Id FROM Categories WHERE NameEs = CostParameters.Category LIMIT 1
+                SET ProcessId = (
+                    SELECT Id FROM Processes WHERE NameEs = CostParameters.Category LIMIT 1
                 )
-                WHERE CategoryId IS NULL;
+                WHERE ProcessId IS NULL;
             ");
 
             // 3. Delete rows with no match
-            migrationBuilder.Sql("DELETE FROM CostParameters WHERE CategoryId IS NULL;");
+            migrationBuilder.Sql("DELETE FROM CostParameters WHERE ProcessId IS NULL;");
 
             // 4. Make NOT NULL
             migrationBuilder.AlterColumn<Guid>(
-                name: "CategoryId",
+                name: "ProcessId",
                 table: "CostParameters",
                 type: "TEXT",
                 nullable: false,
@@ -49,18 +49,18 @@ namespace Filamorfosis.Infrastructure.Migrations
                 name: "IX_CostParameters_Category_Key",
                 table: "CostParameters");
 
-            // 7. Add new FK index and unique index on (CategoryId, Key)
+            // 7. Add new FK index and unique index on (ProcessId, Key)
             migrationBuilder.CreateIndex(
-                name: "IX_CostParameters_CategoryId_Key",
+                name: "IX_CostParameters_ProcessId_Key",
                 table: "CostParameters",
-                columns: new[] { "CategoryId", "Key" },
+                columns: new[] { "ProcessId", "Key" },
                 unique: true);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_CostParameters_Categories_CategoryId",
+                name: "FK_CostParameters_Processes_ProcessId",
                 table: "CostParameters",
-                column: "CategoryId",
-                principalTable: "Categories",
+                column: "ProcessId",
+                principalTable: "Processes",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
         }
@@ -69,11 +69,11 @@ namespace Filamorfosis.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_CostParameters_Categories_CategoryId",
+                name: "FK_CostParameters_Processes_ProcessId",
                 table: "CostParameters");
 
             migrationBuilder.DropIndex(
-                name: "IX_CostParameters_CategoryId_Key",
+                name: "IX_CostParameters_ProcessId_Key",
                 table: "CostParameters");
 
             migrationBuilder.AddColumn<string>(
@@ -86,11 +86,11 @@ namespace Filamorfosis.Infrastructure.Migrations
             migrationBuilder.Sql(@"
                 UPDATE CostParameters
                 SET Category = (
-                    SELECT NameEs FROM Categories WHERE Id = CostParameters.CategoryId LIMIT 1
+                    SELECT NameEs FROM Processes WHERE Id = CostParameters.ProcessId LIMIT 1
                 );
             ");
 
-            migrationBuilder.DropColumn(name: "CategoryId", table: "CostParameters");
+            migrationBuilder.DropColumn(name: "ProcessId", table: "CostParameters");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CostParameters_Category_Key",
