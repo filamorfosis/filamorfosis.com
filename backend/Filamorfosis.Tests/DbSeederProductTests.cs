@@ -23,8 +23,8 @@ public class DbSeederProductTests
     private static async Task SeedProcessesAsync(FilamorfosisDbContext db)
     {
         db.Processes.AddRange(
-            new Process { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "Impresión UV",  NameEn = "UV Printing" },
-            new Process { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Corte Láser",   NameEn = "Laser Cutting" }
+            new Process { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "Impresión UV"},
+            new Process { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Corte Láser"}
         );
         await db.SaveChangesAsync();
     }

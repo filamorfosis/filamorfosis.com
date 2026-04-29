@@ -35,12 +35,12 @@ public class PaymentPropertyTests
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Processes.Add(new Process { Id = catId, Slug = "p", NameEs = "P", NameEn = "P" });
+            db.Processes.Add(new Process { Id = catId, Slug = "p", NameEs = "P"});
             var prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId, Slug = "pp",
-                TitleEs = "P", TitleEn = "P", DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "P", DescriptionEs = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             variantId = Guid.NewGuid();

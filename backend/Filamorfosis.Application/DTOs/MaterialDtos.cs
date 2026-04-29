@@ -2,7 +2,7 @@ namespace Filamorfosis.Application.DTOs;
 
 public class MaterialSupplyUsageDto
 {
-    public Guid CostParameterId { get; set; }
+    public Guid ProcessCostId { get; set; }
     public string Label { get; set; } = string.Empty;
     public string Unit { get; set; } = string.Empty;
     public decimal UnitCost { get; set; }

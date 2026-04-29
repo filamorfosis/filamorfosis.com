@@ -71,9 +71,7 @@ public class AdminMaterialsControllerTests
                 db.Processes.Add(new Process {
                     Id = catId,
                     Slug = $"mat-cat-{catId:N}",
-                    NameEs = category,
-                    NameEn = category
-                });
+                    NameEs = category});
                 db.Materials.Add(new Material
                 {
                     Id = Guid.NewGuid(),
@@ -139,9 +137,7 @@ public class AdminMaterialsControllerTests
                     db.Processes.Add(new Process {
                         Id = catId,
                         Slug = $"filt-cat-{catId:N}",
-                        NameEs = category,
-                        NameEn = category
-                    });
+                        NameEs = category});
                     processMap[category] = catId;
                 }
             }
@@ -152,9 +148,7 @@ public class AdminMaterialsControllerTests
                 db.Processes.Add(new Process {
                     Id = catId,
                     Slug = $"filt-cat-{catId:N}",
-                    NameEs = filterProcess,
-                    NameEn = filterProcess
-                });
+                    NameEs = filterProcess});
                 processMap[filterProcess] = catId;
             }
 

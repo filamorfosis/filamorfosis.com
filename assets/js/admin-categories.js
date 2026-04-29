@@ -94,7 +94,6 @@
     document.getElementById('category-modal-title').textContent    = 'Nueva Proceso';
     document.getElementById('category-modal-subtitle').textContent = 'Completa los datos de la nueva Proceso';
     document.getElementById('cat-modal-nameEs').value   = '';
-    document.getElementById('cat-modal-nameEn').value   = '';
     document.getElementById('cat-modal-slug').value     = '';
     document.getElementById('cat-modal-imageUrl').value = '';
     document.getElementById('cat-modal-cost-section').style.display = 'none';
@@ -110,7 +109,6 @@
     document.getElementById('category-modal-title').textContent    = 'Editar Proceso';
     document.getElementById('category-modal-subtitle').textContent = `Editando: ${cat.nameEs}`;
     document.getElementById('cat-modal-nameEs').value   = cat.nameEs   || '';
-    document.getElementById('cat-modal-nameEn').value   = cat.nameEn   || '';
     document.getElementById('cat-modal-slug').value     = cat.slug     || '';
     document.getElementById('cat-modal-imageUrl').value = cat.imageUrl || '';
 
@@ -128,16 +126,15 @@
     errEl.textContent = '';
 
     const nameEs   = document.getElementById('cat-modal-nameEs').value.trim();
-    const nameEn   = document.getElementById('cat-modal-nameEn').value.trim();
     const slug     = document.getElementById('cat-modal-slug').value.trim();
     const imageUrl = document.getElementById('cat-modal-imageUrl').value.trim() || null;
 
-    if (!nameEs || !nameEn || !slug) {
-      errEl.textContent = 'Nombre ES, Nombre EN y Slug son requeridos.';
+    if (!nameEs || !slug) {
+      errEl.textContent = 'Nombre ES y Slug son requeridos.';
       return;
     }
 
-    const data = { slug, nameEs, nameEn, imageUrl };
+    const data = { slug, nameEs, imageUrl };
     spin(btn, true);
     try {
       if (_editingId) {
@@ -151,6 +148,7 @@
       await loadCategories();
     } catch (err) {
       errEl.textContent = err.detail || 'Error al guardar la Proceso.';
+    } finally {
       spin(btn, false);
     }
   }
@@ -188,10 +186,11 @@
       <i class="fas fa-spinner fa-spin"></i> Cargando...</div>`;
 
     try {
-      const params = await adminApi.adminGetCategoryCostParameters(categoryId);
+      const allParams = await adminApi.adminGetProcessCosts();
+      const params = allParams[categoryId] || [];
       _renderCostParamRows(categoryId, params);
     } catch (e) {
-      list.innerHTML = `<p style="color:#f87171;padding:8px;font-size:1rem">Error al cargar parï¿½metros.</p>`;
+      list.innerHTML = `<p style="color:#f87171;padding:8px;font-size:1rem">Error al cargar parámetros.</p>`;
     }
   }
 
@@ -201,7 +200,7 @@
 
     if (!params.length) {
       list.innerHTML = `<div id="cat-modal-cost-empty" style="color:#475569;font-size:1rem;padding:10px 4px;text-align:center">
-        Sin parï¿½metros de costo.</div>`;
+        Sin parámetros de costo.</div>`;
       return;
     }
 
@@ -215,17 +214,18 @@
         <input type="text" value="${esc(p.unit || '')}" id="cp-modal-unit-${esc(p.id)}"
                class="inline-input-category"
                placeholder="Unidad">
-        <input type="number" step="0.0001" min="0" value="${Number(p.value).toFixed(4)}"
+        <input type="number" step="0.01" min="0" value="${Number(p.value).toFixed(2)}"
                id="cp-modal-val-${esc(p.id)}"
                class="inline-input-category">
         <div style="display:flex;gap:4px">
           <button type="button" class="btn-admin btn-admin-primary btn-admin-sm"
                   id="cp-modal-save-${esc(p.id)}"
                   title="Guardar"
-                  onclick="AdminCategories.saveCostParameterRow('${esc(categoryId)}','${esc(p.id)}')">
+                  onclick="AdminCategories.saveCostParameterRow('${esc(categoryId)}','${esc(p.key)}','${esc(p.id)}')">
             <i class="fas fa-save"></i>
           </button>
           <button type="button" class="btn-admin btn-admin-danger btn-admin-sm"
+                  id="cp-modal-del-${esc(p.id)}"
                   title="Eliminar"
                   onclick="AdminCategories.deleteCostParameterRow('${esc(categoryId)}','${esc(p.id)}')">
             <i class="fas fa-trash"></i>
@@ -234,20 +234,18 @@
       </div>`).join('');
   }
 
-  async function saveCostParameterRow(categoryId, paramId) {
+  async function saveCostParameterRow(categoryId, key, paramId) {
     const label = document.getElementById('cp-modal-label-' + paramId)?.value.trim();
     const unit  = document.getElementById('cp-modal-unit-'  + paramId)?.value.trim();
     const val   = parseFloat(document.getElementById('cp-modal-val-' + paramId)?.value);
     const btn   = document.getElementById('cp-modal-save-' + paramId);
 
     if (!label) { toast('El nombre es requerido.', false); return; }
-    if (isNaN(val) || val < 0) { toast('El valor debe ser un nï¿½mero no negativo.', false); return; }
+    if (isNaN(val) || val < 0) { toast('El valor debe ser un número no negativo.', false); return; }
 
     spin(btn, true);
     try {
-      // Extract the key from the paramId (format: "processId:key")
-      const key = paramId.split(':')[1] || paramId;
-      await adminApi.adminUpsertProcessCostParameter(categoryId, key, { label, unit, value: val });
+      await adminApi.adminUpsertProcessCost(categoryId, key, { label, unit, value: val });
       toast('Parámetro guardado');
       // Refresh materials table so BaseCost reflects the new cost parameter value
       if (typeof AdminCosts !== 'undefined' && AdminCosts.loadAll) {
@@ -255,14 +253,29 @@
       }
     } catch (err) {
       toast(err.detail || 'Error al guardar.', false);
+    } finally {
+      spin(btn, false);
     }
-    spin(btn, false);
   }
 
   async function deleteCostParameterRow(categoryId, paramId) {
-    // Note: The new API doesn't have a delete endpoint for cost parameters
-    // Cost parameters are upserted, not deleted
-    toast('La eliminación de parámetros de costo no está disponible. Use valor 0 para desactivar.', false);
+    if (!await adminConfirm('¿Eliminar este parámetro de costo?', 'Eliminar Parámetro')) return;
+    
+    const btn = document.getElementById('cp-modal-del-' + paramId);
+    if (btn) spin(btn, true);
+    
+    try {
+      await adminApi.adminDeleteProcessCost(categoryId, paramId);
+      toast('Parámetro eliminado');
+      await _loadCostParamsList(categoryId);
+      // Refresh materials table so BaseCost reflects the removed cost parameter
+      if (typeof AdminCosts !== 'undefined' && AdminCosts.loadAll) {
+        await AdminCosts.loadAll();
+      }
+    } catch (err) {
+      toast(err.detail || 'Error al eliminar el parámetro.', false);
+      if (btn) spin(btn, false);
+    }
   }
 
   async function addCostParameterRow() {
@@ -276,18 +289,21 @@
     const label = labelEl.value.trim();
     if (!label) { errEl.textContent = 'El nombre del suministro es requerido.'; return; }
 
+    // Generate a key from the label (lowercase, replace spaces with hyphens)
+    const key = label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    
     try {
-      await adminApi.adminAddCategoryCostParameter(_editingId, {
+      await adminApi.adminUpsertProcessCost(_editingId, key, {
         label,
         unit:  unitEl.value || '',
         value: parseFloat(valEl.value) || 0,
       });
-      toast('Parï¿½metro agregado');
+      toast('Parámetro agregado');
       labelEl.value = '';
       valEl.value   = '0';
       await _loadCostParamsList(_editingId);
     } catch (err) {
-      errEl.textContent = err.detail || 'Error al agregar parï¿½metro.';
+      errEl.textContent = err.detail || 'Error al agregar parámetro.';
     }
   }
 

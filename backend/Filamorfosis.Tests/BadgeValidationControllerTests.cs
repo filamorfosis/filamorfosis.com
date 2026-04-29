@@ -28,8 +28,8 @@ public class BadgeValidationControllerTests
             {
                 Id = prodId, ProcessId = catId,
                 Slug = $"badge-test-{Guid.NewGuid():N}",
-                TitleEs = "Test", TitleEn = "Test",
-                DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "Test",
+                DescriptionEs = "D",
                 Tags = [], ImageUrls = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
@@ -63,8 +63,8 @@ public class BadgeValidationControllerTests
             {
                 Id = prodId, ProcessId = catId,
                 Slug = $"badge-valid-{Guid.NewGuid():N}",
-                TitleEs = "Test", TitleEn = "Test",
-                DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "Test",
+                DescriptionEs = "D",
                 Tags = [], ImageUrls = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });

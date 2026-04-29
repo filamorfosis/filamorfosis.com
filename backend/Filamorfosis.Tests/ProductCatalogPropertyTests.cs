@@ -48,9 +48,7 @@ public class ProductCatalogPropertyTests
                                 Id = productId,
                                 Slug = $"product-{productId:N}",
                                 TitleEs = $"Producto {j}",
-                                TitleEn = $"Product {j}",
                                 DescriptionEs = "Descripción",
-                                DescriptionEn = "Description",
                                 Tags = [],
                                 ImageUrls = [],
                                 IsActive = isActive,
@@ -66,8 +64,7 @@ public class ProductCatalogPropertyTests
                         {
                             Id = catId,
                             Slug = $"cat-{catId:N}",
-                            NameEs = $"Categoría {i}",
-                            NameEn = $"Process {i}"
+                            NameEs = $"Categoría {i}"
                         };
                         foreach (var p in products)
                         {

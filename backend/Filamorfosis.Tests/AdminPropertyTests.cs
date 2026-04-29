@@ -166,15 +166,15 @@ public class AdminPropertyTests
         await factory.SeedAsync(async db =>
         {
             catId = Guid.NewGuid();
-            db.Processes.Add(new Process { Id = catId, Slug = "admin-cat", NameEs = "Cat", NameEn = "Cat" });
+            db.Processes.Add(new Process { Id = catId, Slug = "admin-cat", NameEs = "Cat"});
             await db.SaveChangesAsync();
         });
 
         // Create product
         var createResp = await admin.PostAsJsonAsync("/api/v1/admin/products", new CreateProductRequest
         {
-            TitleEs = "Producto Test", TitleEn = "Test Product",
-            DescriptionEs = "Desc", DescriptionEn = "Desc",
+            TitleEs = "Producto Test",
+            DescriptionEs = "Desc",
             ProcessId = catId, Tags = ["tag1"], IsActive = true
         });
         if (createResp.StatusCode != HttpStatusCode.Created) return false;
@@ -219,12 +219,12 @@ public class AdminPropertyTests
         await factory.SeedAsync(async db =>
         {
             catId = Guid.NewGuid();
-            db.Processes.Add(new Process { Id = catId, Slug = "sc", NameEs = "S", NameEn = "S" });
+            db.Processes.Add(new Process { Id = catId, Slug = "sc", NameEs = "S"});
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId, Slug = "sp",
-                TitleEs = "P", TitleEn = "P", DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "P", DescriptionEs = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             await db.SaveChangesAsync();
@@ -282,12 +282,12 @@ public class AdminProductImagePropertyTests
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Processes.Add(new Process { Id = catId, Slug = $"img-cat-{Guid.NewGuid():N}", NameEs = "C", NameEn = "C" });
+            db.Processes.Add(new Process { Id = catId, Slug = $"img-cat-{Guid.NewGuid():N}", NameEs = "C"});
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId, Slug = $"img-prod-{Guid.NewGuid():N}",
-                TitleEs = "P", TitleEn = "P", DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "P", DescriptionEs = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             await db.SaveChangesAsync();

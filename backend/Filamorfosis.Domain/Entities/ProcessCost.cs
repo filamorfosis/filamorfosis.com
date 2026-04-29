@@ -1,6 +1,6 @@
 namespace Filamorfosis.Domain.Entities;
 
-public class CostParameter
+public class ProcessCost
 {
     public Guid Id { get; set; }
     public Guid ProcessId { get; set; }

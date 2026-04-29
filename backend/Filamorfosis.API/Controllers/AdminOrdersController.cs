@@ -121,9 +121,7 @@ public class AdminOrdersController(
             {
                 Id = i.Id,
                 ProductTitleEs = i.ProductTitleEs,
-                ProductTitleEn = i.ProductTitleEn,
                 VariantLabelEs = i.VariantLabelEs,
-                VariantLabelEn = i.VariantLabelEn,
                 UnitPrice = i.UnitPrice,
                 Quantity = i.Quantity,
                 DesignFileId = i.DesignFileId

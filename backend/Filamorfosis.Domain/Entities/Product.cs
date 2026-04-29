@@ -6,9 +6,7 @@ public class Product
     public Guid ProcessId { get; set; }
     public string Slug { get; set; } = string.Empty;
     public string TitleEs { get; set; } = string.Empty;
-    public string TitleEn { get; set; } = string.Empty;
     public string DescriptionEs { get; set; } = string.Empty;
-    public string DescriptionEn { get; set; } = string.Empty;
     public string[] Tags { get; set; } = [];
     public string[] ImageUrls { get; set; } = [];
     public string? Badge { get; set; }

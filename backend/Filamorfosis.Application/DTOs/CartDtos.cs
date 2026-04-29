@@ -12,9 +12,7 @@ public class CartItemDto
     public Guid Id { get; set; }
     public Guid ProductVariantId { get; set; }
     public string ProductTitleEs { get; set; } = string.Empty;
-    public string ProductTitleEn { get; set; } = string.Empty;
     public string VariantLabelEs { get; set; } = string.Empty;
-    public string VariantLabelEn { get; set; } = string.Empty;
     public decimal UnitPrice { get; set; }       // effective (discounted) price
     public decimal OriginalPrice { get; set; }    // full price before discount
     public int Quantity { get; set; }

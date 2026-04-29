@@ -10,21 +10,21 @@ using Microsoft.EntityFrameworkCore;
 namespace Filamorfosis.API.Controllers;
 
 [ApiController]
-[Route("api/v1/admin/cost-parameters")]
+[Route("api/v1/admin/process-costs")]
 [Authorize(Roles = "Master,PriceManagement")]
 [RequireMfa]
-public class AdminCostParametersController(FilamorfosisDbContext db, IPricingCalculatorService pricing) : ControllerBase
+public class AdminProcessCostsController(FilamorfosisDbContext db, IPricingCalculatorService pricing) : ControllerBase
 {
-    // GET /api/v1/admin/cost-parameters
+    // GET /api/v1/admin/process-costs
     // Returns all parameters grouped by ProcessId
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var parameters = await db.CostParameters
+        var parameters = await db.ProcessesCosts
             .Include(p => p.Process)
             .OrderBy(p => p.Process.NameEs)
             .ThenBy(p => p.Key)
-            .Select(p => new CostParameterDto
+            .Select(p => new ProcessCostDto
             {
                 Id = p.Id,
                 ProcessId = p.ProcessId,
@@ -44,9 +44,9 @@ public class AdminCostParametersController(FilamorfosisDbContext db, IPricingCal
         return Ok(grouped);
     }
 
-    // PUT /api/v1/admin/cost-parameters/{processId}/{key}
+    // PUT /api/v1/admin/process-costs/{processId}/{key}
     [HttpPut("{processId:guid}/{key}")]
-    public async Task<IActionResult> Upsert(Guid processId, string key, [FromBody] UpsertCostParameterRequest req)
+    public async Task<IActionResult> Upsert(Guid processId, string key, [FromBody] UpsertProcessCostRequest req)
     {
         if (req.Value < 0)
             return BadRequest(new ProblemDetails
@@ -61,12 +61,12 @@ public class AdminCostParametersController(FilamorfosisDbContext db, IPricingCal
         if (process is null)
             return NotFound(new ProblemDetails { Status = 404, Detail = "Proceso no encontrado." });
 
-        var parameter = await db.CostParameters
+        var parameter = await db.ProcessesCosts
             .FirstOrDefaultAsync(p => p.ProcessId == processId && p.Key == key);
 
         if (parameter is null)
         {
-            parameter = new CostParameter
+            parameter = new ProcessCost
             {
                 Id = Guid.NewGuid(),
                 ProcessId = processId,
@@ -76,7 +76,7 @@ public class AdminCostParametersController(FilamorfosisDbContext db, IPricingCal
                 Value = req.Value,
                 UpdatedAt = DateTime.UtcNow
             };
-            db.CostParameters.Add(parameter);
+            db.ProcessesCosts.Add(parameter);
         }
         else
         {
@@ -93,7 +93,7 @@ public class AdminCostParametersController(FilamorfosisDbContext db, IPricingCal
 
         // Recompute BaseCost for all materials referencing this cost parameter
         var affectedMaterialIds = await db.MaterialSupplyUsages
-            .Where(u => u.CostParameterId == parameter.Id)
+            .Where(u => u.ProcessCostId == parameter.Id)
             .Select(u => u.MaterialId)
             .Distinct()
             .ToListAsync();
@@ -102,12 +102,12 @@ public class AdminCostParametersController(FilamorfosisDbContext db, IPricingCal
         {
             var usages = await db.MaterialSupplyUsages
                 .AsNoTracking()
-                .Include(u => u.CostParameter)
+                .Include(u => u.ProcessCost)
                 .Where(u => u.MaterialId == materialId)
                 .ToListAsync();
 
             var suppliesCost = pricing.ComputeMaterialBaseCost(
-                usages.Select(u => (u.CostParameter.Value, u.Quantity)));
+                usages.Select(u => (u.ProcessCost.Value, u.Quantity)));
 
             var material = await db.Materials.FirstAsync(m => m.Id == materialId);
             material.BaseCost = material.ManualBaseCost + suppliesCost;
@@ -116,7 +116,7 @@ public class AdminCostParametersController(FilamorfosisDbContext db, IPricingCal
         if (affectedMaterialIds.Count > 0)
             await db.SaveChangesAsync();
 
-        return Ok(new CostParameterDto
+        return Ok(new ProcessCostDto
         {
             Id = parameter.Id,
             ProcessId = parameter.ProcessId,

@@ -30,8 +30,8 @@ public class BadgeFilterTests
                 {
                     Id = Guid.NewGuid(), ProcessId = catId,
                     Slug = $"badge-filter-{b ?? "null"}-{Guid.NewGuid():N}",
-                    TitleEs = $"Product {b}", TitleEn = $"Product {b}",
-                    DescriptionEs = "D", DescriptionEn = "D",
+                    TitleEs = $"Product {b}",
+                    DescriptionEs = "D",
                     Tags = [], ImageUrls = [],
                     Badge = b,
                     IsActive = true, CreatedAt = DateTime.UtcNow

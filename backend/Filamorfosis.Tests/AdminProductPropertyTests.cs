@@ -55,8 +55,7 @@ public class AdminProductPropertyTests
                     ProcessId = existingCatId,
                     Slug = $"pg-prod-{Guid.NewGuid():N}",
                     TitleEs = $"Producto {i}",
-                    TitleEn = $"Product {i}",
-                    DescriptionEs = "Desc", DescriptionEn = "Desc",
+                    DescriptionEs = "Desc",
                     Tags = [], ImageUrls = [],
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
@@ -121,16 +120,15 @@ public class AdminProductPropertyTests
             db.Processes.Add(new Process {
                 Id = catId,
                 Slug = $"vc-cat-{Guid.NewGuid():N}",
-                NameEs = "VCat", NameEn = "VCat"
-            });
+                NameEs = "VCat"});
 
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId,
                 Slug = $"vc-prod-{Guid.NewGuid():N}",
-                TitleEs = "P", TitleEn = "P",
-                DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "P",
+                DescriptionEs = "D",
                 Tags = [], ImageUrls = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
@@ -186,9 +184,7 @@ public class AdminProductPropertyTests
                     Id = Guid.NewGuid(),
                     OrderId = orderId,
                     ProductVariantId = variantId,
-                    ProductTitleEs = "P", ProductTitleEn = "P",
-                    VariantLabelEs = "V", VariantLabelEn = "V",
-                    UnitPrice = 100m, Quantity = 1
+                    ProductTitleEs = "P", VariantLabelEs = "V", UnitPrice = 100m, Quantity = 1
                 });
             }
 

@@ -32,13 +32,13 @@ public class OrderPropertyTests
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Processes.Add(new Process { Id = catId, Slug = $"cat-{catId:N}", NameEs = "T", NameEn = "T" });
+            db.Processes.Add(new Process { Id = catId, Slug = $"cat-{catId:N}", NameEs = "T"});
             var prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId, Slug = $"prod-{prodId:N}",
-                TitleEs = "Prod", TitleEn = "Prod",
-                DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "Prod",
+                DescriptionEs = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             variantId = Guid.NewGuid();

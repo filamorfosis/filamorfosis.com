@@ -6,7 +6,7 @@
 // Feature: material-supply-cost-model, Property 6: Unknown reference IDs are always rejected
 // Feature: material-supply-cost-model, Property 7: Cascade delete removes all child usage rows
 // Feature: material-supply-cost-model, Property 8: Variant stock is in-stock iff all material stock quantities are positive
-// Feature: material-supply-cost-model, Property 9: CostParameter update propagates to all referencing materials
+// Feature: material-supply-cost-model, Property 9: ProcessCost update propagates to all referencing materials
 // Feature: material-supply-cost-model, Property 10: Deleting a material referenced by a variant is always rejected
 
 using System.Net;
@@ -111,14 +111,12 @@ public class MaterialSupplyCostModelPropertyTests
             db.Processes.Add(new Process {
                 Id = catId,
                 Slug = $"p2-cat-{catId:N}",
-                NameEs = "Cat P2",
-                NameEn = "Cat P2"
-            });
+                NameEs = "Cat P2"});
 
             foreach (var (unitCost, qty) in usages)
             {
                 var cpId = Guid.NewGuid();
-                db.CostParameters.Add(new CostParameter
+                db.ProcessesCosts.Add(new ProcessCost
                 {
                     Id = cpId,
                     ProcessId = catId,
@@ -226,12 +224,12 @@ public class MaterialSupplyCostModelPropertyTests
         await factory.SeedAsync(async db =>
         {
             catId = Guid.NewGuid();
-            db.Processes.Add(new Process { Id = catId, Slug = $"p4-cat-{catId:N}", NameEs = "C", NameEn = "C" });
+            db.Processes.Add(new Process { Id = catId, Slug = $"p4-cat-{catId:N}", NameEs = "C"});
 
             for (int i = 0; i < countA + countB; i++)
             {
                 var cpId = Guid.NewGuid();
-                db.CostParameters.Add(new CostParameter
+                db.ProcessesCosts.Add(new ProcessCost
                 {
                     Id = cpId, ProcessId = catId,
                     Key = $"p4-param-{cpId:N}", Label = "P", Unit = "u",
@@ -270,7 +268,7 @@ public class MaterialSupplyCostModelPropertyTests
                 .Where(u => u.MaterialId == materialId)
                 .ToListAsync();
 
-            var actualIds = usages.Select(u => u.CostParameterId).OrderBy(x => x).ToList();
+            var actualIds = usages.Select(u => u.ProcessCostId).OrderBy(x => x).ToList();
             var expectedIds = cpIdsB.OrderBy(x => x).ToList();
             dbOk = actualIds.SequenceEqual(expectedIds)
                 && usages.All(u => u.Quantity == 2.0m);
@@ -291,7 +289,7 @@ public class MaterialSupplyCostModelPropertyTests
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId, Slug = $"p4-prod-{prodId:N}",
-                TitleEs = "P", TitleEn = "P", DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "P", DescriptionEs = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
 
@@ -372,9 +370,9 @@ public class MaterialSupplyCostModelPropertyTests
         await factory.SeedAsync(async db =>
         {
             catId = Guid.NewGuid();
-            db.Processes.Add(new Process { Id = catId, Slug = $"p5-cat-{catId:N}", NameEs = "C", NameEn = "C" });
+            db.Processes.Add(new Process { Id = catId, Slug = $"p5-cat-{catId:N}", NameEs = "C"});
             cpId = Guid.NewGuid();
-            db.CostParameters.Add(new CostParameter
+            db.ProcessesCosts.Add(new ProcessCost
             {
                 Id = cpId, ProcessId = catId, Key = $"p5-{cpId:N}",
                 Label = "P", Unit = "u", Value = 1.0m, UpdatedAt = DateTime.UtcNow
@@ -389,7 +387,7 @@ public class MaterialSupplyCostModelPropertyTests
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId, Slug = $"p5-prod-{prodId:N}",
-                TitleEs = "P", TitleEn = "P", DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "P", DescriptionEs = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             await db.SaveChangesAsync();
@@ -440,12 +438,12 @@ public class MaterialSupplyCostModelPropertyTests
         await factory.SeedAsync(async db =>
         {
             catId = Guid.NewGuid();
-            db.Processes.Add(new Process { Id = catId, Slug = $"p6-cat-{catId:N}", NameEs = "C", NameEn = "C" });
+            db.Processes.Add(new Process { Id = catId, Slug = $"p6-cat-{catId:N}", NameEs = "C"});
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId, Slug = $"p6-prod-{prodId:N}",
-                TitleEs = "P", TitleEn = "P", DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "P", DescriptionEs = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             await db.SaveChangesAsync();
@@ -497,7 +495,7 @@ public class MaterialSupplyCostModelPropertyTests
         await factory.SeedAsync(async db =>
         {
             catId = Guid.NewGuid();
-            db.Processes.Add(new Process { Id = catId, Slug = $"p7-cat-{catId:N}", NameEs = "C", NameEn = "C" });
+            db.Processes.Add(new Process { Id = catId, Slug = $"p7-cat-{catId:N}", NameEs = "C"});
 
             materialId = Guid.NewGuid();
             db.Materials.Add(new Material
@@ -509,7 +507,7 @@ public class MaterialSupplyCostModelPropertyTests
             for (int i = 0; i < n; i++)
             {
                 var cpId = Guid.NewGuid();
-                db.CostParameters.Add(new CostParameter
+                db.ProcessesCosts.Add(new ProcessCost
                 {
                     Id = cpId, ProcessId = catId, Key = $"p7-cp-{cpId:N}",
                     Label = "P", Unit = "u", Value = 1.0m, UpdatedAt = DateTime.UtcNow
@@ -517,7 +515,7 @@ public class MaterialSupplyCostModelPropertyTests
                 db.MaterialSupplyUsages.Add(new MaterialSupplyUsage
                 {
                     Id = Guid.NewGuid(), MaterialId = materialId,
-                    CostParameterId = cpId, Quantity = 1.0m
+                    ProcessCostId = cpId, Quantity = 1.0m
                 });
             }
             await db.SaveChangesAsync();
@@ -554,7 +552,7 @@ public class MaterialSupplyCostModelPropertyTests
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId, Slug = $"p7-prod-{prodId:N}",
-                TitleEs = "P", TitleEn = "P", DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "P", DescriptionEs = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             variantId = Guid.NewGuid();
@@ -618,7 +616,7 @@ public class MaterialSupplyCostModelPropertyTests
         Assert.True(stockService.IsVariantInStock([(5m, 0m)]));               // required=0 = in stock
     }
 
-    // Feature: material-supply-cost-model, Property 9: CostParameter update propagates to all referencing materials
+    // Feature: material-supply-cost-model, Property 9: ProcessCost update propagates to all referencing materials
     // Validates: Requirement 2.2
     [Property(MaxTest = 20)]
     public Property Property9_CostParameterUpdatePropagatestoAllReferencingMaterials()
@@ -645,10 +643,10 @@ public class MaterialSupplyCostModelPropertyTests
         await factory.SeedAsync(async db =>
         {
             catId = Guid.NewGuid();
-            db.Processes.Add(new Process { Id = catId, Slug = $"p9-cat-{catId:N}", NameEs = "C", NameEn = "C" });
+            db.Processes.Add(new Process { Id = catId, Slug = $"p9-cat-{catId:N}", NameEs = "C"});
 
             cpId = Guid.NewGuid();
-            db.CostParameters.Add(new CostParameter
+            db.ProcessesCosts.Add(new ProcessCost
             {
                 Id = cpId, ProcessId = catId, Key = cpKey,
                 Label = "P9 Param", Unit = "u", Value = 1.0m, UpdatedAt = DateTime.UtcNow
@@ -666,15 +664,15 @@ public class MaterialSupplyCostModelPropertyTests
                 db.MaterialSupplyUsages.Add(new MaterialSupplyUsage
                 {
                     Id = Guid.NewGuid(), MaterialId = matId,
-                    CostParameterId = cpId, Quantity = 1.0m
+                    ProcessCostId = cpId, Quantity = 1.0m
                 });
             }
             await db.SaveChangesAsync();
         });
 
-        // PUT new value for the CostParameter
-        var putResp = await client.PutAsJsonAsync($"/api/v1/admin/cost-parameters/{catId}/{cpKey}",
-            new UpsertCostParameterRequest("P9 Param", "u", newValue));
+        // PUT new value for the ProcessCost
+        var putResp = await client.PutAsJsonAsync($"/api/v1/admin/process-costs/{catId}/{cpKey}",
+            new UpsertProcessCostRequest("P9 Param", "u", newValue));
         if (!putResp.IsSuccessStatusCode) return false;
 
         // Verify each material BaseCost == newValue (quantity=1.0 * newValue)
@@ -711,7 +709,7 @@ public class MaterialSupplyCostModelPropertyTests
         await factory.SeedAsync(async db =>
         {
             catId = Guid.NewGuid();
-            db.Processes.Add(new Process { Id = catId, Slug = $"p10-cat-{catId:N}", NameEs = "C", NameEn = "C" });
+            db.Processes.Add(new Process { Id = catId, Slug = $"p10-cat-{catId:N}", NameEs = "C"});
 
             materialId = Guid.NewGuid();
             db.Materials.Add(new Material
@@ -724,7 +722,7 @@ public class MaterialSupplyCostModelPropertyTests
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId, Slug = $"p10-prod-{prodId:N}",
-                TitleEs = "P", TitleEn = "P", DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "P", DescriptionEs = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
 

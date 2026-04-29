@@ -1,3 +1,7 @@
+:root {
+  --z-toast: 99999; /* Above all modals */
+}
+
 body.admin-page {
   background: #0a0e1a;
   color: #e2e8f0;
@@ -369,7 +373,7 @@ body.admin-page {
   padding: 12px 20px;
   color: #e2e8f0;
   font-size: 1rem;
-  z-index: 9999;
+  z-index: 10800;
   opacity: 0;
   transform: translateY(10px);
   transition: opacity 0.3s, transform 0.3s;

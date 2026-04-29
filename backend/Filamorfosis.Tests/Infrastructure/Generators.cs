@@ -38,8 +38,7 @@ public static class FilamorfosisGenerators
 
     public static Gen<Process> ProcessGen() =>
         NonEmptyStringGen(20).SelectMany(slug =>
-        NonEmptyStringGen(30).SelectMany(nameEs =>
-        NonEmptyStringGen(30).Select(nameEn =>
+        NonEmptyStringGen(30).Select(nameEs =>
         {
             var id = Guid.NewGuid();
             return new Process
@@ -47,10 +46,9 @@ public static class FilamorfosisGenerators
                 Id       = id,
                 Slug     = $"{slug}-{id:N}",
                 NameEs   = nameEs,
-                NameEn   = nameEn,
                 ImageUrl = null
             };
-        })));
+        }));
 
     public static Arbitrary<Process> ProcessArb() => Arb.From(ProcessGen());
 
@@ -80,7 +78,6 @@ public static class FilamorfosisGenerators
 
     public static Gen<Product> ProductGen(Guid processId, int variantCount = 2) =>
         NonEmptyStringGen(30).SelectMany(titleEs =>
-        NonEmptyStringGen(30).SelectMany(titleEn =>
         Gen.Elements(true, false).Select(isActive =>
         {
             var id = Guid.NewGuid();
@@ -94,16 +91,14 @@ public static class FilamorfosisGenerators
                 ProcessId    = processId,
                 Slug          = $"product-{id:N}",
                 TitleEs       = titleEs,
-                TitleEn       = titleEn,
                 DescriptionEs = $"Descripción de {titleEs}",
-                DescriptionEn = $"Description of {titleEn}",
                 Tags          = [],
                 ImageUrls     = [],
                 IsActive      = isActive,
                 CreatedAt     = DateTime.UtcNow,
                 Variants      = variants
             };
-        })));
+        }));
 
     public static Arbitrary<Product> ProductArb() => Arb.From(ProductGen(Guid.NewGuid()));
 

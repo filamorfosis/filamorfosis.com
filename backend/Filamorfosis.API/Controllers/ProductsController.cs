@@ -44,9 +44,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
             var term = search.ToLower();
             query = query.Where(p =>
                 p.TitleEs.ToLower().Contains(term) ||
-                p.TitleEn.ToLower().Contains(term) ||
-                p.DescriptionEs.ToLower().Contains(term) ||
-                p.DescriptionEn.ToLower().Contains(term));
+                p.DescriptionEs.ToLower().Contains(term));
         }
 
         if (!string.IsNullOrWhiteSpace(badge))
@@ -70,9 +68,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
                 Id = p.Id,
                 Slug = p.Slug,
                 TitleEs = p.TitleEs,
-                TitleEn = p.TitleEn,
                 DescriptionEs = p.DescriptionEs,
-                DescriptionEn = p.DescriptionEn,
                 Tags = p.Tags,
                 ImageUrls = p.ImageUrls,
                 Badge = p.Badge,
@@ -125,9 +121,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
                 Id = p.Id,
                 Slug = p.Slug,
                 TitleEs = p.TitleEs,
-                TitleEn = p.TitleEn,
                 DescriptionEs = p.DescriptionEs,
-                DescriptionEn = p.DescriptionEn,
                 Tags = p.Tags,
                 ImageUrls = p.ImageUrls,
                 Badge = p.Badge,
@@ -196,9 +190,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
             Id = product.Id,
             Slug = product.Slug,
             TitleEs = product.TitleEs,
-            TitleEn = product.TitleEn,
             DescriptionEs = product.DescriptionEs,
-            DescriptionEn = product.DescriptionEn,
             Tags = product.Tags,
             ImageUrls = product.ImageUrls,
             Badge = product.Badge,

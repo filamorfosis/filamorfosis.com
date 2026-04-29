@@ -61,9 +61,9 @@ public static class DbSeeder
             await userManager.CreateAsync(admin, "Admin1234!");
             await userManager.AddToRoleAsync(admin, "Master");
 
-            // Seed a pre-confirmed MFA secret for the dev admin so the admin panel
-            // is accessible without going through TOTP enrollment.
+            // Seed an MFA secret for the dev admin so the admin panel is accessible.
             // Secret: JBSWY3DPEHPK3PXP (base32) — add to any authenticator app if needed.
+            // IsConfirmed = false so the frontend shows the QR code setup flow on first login.
             // In production this is never seeded; real users enroll via the UI.
             var seededAdmin = await userManager.FindByEmailAsync(adminEmail);
             if (seededAdmin is not null && !await db.AdminMfaSecrets.AnyAsync(m => m.UserId == seededAdmin.Id))
@@ -73,27 +73,35 @@ public static class DbSeeder
                     Id = Guid.NewGuid(),
                     UserId = seededAdmin.Id,
                     SecretBase32 = "JBSWY3DPEHPK3PXP",
-                    IsConfirmed = true,
+                    IsConfirmed = false,  // Changed to false to trigger QR setup flow
                     CreatedAt = DateTime.UtcNow
                 });
                 await db.SaveChangesAsync();
             }
         }
 
-        // Ensure the dev admin always has a confirmed MFA secret (idempotent patch for existing DBs).
-        // This runs even if the user was already seeded in a previous run without an MFA secret.
+        // Ensure the dev admin has an MFA secret.
+        // Only create if missing - don't reset confirmed secrets on restart.
         var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
-        if (existingAdmin is not null && !await db.AdminMfaSecrets.AnyAsync(m => m.UserId == existingAdmin.Id))
+        if (existingAdmin is not null)
         {
-            db.AdminMfaSecrets.Add(new AdminMfaSecret
+            var existingSecret = await db.AdminMfaSecrets.FirstOrDefaultAsync(m => m.UserId == existingAdmin.Id);
+            
+            if (existingSecret is null)
             {
-                Id = Guid.NewGuid(),
-                UserId = existingAdmin.Id,
-                SecretBase32 = "JBSWY3DPEHPK3PXP",
-                IsConfirmed = true,
-                CreatedAt = DateTime.UtcNow
-            });
-            await db.SaveChangesAsync();
+                // No MFA secret exists - create a new unconfirmed one
+                // Secret: JBSWY3DPEHPK3PXP (base32) — add to any authenticator app if needed.
+                db.AdminMfaSecrets.Add(new AdminMfaSecret
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = existingAdmin.Id,
+                    SecretBase32 = "JBSWY3DPEHPK3PXP",
+                    IsConfirmed = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+                await db.SaveChangesAsync();
+            }
+            // If MFA secret exists (confirmed or not), leave it alone
         }
 
         // Seed processes if none exist
@@ -101,11 +109,11 @@ public static class DbSeeder
         {
             var processes = new[]
             {
-                new Process { Id = Guid.NewGuid(), Slug = "uv-printing",    NameEs = "Impresión UV",       NameEn = "UV Printing" },
-                new Process { Id = Guid.NewGuid(), Slug = "3d-printing",    NameEs = "Impresión 3D",       NameEn = "3D Printing" },
-                new Process { Id = Guid.NewGuid(), Slug = "laser-cutting",  NameEs = "Corte Láser",        NameEn = "Laser Cutting" },
-                new Process { Id = Guid.NewGuid(), Slug = "photo-printing", NameEs = "Impresión de Fotos", NameEn = "Photo Printing" },
-                new Process { Id = Guid.NewGuid(), Slug = "material",       NameEs = "Material",           NameEn = "Material" }
+                new Process { Id = Guid.NewGuid(), Slug = "uv-printing",    NameEs = "Impresión UV" },
+                new Process { Id = Guid.NewGuid(), Slug = "3d-printing",    NameEs = "Impresión 3D" },
+                new Process { Id = Guid.NewGuid(), Slug = "laser-cutting",  NameEs = "Corte Láser" },
+                new Process { Id = Guid.NewGuid(), Slug = "photo-printing", NameEs = "Impresión de Fotos" },
+                new Process { Id = Guid.NewGuid(), Slug = "material",       NameEs = "Material" }
             };
             db.Processes.AddRange(processes);
             await db.SaveChangesAsync();
@@ -134,9 +142,7 @@ public static class DbSeeder
                 ProcessId    = uvProcess.Id,
                 Slug          = "taza-personalizada-uv",
                 TitleEs       = "Taza Personalizada UV",
-                TitleEn       = "Custom UV Mug",
                 DescriptionEs = "Impresión UV directa sobre taza de cerámica.",
-                DescriptionEn = "Direct UV printing on ceramic mug.",
                 Tags          = ["taza", "uv", "personalizado"],
                 ImageUrls     = [],
                 IsActive      = true,
@@ -149,13 +155,13 @@ public static class DbSeeder
                 new ProductVariant
                 {
                     Id = Guid.NewGuid(), ProductId = product.Id,
-                    Sku = "UV-MUG-SM", LabelEs = "Taza Pequeña 300ml", LabelEn = "Small Mug 300ml",
+                    Sku = "UV-MUG-SM", LabelEs = "Taza Pequeña 300ml",
                     Price = 199.00m, IsAvailable = true, AcceptsDesignFile = true, StockQuantity = 50
                 },
                 new ProductVariant
                 {
                     Id = Guid.NewGuid(), ProductId = product.Id,
-                    Sku = "UV-MUG-LG", LabelEs = "Taza Grande 450ml", LabelEn = "Large Mug 450ml",
+                    Sku = "UV-MUG-LG", LabelEs = "Taza Grande 450ml",
                     Price = 249.00m, IsAvailable = true, AcceptsDesignFile = true, StockQuantity = 30
                 }
             );
@@ -225,9 +231,7 @@ public static class DbSeeder
                 ProcessId    = processId.Value,
                 Slug          = def.Slug,
                 TitleEs       = def.Title,
-                TitleEn       = def.Title,
                 DescriptionEs = def.Desc,
-                DescriptionEn = def.Desc,
                 Tags          = def.Tags,
                 ImageUrls     = def.Images,
                 Badge         = def.Badge,
@@ -250,7 +254,6 @@ public static class DbSeeder
                     ProductId         = product.Id,
                     Sku               = $"{def.Slug}-{i}-F",
                     LabelEs           = $"{row.Variant} — Flat",
-                    LabelEn           = $"{row.Variant} — Flat",
                     Price             = flatPrice,
                     IsAvailable       = flatAvail,
                     AcceptsDesignFile = true
@@ -261,7 +264,6 @@ public static class DbSeeder
                     ProductId         = product.Id,
                     Sku               = $"{def.Slug}-{i}-R",
                     LabelEs           = $"{row.Variant} — Relieve",
-                    LabelEn           = $"{row.Variant} — Relief",
                     Price             = reliefPrice,
                     IsAvailable       = reliefAvail,
                     AcceptsDesignFile = true

@@ -33,13 +33,13 @@ public class CartPropertyTests
         await factory.SeedAsync(async db =>
         {
             var catId = Guid.NewGuid();
-            db.Processes.Add(new Process { Id = catId, Slug = "test", NameEs = "Test", NameEn = "Test" });
+            db.Processes.Add(new Process { Id = catId, Slug = "test", NameEs = "Test"});
             var prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId, Slug = "test-prod",
-                TitleEs = "Prod", TitleEn = "Prod",
-                DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "Prod",
+                DescriptionEs = "D",
                 Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             variantId = Guid.NewGuid();

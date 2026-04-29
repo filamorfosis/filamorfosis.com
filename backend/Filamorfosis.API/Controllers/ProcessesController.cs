@@ -18,7 +18,6 @@ public class ProcessesController(FilamorfosisDbContext db) : ControllerBase
                 Id = c.Id,
                 Slug = c.Slug,
                 NameEs = c.NameEs,
-                NameEn = c.NameEn,
                 ImageUrl = c.ImageUrl,
                 ProductCount = c.Products.Count(p => p.IsActive)
             })

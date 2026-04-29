@@ -3,9 +3,7 @@ namespace Filamorfosis.Application.DTOs;
 public class CreateProductRequest
 {
     public string TitleEs { get; set; } = string.Empty;
-    public string TitleEn { get; set; } = string.Empty;
     public string DescriptionEs { get; set; } = string.Empty;
-    public string DescriptionEn { get; set; } = string.Empty;
     public Guid ProcessId { get; set; }
     public string[] Tags { get; set; } = [];
     public string? Badge { get; set; }
@@ -15,9 +13,7 @@ public class CreateProductRequest
 public class UpdateProductRequest
 {
     public string? TitleEs { get; set; }
-    public string? TitleEn { get; set; }
     public string? DescriptionEs { get; set; }
-    public string? DescriptionEn { get; set; }
     public Guid? ProcessId { get; set; }
     public string[]? Tags { get; set; }
     public string? Badge { get; set; }
@@ -58,14 +54,12 @@ public class CreateProcessRequest
 {
     public string Slug { get; set; } = string.Empty;
     public string NameEs { get; set; } = string.Empty;
-    public string NameEn { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
 }
 
 public class UpdateProcessRequest
 {
     public string? NameEs { get; set; }
-    public string? NameEn { get; set; }
     public string? Slug { get; set; }
     public string? ImageUrl { get; set; }
 }

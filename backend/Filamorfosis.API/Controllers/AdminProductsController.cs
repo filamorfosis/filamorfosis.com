@@ -47,7 +47,6 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             var pattern = $"%{search.Replace("%", "\\%").Replace("_", "\\_")}%";
             query = query.Where(p =>
                 EF.Functions.Like(p.TitleEs, pattern) ||
-                EF.Functions.Like(p.TitleEn, pattern) ||
                 EF.Functions.Like(p.Slug, pattern));
         }
 
@@ -88,8 +87,8 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             Id = Guid.NewGuid(),
             ProcessId = req.ProcessId,
             Slug = req.TitleEs.ToLower().Replace(" ", "-"),
-            TitleEs = req.TitleEs, TitleEn = req.TitleEn,
-            DescriptionEs = req.DescriptionEs, DescriptionEn = req.DescriptionEn,
+            TitleEs = req.TitleEs,
+            DescriptionEs = req.DescriptionEs,
             Tags = req.Tags, ImageUrls = [],
             IsActive = req.IsActive, CreatedAt = DateTime.UtcNow
         };
@@ -143,9 +142,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             });
 
         if (req.TitleEs is not null) p.TitleEs = req.TitleEs;
-        if (req.TitleEn is not null) p.TitleEn = req.TitleEn;
         if (req.DescriptionEs is not null) p.DescriptionEs = req.DescriptionEs;
-        if (req.DescriptionEn is not null) p.DescriptionEn = req.DescriptionEn;
         if (req.ProcessId.HasValue) p.ProcessId = req.ProcessId.Value;
         if (req.Tags is not null) p.Tags = req.Tags;
         if (req.IsActive.HasValue) p.IsActive = req.IsActive.Value;
@@ -157,11 +154,42 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var p = await db.Products.FirstOrDefaultAsync(p => p.Id == id);
+        var p = await db.Products
+            .Include(p => p.Variants)
+            .FirstOrDefaultAsync(p => p.Id == id);
         if (p is null) return NotFound();
-        p.IsActive = false;
+
+        // Check if product has any variants referenced in orders
+        var variantIds = p.Variants.Select(v => v.Id).ToList();
+        var hasOrders = await db.OrderItems.AnyAsync(oi => variantIds.Contains(oi.ProductVariantId));
+        
+        if (hasOrders)
+        {
+            return Conflict(new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "Conflict",
+                Detail = "No se puede eliminar: el producto tiene pedidos activos."
+            });
+        }
+
+        // Check if product has any variants in active carts
+        var hasCartItems = await db.CartItems.AnyAsync(ci => variantIds.Contains(ci.ProductVariantId));
+        
+        if (hasCartItems)
+        {
+            return Conflict(new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "Conflict",
+                Detail = "No se puede eliminar: el producto está en carritos activos."
+            });
+        }
+
+        // Delete the product (cascade will delete variants, discounts, etc.)
+        db.Products.Remove(p);
         await db.SaveChangesAsync();
-        return Ok(new { id, isActive = false });
+        return NoContent();
     }
 
     [HttpPost("{id:guid}/variants")]
@@ -208,6 +236,9 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             v.Price = computedPrice;
             await db.SaveChangesAsync();
         }
+
+        // Check stock and auto-deactivate if insufficient
+        await _checkAndDeactivateIfInsufficientStock(v.Id);
 
         var created = await db.ProductVariants
             .Include(pv => pv.Discounts)
@@ -266,6 +297,9 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             v.Price = computedPrice;
             await db.SaveChangesAsync();
         }
+
+        // Check stock and auto-deactivate if insufficient
+        await _checkAndDeactivateIfInsufficientStock(v.Id);
 
         var updated = await db.ProductVariants
             .Include(pv => pv.Discounts)
@@ -412,13 +446,12 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         return new ProductDetailDto
         {
         Id = p.Id, Slug = p.Slug,
-        TitleEs = p.TitleEs, TitleEn = p.TitleEn,
-        DescriptionEs = p.DescriptionEs, DescriptionEn = p.DescriptionEn,
+        TitleEs = p.TitleEs,
+        DescriptionEs = p.DescriptionEs,
         Tags = p.Tags, ImageUrls = p.ImageUrls,
         Badge = p.Badge,
         IsActive = p.IsActive, ProcessId = p.ProcessId,
         ProcessNameEs = p.Process?.NameEs,
-        ProcessNameEn = p.Process?.NameEn,
         Variants = variantDtos,
         AttributeDefinitions = p.AttributeDefinitions
             .Select(pa => new AttributeDefinitionDto
@@ -523,8 +556,17 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
                     Detail = "La cantidad debe ser mayor a 0."
                 });
 
-            if (!Guid.TryParse(materialIdStr, out var materialId) ||
-                !await db.Materials.AnyAsync(m => m.Id == materialId))
+            if (!Guid.TryParse(materialIdStr, out var materialId))
+                return BadRequest(new ProblemDetails
+                {
+                    Type = "https://filamorfosis.com/errors/validation",
+                    Title = "Validation error",
+                    Status = 400,
+                    Detail = $"Material no encontrado: {materialIdStr}"
+                });
+
+            var material = await db.Materials.FindAsync(materialId);
+            if (material == null)
                 return BadRequest(new ProblemDetails
                 {
                     Type = "https://filamorfosis.com/errors/validation",
@@ -534,5 +576,29 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
                 });
         }
         return null;
+    }
+
+    private async Task<bool> _checkAndDeactivateIfInsufficientStock(Guid variantId)
+    {
+        var materialUsages = await db.VariantMaterialUsages
+            .Include(u => u.Material)
+            .Where(u => u.VariantId == variantId)
+            .ToListAsync();
+
+        var hasInsufficientStock = materialUsages.Any(u => u.Quantity > (u.Material?.StockQuantity ?? 0));
+        
+        if (hasInsufficientStock)
+        {
+            var variant = await db.ProductVariants.FindAsync(variantId);
+            if (variant != null && variant.IsAvailable)
+            {
+                variant.IsAvailable = false;
+                variant.WasAutoPaused = true;
+                await db.SaveChangesAsync();
+                return true; // Was deactivated
+            }
+        }
+        
+        return false; // Not deactivated
     }
 }

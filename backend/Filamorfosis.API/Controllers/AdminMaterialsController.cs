@@ -23,7 +23,7 @@ public class AdminMaterialsController(
     {
         var query = db.Materials
             .Include(m => m.Process)
-            .Include(m => m.SupplyUsages).ThenInclude(u => u.CostParameter)
+            .Include(m => m.SupplyUsages).ThenInclude(u => u.ProcessCost)
             .AsQueryable();
 
         if (processId.HasValue)
@@ -42,7 +42,7 @@ public class AdminMaterialsController(
     {
         var material = await db.Materials
             .Include(m => m.Process)
-            .Include(m => m.SupplyUsages).ThenInclude(u => u.CostParameter)
+            .Include(m => m.SupplyUsages).ThenInclude(u => u.ProcessCost)
             .FirstOrDefaultAsync(m => m.Id == id);
 
         if (material is null)
@@ -122,19 +122,19 @@ public class AdminMaterialsController(
 
         // Persist supply usages and compute total BaseCost = manual + supplies
         var supplyUsages = req.SupplyUsages ?? new();
-        var costParams = await LoadCostParameters(supplyUsages.Keys);
-        var usageEntities = BuildUsageEntities(material.Id, supplyUsages, costParams);
+        var processCosts = await LoadProcessCosts(supplyUsages.Keys);
+        var usageEntities = BuildUsageEntities(material.Id, supplyUsages, processCosts);
         db.MaterialSupplyUsages.AddRange(usageEntities);
 
         var suppliesCost = pricing.ComputeMaterialBaseCost(
-            costParams.Select(cp => (cp.Value, supplyUsages[cp.Id.ToString()])));
+            processCosts.Select(cp => (cp.Value, supplyUsages[cp.Id.ToString()])));
         material.BaseCost = req.BaseCost + suppliesCost;
 
         await db.SaveChangesAsync();
 
         // Reload with navigations for response
         await db.Entry(material).Collection(m => m.SupplyUsages).Query()
-            .Include(u => u.CostParameter).LoadAsync();
+            .Include(u => u.ProcessCost).LoadAsync();
 
         return StatusCode(201, MapToDto(material));
     }
@@ -145,7 +145,7 @@ public class AdminMaterialsController(
     {
         var material = await db.Materials
             .Include(m => m.Process)
-            .Include(m => m.SupplyUsages).ThenInclude(u => u.CostParameter)
+            .Include(m => m.SupplyUsages).ThenInclude(u => u.ProcessCost)
             .FirstOrDefaultAsync(m => m.Id == id);
 
         if (material is null)
@@ -224,12 +224,12 @@ public class AdminMaterialsController(
             // Replace-all: delete existing, insert new
             db.MaterialSupplyUsages.RemoveRange(material.SupplyUsages);
 
-            var costParams = await LoadCostParameters(req.SupplyUsages.Keys);
-            var usageEntities = BuildUsageEntities(material.Id, req.SupplyUsages, costParams);
+            var processCosts = await LoadProcessCosts(req.SupplyUsages.Keys);
+            var usageEntities = BuildUsageEntities(material.Id, req.SupplyUsages, processCosts);
             db.MaterialSupplyUsages.AddRange(usageEntities);
 
             var suppliesCost = pricing.ComputeMaterialBaseCost(
-                costParams.Select(cp => (cp.Value, req.SupplyUsages[cp.Id.ToString()])));
+                processCosts.Select(cp => (cp.Value, req.SupplyUsages[cp.Id.ToString()])));
             // Use new manual base if provided, otherwise keep existing minus old supplies
             var manualBase = req.BaseCost ?? 0m;
             material.ManualBaseCost = manualBase;
@@ -238,13 +238,13 @@ public class AdminMaterialsController(
             // Update in-memory collection for response mapping
             material.SupplyUsages = usageEntities;
             foreach (var u in material.SupplyUsages)
-                u.CostParameter = costParams.First(cp => cp.Id == u.CostParameterId);
+                u.ProcessCost = processCosts.First(cp => cp.Id == u.ProcessCostId);
         }
         else if (req.BaseCost is not null)
         {
             // Only manual base changed — recompute total keeping existing supplies cost
             var existingSuppliesCost = pricing.ComputeMaterialBaseCost(
-                material.SupplyUsages.Select(u => (u.CostParameter.Value, u.Quantity)));
+                material.SupplyUsages.Select(u => (u.ProcessCost.Value, u.Quantity)));
             material.ManualBaseCost = req.BaseCost.Value;
             material.BaseCost = req.BaseCost.Value + existingSuppliesCost;
         }
@@ -363,10 +363,10 @@ public class AdminMaterialsController(
         StockQuantity = m.StockQuantity,
         SupplyUsages = m.SupplyUsages.Select(u => new MaterialSupplyUsageDto
         {
-            CostParameterId = u.CostParameterId,
-            Label = u.CostParameter.Label,
-            Unit = u.CostParameter.Unit,
-            UnitCost = u.CostParameter.Value,
+            ProcessCostId = u.ProcessCostId,
+            Label = u.ProcessCost.Label,
+            Unit = u.ProcessCost.Unit,
+            UnitCost = u.ProcessCost.Value,
             Quantity = u.Quantity
         }).ToList(),
         CreatedAt = m.CreatedAt
@@ -394,7 +394,7 @@ public class AdminMaterialsController(
                     Detail = $"Parámetro de costo no encontrado: {key}"
                 });
 
-            var exists = await db.CostParameters.AnyAsync(cp => cp.Id == cpId);
+            var exists = await db.ProcessesCosts.AnyAsync(cp => cp.Id == cpId);
             if (!exists)
                 return BadRequest(new ProblemDetails
                 {
@@ -408,10 +408,10 @@ public class AdminMaterialsController(
         return null;
     }
 
-    private async Task<List<CostParameter>> LoadCostParameters(IEnumerable<string> keys)
+    private async Task<List<ProcessCost>> LoadProcessCosts(IEnumerable<string> keys)
     {
         var ids = keys.Select(Guid.Parse).ToList();
-        return await db.CostParameters
+        return await db.ProcessesCosts
             .Where(cp => ids.Contains(cp.Id))
             .ToListAsync();
     }
@@ -419,13 +419,13 @@ public class AdminMaterialsController(
     private static List<MaterialSupplyUsage> BuildUsageEntities(
         Guid materialId,
         Dictionary<string, decimal> usages,
-        List<CostParameter> costParams)
+        List<ProcessCost> processCosts)
     {
         return usages.Select(kv => new MaterialSupplyUsage
         {
             Id = Guid.NewGuid(),
             MaterialId = materialId,
-            CostParameterId = Guid.Parse(kv.Key),
+            ProcessCostId = Guid.Parse(kv.Key),
             Quantity = kv.Value
         }).ToList();
     }

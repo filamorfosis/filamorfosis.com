@@ -19,7 +19,7 @@
       '  position: fixed;',
       '  top: 16px;',
       '  right: 16px;',
-      '  z-index: var(--z-toast, 700);',
+      '  z-index: 99999;',
       '  display: flex;',
       '  flex-direction: column;',
       '  gap: 8px;',

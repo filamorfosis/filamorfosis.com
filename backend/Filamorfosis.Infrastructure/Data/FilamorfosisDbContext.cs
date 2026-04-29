@@ -29,7 +29,7 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
     public DbSet<ProductAttributeDefinition> ProductAttributeDefinitions => Set<ProductAttributeDefinition>();
     public DbSet<VariantAttributeValue> VariantAttributeValues => Set<VariantAttributeValue>();
     public DbSet<Material> Materials => Set<Material>();
-    public DbSet<CostParameter> CostParameters => Set<CostParameter>();
+    public DbSet<ProcessCost> ProcessesCosts => Set<ProcessCost>();
     public DbSet<GlobalParameter> GlobalParameters => Set<GlobalParameter>();
     public DbSet<MaterialSupplyUsage> MaterialSupplyUsages => Set<MaterialSupplyUsage>();
     public DbSet<VariantMaterialUsage> VariantMaterialUsages => Set<VariantMaterialUsage>();
@@ -238,17 +238,17 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
         modelBuilder.Entity<Material>()
             .Property(m => m.ManualBaseCost).HasDefaultValue(0m);
 
-        // MaterialSupplyUsage — FK to Material (cascade) and CostParameter (cascade), unique index
+        // MaterialSupplyUsage — FK to Material (cascade) and ProcessCost (cascade), unique index
         modelBuilder.Entity<MaterialSupplyUsage>()
             .HasOne(u => u.Material).WithMany(m => m.SupplyUsages)
             .HasForeignKey(u => u.MaterialId).OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<MaterialSupplyUsage>()
-            .HasOne(u => u.CostParameter).WithMany()
-            .HasForeignKey(u => u.CostParameterId).OnDelete(DeleteBehavior.Cascade);
+            .HasOne(u => u.ProcessCost).WithMany()
+            .HasForeignKey(u => u.ProcessCostId).OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<MaterialSupplyUsage>()
-            .HasIndex(u => new { u.MaterialId, u.CostParameterId }).IsUnique();
+            .HasIndex(u => new { u.MaterialId, u.ProcessCostId }).IsUnique();
 
         // VariantMaterialUsage — FK to Variant (cascade) and Material (restrict), unique index
         modelBuilder.Entity<VariantMaterialUsage>()
@@ -262,14 +262,14 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
         modelBuilder.Entity<VariantMaterialUsage>()
             .HasIndex(u => new { u.VariantId, u.MaterialId }).IsUnique();
 
-        // CostParameter — FK to Process, unique index on (ProcessId, Key)
-        modelBuilder.Entity<CostParameter>()
+        // ProcessCost — FK to Process, unique index on (ProcessId, Key)
+        modelBuilder.Entity<ProcessCost>()
             .HasOne(cp => cp.Process)
             .WithMany()
             .HasForeignKey(cp => cp.ProcessId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<CostParameter>()
+        modelBuilder.Entity<ProcessCost>()
             .HasIndex(cp => new { cp.ProcessId, cp.Key })
             .IsUnique();
 

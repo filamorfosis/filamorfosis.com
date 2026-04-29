@@ -52,16 +52,15 @@ public class VariantAttributeBugConditionTests
             {
                 Id = catId,
                 Slug = $"bug-cat-{Guid.NewGuid():N}",
-                NameEs = "Cat", NameEn = "Cat"
-            });
+                NameEs = "Cat"});
 
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId,
                 Slug = $"bug-prod-{Guid.NewGuid():N}",
-                TitleEs = "Producto Bug", TitleEn = "Bug Product",
-                DescriptionEs = "Desc", DescriptionEn = "Desc",
+                TitleEs = "Producto Bug",
+                DescriptionEs = "Desc",
                 Tags = [], ImageUrls = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
@@ -122,16 +121,15 @@ public class VariantAttributeBugConditionTests
             {
                 Id = catId,
                 Slug = $"bug2-cat-{Guid.NewGuid():N}",
-                NameEs = "Cat2", NameEn = "Cat2"
-            });
+                NameEs = "Cat2"});
 
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId,
                 Slug = $"bug2-prod-{Guid.NewGuid():N}",
-                TitleEs = "Producto Bug2", TitleEn = "Bug Product2",
-                DescriptionEs = "Desc", DescriptionEn = "Desc",
+                TitleEs = "Producto Bug2",
+                DescriptionEs = "Desc",
                 Tags = [], ImageUrls = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
@@ -144,7 +142,6 @@ public class VariantAttributeBugConditionTests
         var payload = new
         {
             labelEs = "Talla L",
-            labelEn = "Size L",
             sku = $"ATTR-SKU-{Guid.NewGuid():N}",
             price = 150m,
             stockQuantity = 10,

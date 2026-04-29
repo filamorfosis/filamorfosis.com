@@ -11,7 +11,7 @@ public class FilamorfosisDbContextFactory : IDesignTimeDbContextFactory<Filamorf
     public FilamorfosisDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<FilamorfosisDbContext>();
-        optionsBuilder.UseSqlite("Data Source=filamorfosis_design.db")
+        optionsBuilder.UseSqlite("Data Source=filamorfosis.db")
             .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
         return new FilamorfosisDbContext(optionsBuilder.Options);
     }

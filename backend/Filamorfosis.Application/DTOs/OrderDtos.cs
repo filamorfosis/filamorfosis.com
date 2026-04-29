@@ -45,9 +45,7 @@ public class OrderItemDto
 {
     public Guid Id { get; set; }
     public string ProductTitleEs { get; set; } = string.Empty;
-    public string ProductTitleEn { get; set; } = string.Empty;
     public string VariantLabelEs { get; set; } = string.Empty;
-    public string VariantLabelEn { get; set; } = string.Empty;
     public decimal UnitPrice { get; set; }
     public int Quantity { get; set; }
     public Guid? DesignFileId { get; set; }

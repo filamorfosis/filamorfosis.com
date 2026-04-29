@@ -357,35 +357,25 @@
     return apiFetch(`/admin/materials/${id}`, { method: 'DELETE' });
   }
 
-  // ── Cost Parameters ───────────────────────────────────────────────────────
+  // ── Process Costs ─────────────────────────────────────────────────────────
 
-  /** GET /api/v1/admin/cost-parameters — returns all parameters grouped by category */
-  function adminGetCostParameters() {
-    return apiFetch('/admin/cost-parameters');
+  /** GET /api/v1/admin/process-costs — returns all process costs grouped by process */
+  function adminGetProcessCosts() {
+    return apiFetch('/admin/process-costs');
   }
 
-  /**
-   * PUT /api/v1/admin/cost-parameters/{category}/{key} — upsert a cost parameter
-   */
-  function adminUpsertCostParameter(categoryId, key, data) {
-    return apiFetch(`/admin/cost-parameters/${encodeURIComponent(categoryId)}/${encodeURIComponent(key)}`, {
+  /** PUT /api/v1/admin/process-costs/{processId}/{key} — upsert a process cost */
+  function adminUpsertProcessCost(processId, key, data) {
+    return apiFetch(`/admin/process-costs/${processId}/${key}`, {
       method: 'PUT',
       body: JSON.stringify(data)
     });
   }
 
-  // ── Process Cost Parameters ──────────────────────────────────────────────
-
-  /** GET /api/v1/admin/cost-parameters — returns all cost parameters grouped by process */
-  function adminGetCostParameters() {
-    return apiFetch('/admin/cost-parameters');
-  }
-
-  /** PUT /api/v1/admin/cost-parameters/{processId}/{key} — upsert a cost parameter */
-  function adminUpsertProcessCostParameter(processId, key, data) {
-    return apiFetch(`/admin/cost-parameters/${processId}/${key}`, {
-      method: 'PUT',
-      body: JSON.stringify(data)
+  /** DELETE /api/v1/admin/processes/{processId}/cost-parameters/{parameterId} — delete a cost parameter */
+  function adminDeleteProcessCost(processId, parameterId) {
+    return apiFetch(`/admin/processes/${processId}/cost-parameters/${parameterId}`, {
+      method: 'DELETE'
     });
   }
 
@@ -456,10 +446,10 @@
     adminCreateMaterial,
     adminUpdateMaterial,
     adminDeleteMaterial,
-    // cost parameters
-    adminGetCostParameters,
-    adminUpsertCostParameter,
-    adminUpsertProcessCostParameter,
+    // process costs
+    adminGetProcessCosts,
+    adminUpsertProcessCost,
+    adminDeleteProcessCost,
     // global parameters
     adminGetGlobalParameters,
     adminUpdateGlobalParameter

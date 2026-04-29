@@ -66,15 +66,14 @@ public class VariantAttributePreservationTests
             {
                 Id = catId,
                 Slug = $"pres-cat-{Guid.NewGuid():N}",
-                NameEs = "Cat", NameEn = "Cat"
-            });
+                NameEs = "Cat"});
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId,
                 Slug = $"pres-prod-{Guid.NewGuid():N}",
-                TitleEs = "Preservation Product", TitleEn = "Preservation Product",
-                DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "Preservation Product",
+                DescriptionEs = "D",
                 Tags = [], ImageUrls = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
@@ -144,16 +143,15 @@ public class VariantAttributePreservationTests
             {
                 Id = catId,
                 Slug = $"dc-cat-{Guid.NewGuid():N}",
-                NameEs = "DCat", NameEn = "DCat"
-            });
+                NameEs = "DCat"});
 
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId,
                 Slug = $"dc-prod-{Guid.NewGuid():N}",
-                TitleEs = "P", TitleEn = "P",
-                DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "P",
+                DescriptionEs = "D",
                 Tags = [], ImageUrls = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
@@ -206,9 +204,7 @@ public class VariantAttributePreservationTests
                     Id = Guid.NewGuid(),
                     OrderId = orderId,
                     ProductVariantId = variantId,
-                    ProductTitleEs = "P", ProductTitleEn = "P",
-                    VariantLabelEs = "V", VariantLabelEn = "V",
-                    UnitPrice = 100m, Quantity = 1
+                    ProductTitleEs = "P", VariantLabelEs = "V", UnitPrice = 100m, Quantity = 1
                 });
             }
 
@@ -238,16 +234,15 @@ public class VariantAttributePreservationTests
             {
                 Id = catId,
                 Slug = $"del-cat-{Guid.NewGuid():N}",
-                NameEs = "DelCat", NameEn = "DelCat"
-            });
+                NameEs = "DelCat"});
 
             prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId,
                 Slug = $"del-prod-{Guid.NewGuid():N}",
-                TitleEs = "P", TitleEn = "P",
-                DescriptionEs = "D", DescriptionEn = "D",
+                TitleEs = "P",
+                DescriptionEs = "D",
                 Tags = [], ImageUrls = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
@@ -287,16 +282,15 @@ public class VariantAttributePreservationTests
             {
                 Id = catId,
                 Slug = $"sf-cat-{Guid.NewGuid():N}",
-                NameEs = "SFCat", NameEn = "SFCat"
-            });
+                NameEs = "SFCat"});
 
             var prodId = Guid.NewGuid();
             db.Products.Add(new Product
             {
                 Id = prodId, ProcessId = catId,
                 Slug = $"sf-prod-{Guid.NewGuid():N}",
-                TitleEs = "Producto Storefront", TitleEn = "Storefront Product",
-                DescriptionEs = "Descripción", DescriptionEn = "Description",
+                TitleEs = "Producto Storefront",
+                DescriptionEs = "Descripción",
                 Tags = ["tag1", "tag2"], ImageUrls = [],
                 Badge = "new",
                 IsActive = true, CreatedAt = DateTime.UtcNow

@@ -25,6 +25,14 @@
   let _globalParams = []; // GlobalParameterDto[]
   let _editingMaterialId = null;
 
+  // Materials filtering state
+  const materialsState = {
+    search: '',
+    processId: null,
+    allItems: [],
+    filtered: []
+  };
+
   // Supply usages editor state: array of { costParameterId, unitCost, unit, label, quantity }
   let _supplyUsageRows = [];
 
@@ -51,18 +59,84 @@
     try {
       const [materials, costParams, globalParams] = await Promise.all([
         adminApi.adminGetMaterials(),
-        adminApi.adminGetCostParameters(),
+        adminApi.adminGetProcessCosts(),
         adminApi.adminGetGlobalParameters()
       ]);
       _materials = materials || [];
+      materialsState.allItems = _materials;
       _costParams = costParams || {};
       _globalParams = globalParams || [];
-      renderMaterialsTable();
+      _applyMaterialsFilter();
       renderCostParameters();
       renderGlobalParameters();
     } catch (e) {
       toast('Error al cargar datos de costos', false);
     }
+  }
+
+  // ── Materials filtering ───────────────────────────────────────────────────
+
+  function _applyMaterialsFilter() {
+    let filtered = materialsState.allItems.slice();
+
+    // Apply search filter
+    if (materialsState.search) {
+      const searchLower = materialsState.search.toLowerCase();
+      filtered = filtered.filter(m =>
+        (m.name || '').toLowerCase().includes(searchLower) ||
+        (m.sizeLabel || '').toLowerCase().includes(searchLower) ||
+        (m.processNameEs || '').toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply process filter
+    if (materialsState.processId) {
+      filtered = filtered.filter(m => m.processId === materialsState.processId);
+    }
+
+    // Sort by stock (lowest to highest)
+    filtered.sort((a, b) => (a.stockQuantity ?? 0) - (b.stockQuantity ?? 0));
+
+    materialsState.filtered = filtered;
+    renderMaterialsTable();
+    renderProcessFilterButtons();
+  }
+
+  function _filterByProcess(processId) {
+    materialsState.processId = processId || null;
+    _applyMaterialsFilter();
+  }
+
+  function renderProcessFilterButtons() {
+    const container = document.getElementById('materials-process-filters');
+    if (!container) return;
+
+    const categories = (typeof AdminCategories !== 'undefined' && AdminCategories.getCategories)
+      ? AdminCategories.getCategories()
+      : [];
+
+    // Build count map
+    const countMap = {};
+    materialsState.allItems.forEach(m => {
+      countMap[m.processId] = (countMap[m.processId] || 0) + 1;
+    });
+
+    const allBtn = `
+      <button class="prod-cat-filter-btn ${!materialsState.processId ? 'active' : ''}"
+              onclick="AdminCosts._filterByProcess(null)">
+        Todos <span class="prod-cat-filter-count">${materialsState.allItems.length}</span>
+      </button>`;
+
+    const catBtns = categories.map(c => {
+      const count = countMap[c.id] || 0;
+      return `
+        <button class="prod-cat-filter-btn ${materialsState.processId === c.id ? 'active' : ''}"
+                onclick="AdminCosts._filterByProcess('${esc(c.id)}')">
+          ${esc(c.nameEs)} <span class="prod-cat-filter-count">${count}</span>
+        </button>`;
+    }).join('');
+
+    container.innerHTML = allBtn + catBtns;
   }
 
   // ── 12.2 renderMaterialsTable ─────────────────────────────────────────────
@@ -71,19 +145,22 @@
     const tbody = document.getElementById('materials-tbody');
     if (!tbody) return;
 
-    if (!_materials.length) {
+    const items = materialsState.filtered;
+
+    if (!items.length) {
       tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#64748b;padding:24px">Sin materiales</td></tr>';
       return;
     }
 
-    tbody.innerHTML = _materials.map(m => {
+    tbody.innerHTML = items.map(m => {
       const stock = m.stockQuantity ?? 0;
-      const sC = stock > 0 ? '#22c55e' : '#f87171';
-      const sB = stock > 0 ? 'rgba(34,197,94,0.12)' : 'rgba(248,113,113,0.12)';
-      const sD = stock > 0 ? 'rgba(34,197,94,0.35)' : 'rgba(248,113,113,0.35)';
+      // Red if < 5, Yellow if < 30, Green if >= 30
+      const sC = stock < 5 ? '#f87171' : stock < 30 ? '#eab308' : '#22c55e';
+      const sB = stock < 5 ? 'rgba(248,113,113,0.12)' : stock < 30 ? 'rgba(234,179,8,0.12)' : 'rgba(34,197,94,0.12)';
+      const sD = stock < 5 ? 'rgba(248,113,113,0.35)' : stock < 30 ? 'rgba(234,179,8,0.35)' : 'rgba(34,197,94,0.35)';
       return '<tr id="mat-row-' + esc(m.id) + '">' +
         '<td>' + esc(m.name) + '</td>' +
-        '<td>' + esc(m.categoryNameEs || m.category || '—') + '</td>' +
+        '<td>' + esc(m.processNameEs || '—') + '</td>' +
         '<td>' + esc(m.sizeLabel || '—') + '</td>' +
         '<td>' + (m.widthCm != null ? fmt(m.widthCm) : '—') + '</td>' +
         '<td>' + (m.heightCm != null ? fmt(m.heightCm) : '—') + '</td>' +
@@ -159,7 +236,7 @@
     const title = document.getElementById('material-modal-title');
     if (title) title.textContent = 'Editar Material';
 
-    _populateCategorySelect(mat.categoryId);
+    _populateCategorySelect(mat.processId);
     _setField('mat-name', mat.name);
     _setField('mat-sizeLabel', mat.sizeLabel || '');
     _setField('mat-widthCm', mat.widthCm != null ? mat.widthCm : '');
@@ -170,7 +247,7 @@
     _setField('mat-baseCostManual', mat.manualBaseCost != null ? fmt(mat.manualBaseCost) : '0');
 
     // Load supply usages for this category and populate rows
-    _loadCategoryParamsAndPopulateUsages(mat.categoryId, mat.supplyUsages || []);
+    _loadCategoryParamsAndPopulateUsages(mat.processId, mat.supplyUsages || []);
 
     const modal = _getMaterialModal();
     if (modal) modal.style.display = 'flex';
@@ -213,9 +290,9 @@
   // Populate checkbox list from existing supplyUsages (edit mode)
   function _loadCategoryParamsAndPopulateUsages(categoryId, supplyUsages) {
     _currentCategoryParams = _getParamsForCategory(categoryId);
-    // Build a lookup of saved quantities keyed by costParameterId
+    // Build a lookup of saved quantities keyed by processCostId
     const saved = {};
-    (supplyUsages || []).forEach(u => { saved[u.costParameterId] = u.quantity; });
+    (supplyUsages || []).forEach(u => { saved[u.processCostId] = u.quantity; });
     _supplyUsageRows = _currentCategoryParams.map(p => ({
       costParameterId: p.id,
       unitCost: p.value,
@@ -410,7 +487,7 @@
 
     const data = {
       name,
-      categoryId,
+      processId: categoryId,
       sizeLabel: _getField('mat-sizeLabel') || null,
       widthCm: _getField('mat-widthCm') !== '' ? parseFloat(_getField('mat-widthCm')) : null,
       heightCm: _getField('mat-heightCm') !== '' ? parseFloat(_getField('mat-heightCm')) : null,
@@ -515,7 +592,7 @@
           '<td>' +
             '<button class="btn-admin btn-admin-primary btn-admin-sm"' +
                     ' id="cp-save-' + esc(p.id) + '"' +
-                    ' onclick="AdminCosts.saveCostParameter(\'' + esc(p.categoryId) + '\',\'' + esc(p.key) + '\',\'' + esc(p.id) + '\',\'' + esc(p.label || p.key) + '\')">' +
+                    ' onclick="AdminCosts.saveCostParameter(\'' + esc(p.processId) + '\',\'' + esc(p.key) + '\',\'' + esc(p.id) + '\',\'' + esc(p.label || p.key) + '\')">' +
               '<i class="fas fa-save"></i> Guardar' +
             '</button>' +
           '</td>' +
@@ -532,7 +609,7 @@
     }).join('');
   }
 
-  async function saveCostParameter(categoryId, key, id, label) {
+  async function saveCostParameter(processId, key, id, label) {
     const input = document.getElementById('cp-val-' + id);
     const btn = document.getElementById('cp-save-' + id);
     if (!input) return;
@@ -548,7 +625,7 @@
         // Preserve existing unit from cached params
         Object.values(_costParams).flat().find(p => p.id === id)?.unit || ''
       );
-      await adminApi.adminUpsertCostParameter(categoryId, key, { label, unit, value });
+      await adminApi.adminUpsertProcessCost(processId, key, { label, unit, value });
       toast('Parámetro guardado');
       await loadAll();
     } catch (err) {
@@ -613,6 +690,29 @@
     spin(btn, false);
   }
 
+  // ── Search event listener ─────────────────────────────────────────────────
+
+  function _initMaterialsSearch() {
+    const searchInput = document.getElementById('materials-search');
+    if (!searchInput) return;
+
+    let debounceTimer;
+    searchInput.addEventListener('input', function (e) {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () {
+        materialsState.search = e.target.value.trim();
+        _applyMaterialsFilter();
+      }, 300);
+    });
+  }
+
+  // Initialize search on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _initMaterialsSearch);
+  } else {
+    _initMaterialsSearch();
+  }
+
   // ── Public API ────────────────────────────────────────────────────────────
 
   window.AdminCosts = {
@@ -633,6 +733,8 @@
     _onSupplyQtyChange,
     _updateTotalCostPreview,
     _updateBaseCostPreview,
+    // Materials filtering
+    _filterByProcess,
     // Caches
     getMaterials: () => _materials,
     getGlobalParams: () => _globalParams,

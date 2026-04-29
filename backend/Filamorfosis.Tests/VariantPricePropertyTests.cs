@@ -124,7 +124,7 @@ public class VariantPricePropertyTests
     {
         await using var factory = new FilamorfosisWebFactory();
 
-        // Seed: Material (Laser Engraving), CostParameter, GlobalParameter
+        // Seed: Material (Laser Engraving), ProcessCost, GlobalParameter
         var materialId = Guid.NewGuid();
         var ProcessId = Guid.NewGuid();
 
@@ -135,9 +135,7 @@ public class VariantPricePropertyTests
             {
                 Id = ProcessId,
                 Slug = $"cat-{ProcessId:N}",
-                NameEs = "Categoría Test",
-                NameEn = "Test Process"
-            });
+                NameEs = "Categoría Test"});
 
             // Seed material with the test Process
             db.Materials.Add(new Material
@@ -149,10 +147,10 @@ public class VariantPricePropertyTests
                 CreatedAt = DateTime.UtcNow
             });
 
-            // Seed CostParameter: electric_cost_per_hour = 10.00 for the test Process
+            // Seed ProcessCost: electric_cost_per_hour = 10.00 for the test Process
             // Use a unique ID per test run to avoid conflicts with seeded data
             var cpId = Guid.NewGuid();
-            db.CostParameters.Add(new CostParameter
+            db.ProcessesCosts.Add(new ProcessCost
             {
                 Id = cpId,
                 ProcessId = ProcessId,
@@ -191,9 +189,7 @@ public class VariantPricePropertyTests
         var createProductResp = await client.PostAsJsonAsync("/api/v1/admin/products", new
         {
             titleEs = $"Producto Test {Guid.NewGuid():N}",
-            titleEn = "Test Product",
             descriptionEs = "Descripción",
-            descriptionEn = "Description",
             ProcessId,
             tags = Array.Empty<string>(),
             isActive = true

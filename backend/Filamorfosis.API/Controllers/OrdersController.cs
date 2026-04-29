@@ -59,9 +59,7 @@ public class OrdersController(FilamorfosisDbContext db) : ControllerBase
             Id = Guid.NewGuid(),
             ProductVariantId = i.ProductVariantId,
             ProductTitleEs = i.Variant?.Product?.TitleEs ?? string.Empty,
-            ProductTitleEn = i.Variant?.Product?.TitleEn ?? string.Empty,
             VariantLabelEs = i.Variant?.LabelEs ?? string.Empty,
-            VariantLabelEn = i.Variant?.LabelEs ?? string.Empty,
             UnitPrice = DiscountCalculator.ComputeEffectivePrice(i.Variant?.Price ?? 0, (i.Variant?.Discounts ?? []).Concat(i.Variant?.Product?.Discounts ?? [])),
             Quantity = i.Quantity,
             DesignFileId = i.DesignFileId
@@ -173,9 +171,7 @@ public class OrdersController(FilamorfosisDbContext db) : ControllerBase
         {
             Id = i.Id,
             ProductTitleEs = i.ProductTitleEs,
-            ProductTitleEn = i.ProductTitleEn,
             VariantLabelEs = i.VariantLabelEs,
-            VariantLabelEn = i.VariantLabelEn,
             UnitPrice = i.UnitPrice,
             Quantity = i.Quantity,
             DesignFileId = i.DesignFileId

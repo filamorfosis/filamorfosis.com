@@ -27,7 +27,7 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
         var processIds = processes.Select(c => c.Id).ToList();
 
         // Load cost parameters for all processes by ID
-        var costParams = await db.CostParameters
+        var costParams = await db.ProcessesCosts
             .Include(p => p.Process)
             .Where(p => processIds.Contains(p.ProcessId))
             .OrderBy(p => p.Label)
@@ -35,7 +35,7 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
 
         var costParamsByProcess = costParams
             .GroupBy(p => p.ProcessId)
-            .ToDictionary(g => g.Key, g => g.Select(p => new CostParameterDto
+            .ToDictionary(g => g.Key, g => g.Select(p => new ProcessCostDto
             {
                 Id = p.Id,
                 ProcessId = p.ProcessId,
@@ -52,7 +52,6 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
             Id = c.Id,
             Slug = c.Slug,
             NameEs = c.NameEs,
-            NameEn = c.NameEn,
             ImageUrl = c.ImageUrl,
             ProductCount = db.Products.Count(p => p.ProcessId == c.Id && p.IsActive),
             Attributes = c.Attributes.Select(a => new ProcessAttributeDto
@@ -74,7 +73,6 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
             Id = Guid.NewGuid(),
             Slug = req.Slug,
             NameEs = req.NameEs,
-            NameEn = req.NameEn,
             ImageUrl = req.ImageUrl
         };
         db.Processes.Add(process);
@@ -85,7 +83,6 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
             Id = process.Id,
             Slug = process.Slug,
             NameEs = process.NameEs,
-            NameEn = process.NameEn,
             ImageUrl = process.ImageUrl,
             ProductCount = 0,
             Attributes = new List<ProcessAttributeDto>()
@@ -102,7 +99,6 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
         if (process is null) return NotFound();
 
         if (req.NameEs is not null) process.NameEs = req.NameEs;
-        if (req.NameEn is not null) process.NameEn = req.NameEn;
         if (req.Slug is not null) process.Slug = req.Slug;
         if (req.ImageUrl is not null) process.ImageUrl = req.ImageUrl;
 
@@ -113,7 +109,6 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
             Id = process.Id,
             Slug = process.Slug,
             NameEs = process.NameEs,
-            NameEn = process.NameEn,
             ImageUrl = process.ImageUrl,
             ProductCount = await db.Products.CountAsync(p => p.ProcessId == process.Id && p.IsActive),
             Attributes = process.Attributes.Select(a => new ProcessAttributeDto
@@ -199,11 +194,11 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
     {
         if (!await db.Processes.AnyAsync(c => c.Id == id)) return NotFound();
 
-        var parameters = await db.CostParameters
+        var parameters = await db.ProcessesCosts
             .Include(p => p.Process)
             .Where(p => p.ProcessId == id)
             .OrderBy(p => p.Label)
-            .Select(p => new CostParameterDto
+            .Select(p => new ProcessCostDto
             {
                 Id = p.Id, ProcessId = p.ProcessId, ProcessNameEs = p.Process.NameEs,
                 Key = p.Key, Label = p.Label, Unit = p.Unit, Value = p.Value, UpdatedAt = p.UpdatedAt
@@ -216,7 +211,7 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
     // POST /api/v1/admin/processes/{id}/cost-parameters
     [HttpPost("{id:guid}/cost-parameters")]
     [Authorize(Roles = "Master,PriceManagement")]
-    public async Task<IActionResult> AddCostParameter(Guid id, [FromBody] CreateCostParameterRequest req)
+    public async Task<IActionResult> AddCostParameter(Guid id, [FromBody] UpsertProcessCostRequest req)
     {
         var process = await db.Processes.FirstOrDefaultAsync(c => c.Id == id);
         if (process is null) return NotFound();
@@ -228,12 +223,12 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
             .Replace(" ", "_").Replace("(", "").Replace(")", "")
             .Replace("/", "_per_").Replace("²", "2").Trim('_');
 
-        var existing = await db.CostParameters
+        var existing = await db.ProcessesCosts
             .FirstOrDefaultAsync(p => p.ProcessId == id && p.Key == key);
         if (existing is not null)
             return Conflict(new { detail = $"Ya existe un parámetro con la clave '{key}' en este proceso." });
 
-        var param = new CostParameter
+        var param = new ProcessCost
         {
             Id = Guid.NewGuid(),
             ProcessId = id,
@@ -243,10 +238,10 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
             Value = req.Value,
             UpdatedAt = DateTime.UtcNow
         };
-        db.CostParameters.Add(param);
+        db.ProcessesCosts.Add(param);
         await db.SaveChangesAsync();
 
-        return StatusCode(201, new CostParameterDto
+        return StatusCode(201, new ProcessCostDto
         {
             Id = param.Id, ProcessId = param.ProcessId, ProcessNameEs = process.NameEs,
             Key = param.Key, Label = param.Label, Unit = param.Unit, Value = param.Value, UpdatedAt = param.UpdatedAt
@@ -256,12 +251,12 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
     // PUT /api/v1/admin/processes/{id}/cost-parameters/{parameterId}
     [HttpPut("{id:guid}/cost-parameters/{parameterId:guid}")]
     [Authorize(Roles = "Master,PriceManagement")]
-    public async Task<IActionResult> UpdateCostParameter(Guid id, Guid parameterId, [FromBody] UpdateCostParameterRequest req)
+    public async Task<IActionResult> UpdateCostParameter(Guid id, Guid parameterId, [FromBody] UpsertProcessCostRequest req)
     {
         var process = await db.Processes.FirstOrDefaultAsync(c => c.Id == id);
         if (process is null) return NotFound();
 
-        var param = await db.CostParameters
+        var param = await db.ProcessesCosts
             .FirstOrDefaultAsync(p => p.Id == parameterId && p.ProcessId == id);
         if (param is null) return NotFound();
 
@@ -279,7 +274,7 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
 
         // Recompute BaseCost for every material that references this cost parameter
         var affectedMaterialIds = await db.MaterialSupplyUsages
-            .Where(u => u.CostParameterId == parameterId)
+            .Where(u => u.ProcessCostId == parameterId)
             .Select(u => u.MaterialId)
             .Distinct()
             .ToListAsync();
@@ -288,12 +283,12 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
         {
             var usages = await db.MaterialSupplyUsages
                 .AsNoTracking()
-                .Include(u => u.CostParameter)
+                .Include(u => u.ProcessCost)
                 .Where(u => u.MaterialId == materialId)
                 .ToListAsync();
 
             var suppliesCost = pricing.ComputeMaterialBaseCost(
-                usages.Select(u => (u.CostParameter.Value, u.Quantity)));
+                usages.Select(u => (u.ProcessCost.Value, u.Quantity)));
 
             var material = await db.Materials.FirstAsync(m => m.Id == materialId);
             material.BaseCost = material.ManualBaseCost + suppliesCost;
@@ -302,7 +297,7 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
         if (affectedMaterialIds.Count > 0)
             await db.SaveChangesAsync();
 
-        return Ok(new CostParameterDto
+        return Ok(new ProcessCostDto
         {
             Id = param.Id, ProcessId = param.ProcessId, ProcessNameEs = process.NameEs,
             Key = param.Key, Label = param.Label, Unit = param.Unit, Value = param.Value, UpdatedAt = param.UpdatedAt
@@ -314,11 +309,11 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
     [Authorize(Roles = "Master,PriceManagement")]
     public async Task<IActionResult> DeleteCostParameter(Guid id, Guid parameterId)
     {
-        var param = await db.CostParameters
+        var param = await db.ProcessesCosts
             .FirstOrDefaultAsync(p => p.Id == parameterId && p.ProcessId == id);
         if (param is null) return NotFound();
 
-        db.CostParameters.Remove(param);
+        db.ProcessesCosts.Remove(param);
         await db.SaveChangesAsync();
         return NoContent();
     }

@@ -69,8 +69,8 @@
     if (typeof QRCode !== 'undefined') {
       new QRCode(container, {
         text: uri,
-        width: 180,
-        height: 180,
+        width: 300,
+        height: 300,
         colorDark: '#ffffff',
         colorLight: '#0a0e1a'
       });

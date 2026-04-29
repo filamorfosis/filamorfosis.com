@@ -65,7 +65,6 @@ public class AdminProcessPropertyTests
             {
                 Slug = uniqueSlug,
                 NameEs = nameEs,
-                NameEn = nameEn,
                 ImageUrl = null
             });
 
@@ -86,8 +85,7 @@ public class AdminProcessPropertyTests
 
         // Assert exact field match
         return fetched.Slug == uniqueSlug
-            && fetched.NameEs == nameEs
-            && fetched.NameEn == nameEn;
+            && fetched.NameEs == nameEs;
     }
 
     // ── Property 6: Process delete conflict ─────────────────────────────────
@@ -119,7 +117,6 @@ public class AdminProcessPropertyTests
                 Id = catId,
                 Slug = $"conflict-cat-{Guid.NewGuid():N}",
                 NameEs = "CatConflicto",
-                NameEn = "ConflictCat",
                 IsActive = true
             });
 
@@ -131,9 +128,7 @@ public class AdminProcessPropertyTests
                     ProcessId = catId,
                     Slug = $"prod-{Guid.NewGuid():N}",
                     TitleEs = $"Producto {i}",
-                    TitleEn = $"Product {i}",
                     DescriptionEs = "Descripción",
-                    DescriptionEn = "Description",
                     Tags = [],
                     ImageUrls = [],
                     IsActive = true,

@@ -80,6 +80,8 @@
       state.total = state.items.length;
       _applyFilter();
       renderCategoryFilterButtons();
+      // Populate the add-product dropdown in case it's visible
+      _populateAddProductCategoryDropdown();
     } catch (e) {
       if (tbody) {
         tbody.innerHTML = '<tr><td colspan="5" style="color:#f87171;text-align:center;padding:24px">' +
@@ -90,7 +92,7 @@
 
   function _applyFilter() {
     if (state.categoryId) {
-      state.filtered = state.items.filter(p => p.categoryId === state.categoryId);
+      state.filtered = state.items.filter(p => p.processId === state.categoryId);
     } else {
       state.filtered = state.items.slice();
     }
@@ -150,7 +152,7 @@
       return `
       <tr>
         <td style="font-weight:600;color:#e2e8f0">${esc(p.titleEs || p.title || '—')}</td>
-        <td style="color:#94a3b8;font-size:1rem">${esc(p.categoryNameEs || p.categoryName || '—')}</td>
+        <td style="color:#94a3b8;font-size:1rem">${esc(p.processNameEs || '—')}</td>
         <td>
           <span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:1rem;font-weight:600;
             background:${statusBg};color:${statusColor};border:1px solid ${statusBorder}">
@@ -194,7 +196,7 @@
     // Build count map
     const countMap = {};
     state.items.forEach(p => {
-      countMap[p.categoryId] = (countMap[p.categoryId] || 0) + 1;
+      countMap[p.processId] = (countMap[p.processId] || 0) + 1;
     });
 
     const allBtn = `
@@ -221,28 +223,35 @@
     renderCategoryFilterButtons();
   }
 
+  // -- Helper to populate add-product category dropdown ---------------------
+
+  function _populateAddProductCategoryDropdown() {
+    const select = document.getElementById('add-product-category');
+    if (!select) return;
+
+    const categories = (typeof AdminCategories !== 'undefined' && AdminCategories.getCategories)
+      ? AdminCategories.getCategories()
+      : [];
+
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">-- Seleccionar --</option>' +
+      categories.map(c => `<option value="${esc(c.id)}">${esc(c.nameEs)}</option>`).join('');
+    
+    // Restore previous selection if it still exists
+    if (currentValue && categories.some(c => c.id === currentValue)) {
+      select.value = currentValue;
+    }
+  }
+
   // -- Task 3.3 — init -------------------------------------------------------
 
   function init() {
-    // Add-product form toggle
-    const toggleBtn = document.getElementById('toggle-add-product');
-    const formWrap  = document.getElementById('add-product-form-wrap');
-    const cancelBtn = document.getElementById('cancel-add-product');
-    const addForm   = document.getElementById('add-product-form');
-
-    if (toggleBtn && formWrap) {
-      toggleBtn.addEventListener('click', () => formWrap.classList.toggle('open'));
-    }
-    if (cancelBtn && formWrap && addForm) {
-      cancelBtn.addEventListener('click', () => {
-        formWrap.classList.remove('open');
-        addForm.reset();
-        const errEl = document.getElementById('add-product-err');
-        if (errEl) errEl.textContent = '';
+    // Add-product button opens modal
+    const addProductBtn = document.getElementById('btn-add-product');
+    if (addProductBtn) {
+      addProductBtn.addEventListener('click', () => {
+        openEditProductModal(null);
       });
-    }
-    if (addForm) {
-      addForm.addEventListener('submit', saveProductModal);
     }
 
     // Product edit modal close
@@ -354,7 +363,7 @@
       : [];
 
     const catOptions = categories.map(c =>
-      `<option value="${esc(c.id)}" ${product && product.categoryId === c.id ? 'selected' : ''}>${esc(c.nameEs)}</option>`
+      `<option value="${esc(c.id)}" ${product && product.processId === c.id ? 'selected' : ''}>${esc(c.nameEs)}</option>`
     ).join('');
 
     const badgeOptions = [
@@ -461,7 +470,15 @@
                 <i class="fas fa-plus"></i> Agregar variante
               </button>
             </div>`
-          : '');
+          : `<div style="margin-top:20px;padding:16px;border-radius:8px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2)">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                <i class="fas fa-info-circle" style="color:#a78bfa;font-size:1.2rem"></i>
+                <span style="font-size:1rem;font-weight:600;color:#c4b5fd">Variantes del Producto</span>
+              </div>
+              <p style="color:#94a3b8;font-size:1rem;margin:0">
+                Para agregar variantes, primero debes guardar el producto. Una vez guardado, podrás agregar y configurar las variantes con sus materiales, precios y atributos.
+              </p>
+            </div>`);
 
     body.innerHTML = `
       <form id="prod-edit-form" class="admin-form" novalidate>
@@ -476,9 +493,9 @@
                            border:1px solid rgba(255,255,255,0.08);color:#e2e8f0;font-size:1rem;
                            display:flex;align-items:center;gap:8px">
                  <i class="fas fa-lock" style="color:#475569;font-size:1rem"></i>
-                 ${esc(product.categoryNameEs || '—')}
+                 ${esc(product.processNameEs || '—')}
                </div>
-               <input type="hidden" id="pedit-categoryId" value="${esc(product.categoryId)}">`
+               <input type="hidden" id="pedit-categoryId" value="${esc(product.processId)}">`
             : `<select id="pedit-categoryId" required>
                  <option value="">-- Seleccionar --</option>
                  ${catOptions}
@@ -526,29 +543,15 @@
 
   async function saveProductModal(event) {
     event.preventDefault();
-    const errEl = document.getElementById('pedit-err') || document.getElementById('add-product-err');
+    const errEl = document.getElementById('pedit-err');
     if (errEl) errEl.textContent = '';
 
-    // Determine which form is active
-    const isEditModal = !!document.getElementById('pedit-titleEs');
-    const titleEs     = isEditModal
-      ? (document.getElementById('pedit-titleEs') || {}).value?.trim()
-      : (event.target.querySelector('[name="titleEs"]') || {}).value?.trim();
-    const categoryId  = isEditModal
-      ? (document.getElementById('pedit-categoryId') || {}).value
-      : (event.target.querySelector('[name="categoryId"]') || {}).value;
-    const descriptionEs = isEditModal
-      ? (document.getElementById('pedit-descriptionEs') || {}).value?.trim()
-      : (event.target.querySelector('[name="descriptionEs"]') || {}).value?.trim();
-    const tagsRaw     = isEditModal
-      ? (document.getElementById('pedit-tags') || {}).value?.trim()
-      : (event.target.querySelector('[name="tags"]') || {}).value?.trim();
-    const badge       = isEditModal
-      ? (document.getElementById('pedit-badge') || {}).value
-      : (event.target.querySelector('[name="badge"]') || {}).value;
-    const isActive    = isEditModal
-      ? !!(document.getElementById('pedit-isActive') || {}).checked
-      : !!(event.target.querySelector('[name="isActive"]') || {}).checked;
+    const titleEs = (document.getElementById('pedit-titleEs') || {}).value?.trim();
+    const categoryId = (document.getElementById('pedit-categoryId') || {}).value;
+    const descriptionEs = (document.getElementById('pedit-descriptionEs') || {}).value?.trim();
+    const tagsRaw = (document.getElementById('pedit-tags') || {}).value?.trim();
+    const badge = (document.getElementById('pedit-badge') || {}).value;
+    const isActive = !!(document.getElementById('pedit-isActive') || {}).checked;
 
     if (!titleEs) {
       if (errEl) errEl.textContent = 'El título es requerido.';
@@ -563,17 +566,14 @@
 
     const data = {
       titleEs,
-      titleEn: titleEs,
-      categoryId,
+      processId: categoryId,
       descriptionEs: descriptionEs || null,
-      descriptionEn: descriptionEs || null,
       tags,
       badge: badge || null,
       isActive
     };
 
-    const btn = document.getElementById('pedit-save-btn') ||
-                event.target.querySelector('button[type="submit"]');
+    const btn = document.getElementById('pedit-save-btn');
     spin(btn, true);
 
     try {
@@ -586,11 +586,6 @@
       }
       spin(btn, false);
       _closeProductModal();
-      // Also close add-product form if it was open
-      const formWrap = document.getElementById('add-product-form-wrap');
-      if (formWrap) formWrap.classList.remove('open');
-      const addForm = document.getElementById('add-product-form');
-      if (addForm) addForm.reset();
       await loadProducts();
     } catch (err) {
       if (errEl) errEl.textContent = err.detail || 'Error al guardar el producto.';
@@ -661,9 +656,9 @@
 
   // Returns materials filtered to the current product's category (or all if no category match)
   function _filteredMaterials() {
-    const catId = _currentProduct && _currentProduct.categoryId;
+    const catId = _currentProduct && _currentProduct.processId;
     if (!catId) return _materials;
-    const filtered = _materials.filter(m => m.categoryId === catId);
+    const filtered = _materials.filter(m => m.processId === catId);
     return filtered.length ? filtered : _materials;
   }
 
@@ -714,6 +709,30 @@
 
     // -- Task 12.1 — _renderMaterialUsagesTable -------------------------------
 
+  function _checkStockAndUpdateAvailability() {
+    const availEl = document.getElementById('vmod-avail');
+    if (!availEl) return;
+
+    // Check if any material has zero stock
+    let hasZeroStock = false;
+    for (const row of _materialUsageRows) {
+      const mat = _materialsMap[row.materialId];
+      if (mat && (mat.stockQuantity ?? 0) <= 0) {
+        hasZeroStock = true;
+        break;
+      }
+    }
+
+    if (hasZeroStock) {
+      availEl.checked = false;
+      availEl.disabled = true;
+      availEl.title = 'No se puede marcar como disponible: uno o más materiales sin stock';
+    } else {
+      availEl.disabled = false;
+      availEl.title = '';
+    }
+  }
+
   function _renderMaterialUsagesTable() {
     const table    = document.getElementById('vmod-material-usages-table');
     const tbody    = document.getElementById('vmod-material-usages-tbody');
@@ -725,6 +744,7 @@
       if (table)   table.style.display = 'none';
       if (emptyEl) emptyEl.style.display = '';
       if (addBtn)  addBtn.removeAttribute('disabled');
+      _checkStockAndUpdateAvailability();
       return;
     }
 
@@ -737,11 +757,11 @@
     tbody.innerHTML = _materialUsageRows.map((row, idx) => {
       const lineCost = row.baseCost * row.quantity;
 
-      const opts = list.filter(m => !usedIds.has(m.id) || m.id === row.materialId).map(m =>
-        '<option value="' + esc(m.id) + '"' + (m.id === row.materialId ? ' selected' : '') + '>' +
-          esc(m.name) + (m.sizeLabel ? ' — ' + esc(m.sizeLabel) : '') +
-        '</option>'
-      ).join('');
+      const opts = list.filter(m => !usedIds.has(m.id) || m.id === row.materialId).map(m => {
+        return '<option value="' + esc(m.id) + '"' + (m.id === row.materialId ? ' selected' : '') + '>' +
+          esc(m.name) +
+        '</option>';
+      }).join('');
 
       const selMat   = _materialsMap[row.materialId];
       const stock    = selMat ? (selMat.stockQuantity ?? 0) : null;
@@ -755,35 +775,42 @@
                      : stock <= 5    ? 'rgba(234,179,8,0.12)'
                      :                 'rgba(34,197,94,0.12)';
 
+      // Stock warning message
+      const stockWarning = stock !== null && stock <= 0 
+        ? '<div style="color:#f87171;font-size:1rem;margin-top:4px"><i class="fas fa-exclamation-triangle"></i> Sin stock disponible</div>'
+        : stock !== null && stock <= 5
+        ? '<div style="color:#eab308;font-size:1rem;margin-top:4px"><i class="fas fa-exclamation-triangle"></i> Stock bajo</div>'
+        : '';
+
       return '<tr class="vmod-mat-row">' +
-        '<td class="vmod-mat-cell">' +
+        '<td class="vmod-mat-cell" style="padding:6px 8px">' +
           '<select id="vmod-mat-sel-' + idx + '"' +
                   ' onchange="AdminProducts._onMaterialUsageRowChange(' + idx + ')"' +
-                  ' class="inline-select">' +
+                  ' style="width:100%;background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:6px 10px;border-radius:6px;font-size:1rem;font-family:Poppins,sans-serif">' +
             opts +
           '</select>' +
+          stockWarning +
         '</td>' +
-        '<td class="vmod-mat-cell vmod-mat-cell--stock">' +
-          '<span class="vmod-stock-badge" style="color:' + stockClr + ';background:' + stockBg + '">' +
+        '<td class="vmod-mat-cell vmod-mat-cell--stock" style="padding:6px 8px;text-align:center">' +
+          '<span class="vmod-stock-badge" style="color:' + stockClr + ';background:' + stockBg + ';padding:4px 10px;border-radius:999px;font-weight:600;font-size:0.875rem;display:inline-block;white-space:nowrap">' +
             stockTxt +
           '</span>' +
         '</td>' +
-        '<td class="vmod-mat-cell vmod-mat-cell--qty">' +
-          '<input type="number" step="0.001" min="0.001"' +
+        '<td class="vmod-mat-cell vmod-mat-cell--qty" style="padding:6px 8px;text-align:right">' +
+          '<input type="number" step="0.01" min="0.01"' +
                  ' id="vmod-mat-qty-' + idx + '"' +
                  ' value="' + esc(String(row.quantity)) + '"' +
                  ' onchange="AdminProducts._onMaterialUsageRowChange(' + idx + ')"' +
-                 ' oninput="AdminProducts._onMaterialUsageRowChange(' + idx + ')"' +
-                 ' class="inline-input-sm">' +
+                 ' style="width:90px;background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:6px 10px;border-radius:6px;font-size:1rem;text-align:right">' +
         '</td>' +
-        '<td class="vmod-mat-cell vmod-mat-cell--cost" id="vmod-mat-cost-' + idx + '">' +
+        '<td class="vmod-mat-cell vmod-mat-cell--cost" id="vmod-mat-cost-' + idx + '" style="padding:6px 8px;text-align:right;color:#94a3b8;font-weight:600;font-size:1rem">' +
           '$' + fmt(lineCost) +
         '</td>' +
-        '<td class="vmod-mat-cell vmod-mat-cell--del">' +
+        '<td class="vmod-mat-cell vmod-mat-cell--del" style="padding:6px 8px;text-align:center">' +
           '<button type="button"' +
                   ' onclick="AdminProducts._removeMaterialUsageRow(' + idx + ')"' +
                   ' title="Eliminar fila"' +
-                  ' class="vmod-mat-del-btn">' +
+                  ' class="btn-admin btn-admin-danger btn-admin-sm">' +
             '<i class="fas fa-times"></i>' +
           '</button>' +
         '</td>' +
@@ -797,6 +824,8 @@
         addBtn.removeAttribute('disabled');
       }
     }
+
+    _checkStockAndUpdateAvailability();
   }
 
     // -- Task 5.3 — _updatePricePreview ---------------------------------------

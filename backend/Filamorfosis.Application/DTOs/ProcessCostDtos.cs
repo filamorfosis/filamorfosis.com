@@ -1,6 +1,6 @@
 namespace Filamorfosis.Application.DTOs;
 
-public class CostParameterDto
+public class ProcessCostDto
 {
     public Guid Id { get; set; }
     public Guid ProcessId { get; set; }
@@ -12,7 +12,7 @@ public class CostParameterDto
     public DateTime UpdatedAt { get; set; }
 }
 
-public record UpsertCostParameterRequest(
+public record UpsertProcessCostRequest(
     string Label,
     string Unit,
     decimal Value

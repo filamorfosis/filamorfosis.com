@@ -6,18 +6,15 @@ public class ProductVariant
     public Guid ProductId { get; set; }
     public string Sku { get; set; } = string.Empty;
     public string LabelEs { get; set; } = string.Empty;
-    public string LabelEn { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public bool IsAvailable { get; set; }
     public bool AcceptsDesignFile { get; set; }
     /// <summary>True when IsAvailable was set to false automatically by the pricing guard (effectivePrice below break-even).</summary>
     public bool WasAutoPaused { get; set; }
     public int StockQuantity { get; set; }
-    public int? WeightGrams { get; set; }
     public decimal BaseCost { get; set; } = 0;
     public decimal Profit { get; set; } = 0;
     public int? ManufactureTimeMinutes { get; set; }
-    public string? PrintType { get; set; }
     public Product Product { get; set; } = null!;
     public ICollection<Discount> Discounts { get; set; } = new List<Discount>();
     public ICollection<VariantAttributeValue> AttributeValues { get; set; } = new List<VariantAttributeValue>();

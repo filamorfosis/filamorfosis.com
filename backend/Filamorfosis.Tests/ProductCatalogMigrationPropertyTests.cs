@@ -73,9 +73,7 @@ public class ProductCatalogMigrationPropertyTests
                     ProcessId    = Guid.NewGuid(),
                     Slug          = "test-product",
                     TitleEs       = "Test",
-                    TitleEn       = "Test",
                     DescriptionEs = "D",
-                    DescriptionEn = "D",
                     Tags          = [],
                     ImageUrls     = [],
                     Badge         = badge,
@@ -114,8 +112,8 @@ public class ProductCatalogMigrationPropertyTests
         await db.Database.EnsureCreatedAsync();
 
         db.Processes.AddRange(
-            new Process { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "UV",    NameEn = "UV" },
-            new Process { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Laser", NameEn = "Laser" }
+            new Process { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "UV"},
+            new Process { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Laser"}
         );
         await db.SaveChangesAsync();
 
@@ -148,8 +146,8 @@ public class ProductCatalogMigrationPropertyTests
         await db.Database.EnsureCreatedAsync();
 
         db.Processes.AddRange(
-            new Process { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "UV",    NameEn = "UV" },
-            new Process { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Laser", NameEn = "Laser" }
+            new Process { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "UV"},
+            new Process { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Laser"}
         );
         await db.SaveChangesAsync();
         await DbSeeder.SeedProductsAsync(db);
@@ -189,8 +187,8 @@ public class ProductCatalogMigrationPropertyTests
         await db.Database.EnsureCreatedAsync();
 
         db.Processes.AddRange(
-            new Process { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "UV",    NameEn = "UV" },
-            new Process { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Laser", NameEn = "Laser" }
+            new Process { Id = Guid.NewGuid(), Slug = "uv-printing",   NameEs = "UV"},
+            new Process { Id = Guid.NewGuid(), Slug = "laser-cutting", NameEs = "Laser"}
         );
         await db.SaveChangesAsync();
         await DbSeeder.SeedProductsAsync(db);
@@ -251,9 +249,7 @@ public class ProductCatalogMigrationPropertyTests
                 db.Processes.Add(new Process {
                     Id     = Guid.NewGuid(),
                     Slug   = "uv-printing",
-                    NameEs = "UV",
-                    NameEn = "UV"
-                });
+                    NameEs = "UV"});
                 await db.SaveChangesAsync();
             }
 
@@ -267,9 +263,7 @@ public class ProductCatalogMigrationPropertyTests
                     ProcessId    = catId,
                     Slug          = $"prop6-{b ?? "null"}-{Guid.NewGuid():N}",
                     TitleEs       = $"P {b}",
-                    TitleEn       = $"P {b}",
                     DescriptionEs = "D",
-                    DescriptionEn = "D",
                     Tags          = [],
                     ImageUrls     = [],
                     Badge         = b,

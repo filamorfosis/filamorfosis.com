@@ -23,8 +23,7 @@ public class ProductFilterPropertyTests
             {
                 Id = id,
                 Slug = $"cat-{id:N}",
-                NameEs = $"Cat {i}",
-                NameEn = $"Cat {i}"
+                NameEs = $"Cat {i}"
             }).ToList();
 
             return Gen.Choose(1, 6).SelectMany(prodCount =>
@@ -41,9 +40,7 @@ public class ProductFilterPropertyTests
                                 ProcessId = catId,
                                 Slug = $"prod-{pid:N}",
                                 TitleEs = $"Producto {suffix}",
-                                TitleEn = $"Product {suffix}",
                                 DescriptionEs = "Desc",
-                                DescriptionEn = "Desc",
                                 Tags = [],
                                 ImageUrls = [],
                                 IsActive = isActive,
@@ -135,9 +132,7 @@ public class ProductFilterPropertyTests
         var expectedIds = products
             .Where(p => p.IsActive && (
                 p.TitleEs.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                p.TitleEn.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                p.DescriptionEs.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                p.DescriptionEn.Contains(term, StringComparison.OrdinalIgnoreCase)))
+                p.DescriptionEs.Contains(term, StringComparison.OrdinalIgnoreCase)))
             .Select(p => p.Id).ToHashSet();
 
         var returnedIds = result.Items.Select(p => p.Id).ToHashSet();
@@ -243,9 +238,7 @@ public class ProductFilterPropertyTests
         var expectedIds = products
             .Where(p => p.IsActive && (
                 p.TitleEs.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                p.TitleEn.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                p.DescriptionEs.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                p.DescriptionEn.Contains(term, StringComparison.OrdinalIgnoreCase)))
+                p.DescriptionEs.Contains(term, StringComparison.OrdinalIgnoreCase)))
             .Select(p => p.Id).ToHashSet();
 
         var returnedIds = result.Items.Select(p => p.Id).ToHashSet();
@@ -272,8 +265,7 @@ public class ProductFilterPropertyTests
             {
                 Id = id,
                 Slug = $"cat-{id:N}",
-                NameEs = $"Cat {i}",
-                NameEn = $"Cat {i}"
+                NameEs = $"Cat {i}"
             }).ToList();
 
             return Gen.Choose(2, 6).SelectMany(prodCount =>
@@ -290,9 +282,7 @@ public class ProductFilterPropertyTests
                                 ProcessId = catId,
                                 Slug = $"prod-{pid:N}",
                                 TitleEs = $"Producto {j}",
-                                TitleEn = $"Product {j}",
                                 DescriptionEs = "Desc",
-                                DescriptionEn = "Desc",
                                 Tags = [],
                                 ImageUrls = [],
                                 Badge = badge,
@@ -353,9 +343,7 @@ public class ProductFilterPropertyTests
         {
             Id = catId,
             Slug = "test-cat",
-            NameEs = "Test",
-            NameEn = "Test"
-        };
+            NameEs = "Test"};
 
         return Gen.Choose(5, 10).SelectMany(prodCount =>
         {
@@ -368,9 +356,7 @@ public class ProductFilterPropertyTests
                     ProcessId = catId,
                     Slug = $"prod-{j}",
                     TitleEs = $"Producto {j}",
-                    TitleEn = $"Product {j}",
                     DescriptionEs = "Desc",
-                    DescriptionEn = "Desc",
                     Tags = [],
                     ImageUrls = [],
                     IsActive = true,
