@@ -112,8 +112,11 @@
   }
 
   /** GET /api/v1/admin/products/{id} — single product with variants + discounts */
-  function adminGetProduct(id) {
-    return apiFetch(`/admin/products/${id}`);
+  function adminGetProduct(id, bustCache = false) {
+    const url = bustCache 
+      ? `/admin/products/${id}?_t=${Date.now()}`
+      : `/admin/products/${id}`;
+    return apiFetch(url);
   }
 
   /** POST /api/v1/admin/products — create a new product */
@@ -357,6 +360,13 @@
     return apiFetch(`/admin/materials/${id}`, { method: 'DELETE' });
   }
 
+  /** POST /api/v1/admin/materials/{id}/recompute-variants — recalculate variant prices after material cost change */
+  function adminRecomputeVariantPrices(materialId) {
+    return apiFetch(`/admin/materials/${materialId}/recompute-variants`, {
+      method: 'POST'
+    });
+  }
+
   // ── Process Costs ─────────────────────────────────────────────────────────
 
   /** GET /api/v1/admin/process-costs — returns all process costs grouped by process */
@@ -525,6 +535,7 @@
     adminCreateMaterial,
     adminUpdateMaterial,
     adminDeleteMaterial,
+    adminRecomputeVariantPrices,
     // process costs
     adminGetProcessCosts,
     adminUpsertProcessCost,

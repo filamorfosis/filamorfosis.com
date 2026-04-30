@@ -374,8 +374,21 @@
     let product = null;
     if (id) {
       try {
-        product = await adminApi.adminGetProduct(id);
+        console.log('[AdminProducts] Fetching product data from server for ID:', id);
+        // Always bust cache to ensure we get fresh data (especially after material cost updates)
+        product = await adminApi.adminGetProduct(id, true);
         _currentProduct = product;
+        console.log('[AdminProducts] Product data fetched:', {
+          id: product.id,
+          title: product.titleEs,
+          variantCount: product.variants?.length,
+          variants: product.variants?.map(v => ({
+            id: v.id,
+            label: v.labelEs,
+            baseCost: v.baseCost,
+            price: v.price
+          }))
+        });
       } catch (e) {
         body.innerHTML = '<div style="color:#f87171;text-align:center;padding:24px">' +
           '<i class="fas fa-exclamation-triangle"></i> ' +
@@ -1774,7 +1787,9 @@
     _openCategoryAssignmentModal,
     _closeCategoryAssignmentModal,
     _toggleCategoryCollapse,
-    _saveCategoryAssignmentModal
+    _saveCategoryAssignmentModal,
+    // Expose editing state for external modules
+    get _editingProductId() { return _editingProductId; }
   };
 
 }(window));

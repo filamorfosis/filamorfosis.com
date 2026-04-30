@@ -498,13 +498,19 @@ function renderModal(p) {
                     // Compute effective price client-side from discounts (same logic as admin table)
                     var now = new Date();
                     var effectivePrice = v.price ?? 0;
+                    var appliedDiscounts = []; // Track applied discounts for display
                     (v.discounts || []).forEach(function(d) {
                         var starts = d.startsAt ? new Date(d.startsAt) : null;
                         var ends   = d.endsAt   ? new Date(d.endsAt)   : null;
                         var active = (!starts || starts <= now) && (!ends || ends >= now);
                         if (!active) return;
-                        if (d.discountType === 'Percentage') effectivePrice = effectivePrice * (1 - d.value / 100);
-                        else effectivePrice = Math.max(0, effectivePrice - d.value);
+                        if (d.discountType === 'Percentage') {
+                            effectivePrice = effectivePrice * (1 - d.value / 100);
+                            appliedDiscounts.push({ type: 'Percentage', value: d.value });
+                        } else {
+                            effectivePrice = Math.max(0, effectivePrice - d.value);
+                            appliedDiscounts.push({ type: 'Fixed', value: d.value });
+                        }
                     });
                     // Also use server-sent effectivePrice if it's valid and lower
                     if (v.effectivePrice != null && v.effectivePrice > 0 && v.effectivePrice < effectivePrice) {
@@ -512,7 +518,31 @@ function renderModal(p) {
                     }
 
                     var hasDiscount = available && effectivePrice < (v.price ?? 0);
-                    var discountPct = hasDiscount ? Math.round((1 - effectivePrice / v.price) * 100) : 0;
+                    
+                    // Build discount badge text based on discount type
+                    var discountBadge = '';
+                    if (hasDiscount) {
+                        // Calculate total discount amount
+                        var totalDiscountAmount = (v.price ?? 0) - effectivePrice;
+                        
+                        if (appliedDiscounts.length === 1) {
+                            // Single discount - show based on type
+                            var discount = appliedDiscounts[0];
+                            if (discount.type === 'Percentage') {
+                                discountBadge = '-' + Math.round(discount.value) + '%';
+                            } else {
+                                discountBadge = '-$' + Math.round(discount.value);
+                            }
+                        } else if (appliedDiscounts.length > 1) {
+                            // Multiple discounts - show total dollar amount
+                            discountBadge = '-$' + Math.round(totalDiscountAmount);
+                        } else {
+                            // Fallback: calculate percentage if no discount info available
+                            var discountPct = Math.round((1 - effectivePrice / v.price) * 100);
+                            discountBadge = '-' + discountPct + '%';
+                        }
+                    }
+                    
                     var priceLabel = available ? ('$' + Math.round(hasDiscount ? effectivePrice : v.price) + ' MXN') : '';
                     return `<div class="modal-variant-item${!available ? ' unavailable' : ''}" data-variant-id="${v.id}">
                         <label class="modal-variant-check-wrap${!available ? ' modal-variant-check-wrap--disabled' : ''}">
@@ -523,7 +553,7 @@ function renderModal(p) {
                         <span class="modal-variant-price">
                             ${hasDiscount ? `
                                 <span style="text-decoration:line-through;color:#64748b;font-size:1rem;margin-right:2px">$${Math.round(v.price)}</span>
-                                <span class="variant-discount-badge">-${discountPct}%</span>
+                                <span class="variant-discount-badge">${discountBadge}</span>
                                 <span style="color:#fb923c;font-weight:700">$${Math.round(effectivePrice)} MXN</span>
                             ` : priceLabel}
                         </span>

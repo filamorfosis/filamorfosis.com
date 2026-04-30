@@ -217,17 +217,27 @@
       ).join('');
   }
 
-  function openAddMaterialModal() {
+  async function openAddMaterialModal() {
     _editingMaterialId = null;
     _clearMaterialForm();
     const title = document.getElementById('material-modal-title');
     if (title) title.textContent = 'Agregar Material';
+    
+    // Ensure processes are loaded before populating dropdown
+    if (typeof AdminProcesses !== 'undefined' && AdminProcesses.loadProcesses) {
+      const processes = AdminProcesses.getProcesses();
+      if (!processes || processes.length === 0) {
+        console.log('[AdminCosts] Processes not loaded, loading now...');
+        await AdminProcesses.loadProcesses();
+      }
+    }
+    
     _populateCategorySelect(null);
     const modal = _getMaterialModal();
     if (modal) modal.style.display = 'flex';
   }
 
-  function openEditMaterialModal(id) {
+  async function openEditMaterialModal(id) {
     const mat = _materials.find(m => m.id === id);
     if (!mat) return;
     _editingMaterialId = id;
@@ -235,6 +245,15 @@
 
     const title = document.getElementById('material-modal-title');
     if (title) title.textContent = 'Editar Material';
+
+    // Ensure processes are loaded before populating dropdown
+    if (typeof AdminProcesses !== 'undefined' && AdminProcesses.loadProcesses) {
+      const processes = AdminProcesses.getProcesses();
+      if (!processes || processes.length === 0) {
+        console.log('[AdminCosts] Processes not loaded, loading now...');
+        await AdminProcesses.loadProcesses();
+      }
+    }
 
     _populateCategorySelect(mat.processId);
     _setField('mat-name', mat.name);
@@ -502,19 +521,58 @@
     spin(btn, true);
     try {
       let saved;
+      let materialId;
       if (_editingMaterialId) {
         saved = await adminApi.adminUpdateMaterial(_editingMaterialId, data);
-        toast('Material actualizado');
+        materialId = _editingMaterialId;
+        
+        // Recompute affected variant prices
+        try {
+          const result = await adminApi.adminRecomputeVariantPrices(materialId);
+          if (result && result.recomputedCount > 0) {
+            console.log(`Recomputed ${result.recomputedCount} variant(s)`);
+            toast(`Material actualizado. ${result.recomputedCount} variante(s) actualizada(s)`);
+          } else {
+            toast('Material actualizado');
+          }
+        } catch (recomputeErr) {
+          console.error('Error recomputing variant prices:', recomputeErr);
+          toast('Material actualizado (error al recalcular variantes)', false);
+        }
       } else {
         saved = await adminApi.adminCreateMaterial(data);
         toast('Material creado');
       }
+      
       spin(btn, false);
       closeMaterialModal();
+      
+      // Reload materials data
       await loadAll();
-      // Refresh products table to update stock status badges
+      
+      // Force refresh products table
       if (typeof AdminProducts !== 'undefined' && AdminProducts.loadProducts) {
+        console.log('[AdminCosts] Refreshing products table after material update...');
         await AdminProducts.loadProducts();
+      }
+      
+      // If a product modal is open, refresh it with fresh data
+      const productModal = document.getElementById('prod-edit-modal');
+      if (productModal && productModal.style.display === 'flex') {
+        const editingProductId = window.AdminProducts?._editingProductId;
+        if (editingProductId) {
+          console.log('[AdminCosts] Product modal is open, refreshing with ID:', editingProductId);
+          // Close the modal first to clear state
+          productModal.style.display = 'none';
+          // Small delay to ensure DOM updates, then reopen with fresh data
+          setTimeout(async () => {
+            console.log('[AdminCosts] Reopening product modal to fetch fresh data...');
+            if (typeof AdminProducts !== 'undefined' && AdminProducts.openEditProductModal) {
+              await AdminProducts.openEditProductModal(editingProductId);
+              console.log('[AdminCosts] Product modal refreshed with fresh data');
+            }
+          }, 50);
+        }
       }
     } catch (err) {
       if (errEl) errEl.textContent = err.detail || 'Error al guardar el material.';
