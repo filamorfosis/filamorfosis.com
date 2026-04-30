@@ -43,6 +43,7 @@
   let _editingProductId = null;
   let _editingVariantId = null;
   let _editingVariantProductId = null;
+  let _currentProductAssignedCategories = []; // Stores assigned categories for the category modal
   let _materials = [];
   let _materialsMap = {};      // { materialId: material } for quick lookup
   let _currentProduct = null;   // full product object while edit modal is open
@@ -361,6 +362,15 @@
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 
+    // Ensure processes are loaded before rendering the modal
+    if (typeof AdminProcesses !== 'undefined' && AdminProcesses.getProcesses) {
+      const processes = AdminProcesses.getProcesses();
+      if (!processes || processes.length === 0) {
+        console.log('Processes not loaded, loading now...');
+        await AdminProcesses.loadProcesses();
+      }
+    }
+
     let product = null;
     if (id) {
       try {
@@ -374,12 +384,12 @@
       }
     }
 
-    const categories = (typeof AdminCategories !== 'undefined' && AdminCategories.getCategories)
-      ? AdminCategories.getCategories()
+    const categories = (typeof AdminProcesses !== 'undefined' && AdminProcesses.getProcesses)
+      ? AdminProcesses.getProcesses()
       : [];
 
     const catOptions = categories.map(c =>
-      `<option value="${esc(c.id)}" ${product && product.processId === c.id ? 'selected' : ''}>${esc(c.name)}</option>`
+      `<option value="${esc(c.id)}" ${product && product.processId === c.id ? 'selected' : ''}>${esc(c.nameEs)}</option>`
     ).join('');
 
     const badgeOptions = [
@@ -539,14 +549,18 @@
       
       <!-- Category Assignment Section -->
       <div class="admin-form-full category-assignment-section">
-        <div class="category-assignment-header">
-          <i class="fas fa-tags"></i>
-          <span>Categorías</span>
-        </div>
-        <div id="product-categories-assignment" class="category-assignment-container">
-          <div class="category-assignment-loading">
-            <i class="fas fa-spinner fa-spin"></i> Cargando categorías...
+        <div class="category-assignment-header" style="display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex;align-items:center;gap:8px">
+            <i class="fas fa-tags"></i>
+            <span>Categorías</span>
           </div>
+          <button type="button" class="btn-admin btn-admin-secondary btn-admin-sm" 
+                  onclick="AdminProducts._openCategoryAssignmentModal()">
+            <i class="fas fa-edit"></i> Asignar categorías
+          </button>
+        </div>
+        <div id="product-categories-summary" class="category-assignment-summary" style="padding:12px;background:rgba(139,92,246,0.05);border-radius:6px;min-height:40px">
+          <span style="color:#64748b;font-size:1rem">Cargando...</span>
         </div>
       </div>
       
@@ -576,56 +590,52 @@
 
   /**
    * Render the category assignment UI in the product editor modal.
-   * Fetches categories and subcategories from AdminCategories.getCategories() and currently assigned
-   * categories via adminApi.adminGetProductCategories(productId).
-   * Renders a simplified two-level structure: categories with their subcategories.
-   * Products are assigned to subcategories, which automatically inherit the parent category.
+   * Now shows a summary in the product modal and provides a button to open
+   * a separate modal for full category assignment.
    * 
    * @param {Object} product - Product object (null for new products)
    */
   async function _renderCategoryAssignmentUI(product) {
-    const container = document.getElementById('product-categories-assignment');
-    if (!container) return;
+    const summaryContainer = document.getElementById('product-categories-summary');
+    if (!summaryContainer) return;
 
     // Show loading state
-    container.innerHTML = '<div class="category-assignment-loading">' +
-      '<i class="fas fa-spinner fa-spin"></i> Cargando categorías...' +
-      '</div>';
+    summaryContainer.innerHTML = '<span style="color:#64748b;font-size:1rem">' +
+      '<i class="fas fa-spinner fa-spin"></i> Cargando categorías...</span>';
 
     try {
-      // Fetch all categories from AdminCategories cache
-      const allCategories = (typeof AdminCategories !== 'undefined' && AdminCategories.getCategories)
-        ? AdminCategories.getCategories()
-        : [];
-
       // Fetch currently assigned categories for this product (if editing)
-      let assignedCategoryIds = [];
+      let assignedCategories = [];
       if (product && product.id) {
         try {
-          const assignedCategories = await adminApi.adminGetProductCategories(product.id);
-          assignedCategoryIds = assignedCategories.map(c => c.id);
+          assignedCategories = await adminApi.adminGetProductCategories(product.id);
         } catch (e) {
           console.error('Error loading assigned categories:', e);
-          // Continue with empty array if fetch fails
         }
       }
 
-      // Render simplified two-level category structure
-      const categoriesHtml = _renderSimplifiedCategoryTree(allCategories, assignedCategoryIds);
+      // Store assigned categories for the modal
+      _currentProductAssignedCategories = assignedCategories;
 
-      if (!allCategories.length) {
-        container.innerHTML = '<div style="text-align:center;color:#64748b;padding:20px;font-size:1rem">' +
-          '<i class="fas fa-folder-open" style="font-size:1.5rem;margin-bottom:8px;display:block;opacity:0.5"></i>' +
-          'No hay categorías disponibles' +
-          '</div>';
+      // Render summary
+      if (!assignedCategories.length) {
+        summaryContainer.innerHTML = '<span style="color:#64748b;font-size:1rem">' +
+          '<i class="fas fa-folder-open"></i> Sin categorías asignadas</span>';
       } else {
-        container.innerHTML = categoriesHtml;
+        const categoryNames = assignedCategories.map(c => {
+          const icon = c.icon || '📄';
+          return '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(139,92,246,0.15);border-radius:4px;margin:2px">' +
+            '<span style="font-size:1rem">' + esc(icon) + '</span>' +
+            '<span style="color:#e2e8f0;font-size:1rem">' + esc(c.name) + '</span>' +
+            '</span>';
+        }).join(' ');
+        
+        summaryContainer.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:6px">' + categoryNames + '</div>';
       }
     } catch (e) {
-      console.error('Error rendering category assignment UI:', e);
-      container.innerHTML = '<div style="color:#f87171;text-align:center;padding:20px;font-size:1rem">' +
-        '<i class="fas fa-exclamation-triangle"></i> Error al cargar categorías' +
-        '</div>';
+      console.error('Error rendering category summary:', e);
+      summaryContainer.innerHTML = '<span style="color:#f87171;font-size:1rem">' +
+        '<i class="fas fa-exclamation-triangle"></i> Error al cargar categorías</span>';
     }
   }
 
@@ -681,6 +691,230 @@
         return html;
       }).join('') +
       '</div>';
+  }
+
+  // -- Category Assignment Modal (separate modal on top of product modal) ---
+
+  /**
+   * Open the category assignment modal.
+   * This modal stacks on top of the product modal for better UX.
+   */
+  function _openCategoryAssignmentModal() {
+    console.log('Opening category assignment modal...');
+    
+    let modal = document.getElementById('category-assignment-modal');
+    if (!modal) {
+      console.log('Modal not found, creating it...');
+      _createCategoryAssignmentModal();
+      modal = document.getElementById('category-assignment-modal');
+    }
+    
+    if (!modal) {
+      console.error('Failed to create category assignment modal');
+      return;
+    }
+    
+    console.log('Modal found, displaying it...');
+    modal.style.display = 'flex';
+    _renderCategoryAssignmentModalContent();
+  }
+
+  /**
+   * Close the category assignment modal and refresh the summary in the product modal.
+   */
+  function _closeCategoryAssignmentModal() {
+    const modal = document.getElementById('category-assignment-modal');
+    if (modal) modal.style.display = 'none';
+    
+    // Refresh the summary in the product modal
+    const product = _editingProductId ? { id: _editingProductId } : null;
+    _renderCategoryAssignmentUI(product);
+  }
+
+  /**
+   * Create the category assignment modal HTML and append to body.
+   */
+  function _createCategoryAssignmentModal() {
+    const modalHtml = `
+      <div id="category-assignment-modal" class="admin-modal-overlay" 
+           style="display:none;position:fixed;inset:0;z-index:10650;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px)">
+        <div class="admin-modal-box" style="max-width:600px">
+          <button class="admin-modal-close" onclick="AdminProducts._closeCategoryAssignmentModal()" aria-label="Cerrar">
+            <i class="fas fa-times"></i>
+          </button>
+          <div class="admin-modal-title">
+            <i class="fas fa-tags" style="margin-right:8px"></i>
+            Asignar Categorías
+          </div>
+          <div class="admin-modal-subtitle">Selecciona las categorías para este producto</div>
+          
+          <div id="category-assignment-modal-content" style="max-height:500px;overflow-y:auto;padding:12px 0">
+            <div style="text-align:center;padding:24px;color:#64748b">
+              <i class="fas fa-spinner fa-spin"></i> Cargando...
+            </div>
+          </div>
+          
+          <div class="modal-error" id="category-assignment-modal-err"></div>
+          <div style="display:flex;gap:10px;margin-top:18px">
+            <button type="button" class="btn-modal-ghost" style="flex:1" onclick="AdminProducts._closeCategoryAssignmentModal()">
+              <i class="fas fa-times"></i>&nbsp; Cancelar
+            </button>
+            <button type="button" class="btn-modal-primary" style="flex:1" onclick="AdminProducts._saveCategoryAssignmentModal()">
+              <i class="fas fa-save"></i>&nbsp; Guardar
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    console.log('Category assignment modal created and appended to body');
+  }
+
+  /**
+   * Render the collapsible category tree in the assignment modal.
+   */
+  async function _renderCategoryAssignmentModalContent() {
+    const container = document.getElementById('category-assignment-modal-content');
+    if (!container) return;
+
+    container.innerHTML = '<div style="text-align:center;padding:24px;color:#64748b">' +
+      '<i class="fas fa-spinner fa-spin"></i> Cargando categorías...</div>';
+
+    try {
+      // Fetch all categories
+      const allCategories = (typeof AdminCategories !== 'undefined' && AdminCategories.getCategories)
+        ? AdminCategories.getCategories()
+        : [];
+
+      // Get assigned category IDs
+      const assignedIds = _currentProductAssignedCategories.map(c => c.id);
+
+      if (!allCategories.length) {
+        container.innerHTML = '<div style="text-align:center;color:#64748b;padding:24px;font-size:1rem">' +
+          '<i class="fas fa-folder-open" style="font-size:1.5rem;margin-bottom:8px;display:block;opacity:0.5"></i>' +
+          'No hay categorías disponibles' +
+          '</div>';
+        return;
+      }
+
+      // Render collapsible category tree
+      container.innerHTML = _renderCollapsibleCategoryTree(allCategories, assignedIds);
+    } catch (e) {
+      console.error('Error rendering category assignment modal:', e);
+      container.innerHTML = '<div style="color:#f87171;text-align:center;padding:24px;font-size:1rem">' +
+        '<i class="fas fa-exclamation-triangle"></i> Error al cargar categorías' +
+        '</div>';
+    }
+  }
+
+  /**
+   * Render collapsible category tree with expand/collapse functionality.
+   * @param {Array} categories - Array of category objects
+   * @param {Array} assignedIds - Array of currently assigned category IDs
+   * @returns {string} HTML string for the collapsible tree
+   */
+  function _renderCollapsibleCategoryTree(categories, assignedIds) {
+    if (!categories || !categories.length) return '';
+
+    return '<div class="collapsible-category-tree" style="display:flex;flex-direction:column;gap:8px">' +
+      categories.map((category, idx) => {
+        const icon = category.icon || '📁';
+        const name = category.name || '(Sin nombre)';
+        const subcategories = category.subCategories || [];
+        const hasSubcategories = subcategories.length > 0;
+
+        let html = '<div class="category-collapsible-group" style="border:1px solid rgba(139,92,246,0.2);border-radius:8px;overflow:hidden">';
+        
+        // Category header (clickable to expand/collapse)
+        html += '<div class="category-collapsible-header" ' +
+          'onclick="AdminProducts._toggleCategoryCollapse(\'cat-' + idx + '\')" ' +
+          'style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:rgba(139,92,246,0.08);cursor:pointer;user-select:none">' +
+          '<div style="display:flex;align-items:center;gap:8px">' +
+            '<i class="fas fa-chevron-right category-collapse-icon" id="cat-icon-' + idx + '" ' +
+            'style="color:#8b5cf6;font-size:1rem;transition:transform 0.2s"></i>' +
+            '<span style="font-size:1.2rem">' + esc(icon) + '</span>' +
+            '<span style="color:#e2e8f0;font-size:1rem;font-weight:600">' + esc(name) + '</span>' +
+          '</div>' +
+          '<span style="color:#64748b;font-size:1rem">' + subcategories.length + ' subcategorías</span>' +
+          '</div>';
+
+        // Subcategories (collapsible)
+        if (hasSubcategories) {
+          html += '<div id="cat-' + idx + '" class="category-collapsible-content" style="display:none;padding:12px;background:rgba(139,92,246,0.03)">';
+          html += '<div style="display:flex;flex-direction:column;gap:8px">';
+          
+          subcategories.forEach(sub => {
+            const isChecked = assignedIds.includes(sub.id);
+            const subIcon = sub.icon || '📄';
+            const subName = sub.name || '(Sin nombre)';
+            
+            html += '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px;border-radius:4px;transition:background 0.2s" ' +
+              'onmouseover="this.style.background=\'rgba(139,92,246,0.1)\'" ' +
+              'onmouseout="this.style.background=\'\'">' +
+              '<input type="checkbox" ' +
+              'class="category-assignment-checkbox" ' +
+              'data-category-id="' + esc(sub.id) + '" ' +
+              'data-parent-category-id="' + esc(category.id) + '" ' +
+              (isChecked ? 'checked ' : '') +
+              'style="width:18px;height:18px;cursor:pointer;accent-color:#8b5cf6">' +
+              '<span style="font-size:1rem">' + esc(subIcon) + '</span>' +
+              '<span style="color:#e2e8f0;font-size:1rem">' + esc(subName) + '</span>' +
+              '</label>';
+          });
+          
+          html += '</div></div>';
+        } else {
+          html += '<div id="cat-' + idx + '" class="category-collapsible-content" style="display:none;padding:12px;background:rgba(139,92,246,0.03)">' +
+            '<div style="color:#64748b;font-size:1rem;text-align:center">Sin subcategorías</div>' +
+            '</div>';
+        }
+
+        html += '</div>';
+        return html;
+      }).join('') +
+      '</div>';
+  }
+
+  /**
+   * Toggle collapse/expand for a category.
+   * @param {string} categoryId - Category element ID
+   */
+  function _toggleCategoryCollapse(categoryId) {
+    const content = document.getElementById(categoryId);
+    const icon = document.getElementById(categoryId.replace('cat-', 'cat-icon-'));
+    
+    if (!content) return;
+    
+    if (content.style.display === 'none') {
+      content.style.display = 'block';
+      if (icon) icon.style.transform = 'rotate(90deg)';
+    } else {
+      content.style.display = 'none';
+      if (icon) icon.style.transform = 'rotate(0deg)';
+    }
+  }
+
+  /**
+   * Save category assignments from the modal.
+   */
+  async function _saveCategoryAssignmentModal() {
+    if (!_editingProductId) {
+      toast('Debes guardar el producto primero antes de asignar categorías.', false);
+      return;
+    }
+
+    const errEl = document.getElementById('category-assignment-modal-err');
+    if (errEl) errEl.textContent = '';
+
+    try {
+      const selectedIds = _getSelectedCategoryIds();
+      await _saveCategoryAssignments(_editingProductId, selectedIds);
+      toast('Categorías guardadas');
+      _closeCategoryAssignmentModal();
+    } catch (err) {
+      if (errEl) errEl.textContent = err.message || 'Error al guardar categorías.';
+    }
   }
 
   /**
@@ -741,13 +975,17 @@
       if (errEl) errEl.textContent = 'El procesamiento es requerido.';
       return;
     }
+    if (!descriptionEs) {
+      if (errEl) errEl.textContent = 'La descripción es requerida.';
+      return;
+    }
 
     const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
 
     const data = {
       titleEs,
       processId: categoryId,
-      descriptionEs: descriptionEs || null,
+      descriptionEs,
       tags,
       badge: badge || null,
       isActive
@@ -1531,7 +1769,12 @@
     _deleteProductDiscount,
     // Category assignment (Task 12.2)
     _renderCategoryAssignmentUI,
-    _getSelectedCategoryIds
+    _getSelectedCategoryIds,
+    // Category assignment modal
+    _openCategoryAssignmentModal,
+    _closeCategoryAssignmentModal,
+    _toggleCategoryCollapse,
+    _saveCategoryAssignmentModal
   };
 
 }(window));
