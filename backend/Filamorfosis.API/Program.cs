@@ -103,7 +103,10 @@ builder.Services.AddAuthentication(options =>
     {
         OnMessageReceived = ctx =>
         {
-            if (ctx.Request.Cookies.TryGetValue("access_token", out var token))
+            // Check for admin_access_token first (for admin endpoints), then fall back to access_token (for customer endpoints)
+            if (ctx.Request.Cookies.TryGetValue("admin_access_token", out var adminToken))
+                ctx.Token = adminToken;
+            else if (ctx.Request.Cookies.TryGetValue("access_token", out var token))
                 ctx.Token = token;
             return Task.CompletedTask;
         }

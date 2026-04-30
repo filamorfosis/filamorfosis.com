@@ -313,18 +313,21 @@ public class AdminAuthController(
         // Use SameSite=Lax for localhost to allow development without HTTPS
         var sameSite = isLocalhost ? SameSiteMode.Lax : SameSiteMode.None;
 
-        Response.Cookies.Append("access_token", accessToken, new CookieOptions
+        // Use different cookie names for admin to avoid conflicts with customer auth
+        Response.Cookies.Append("admin_access_token", accessToken, new CookieOptions
         {
             HttpOnly = true,
             SameSite = sameSite,
             Secure = secure,
+            Path = "/",
             Expires = DateTimeOffset.UtcNow.AddHours(24)
         });
-        Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+        Response.Cookies.Append("admin_refresh_token", refreshToken, new CookieOptions
         {
             HttpOnly = true,
             SameSite = sameSite,
             Secure = secure,
+            Path = "/",
             Expires = DateTimeOffset.UtcNow.AddDays(jwtService.RefreshTokenExpiryDays)
         });
     }

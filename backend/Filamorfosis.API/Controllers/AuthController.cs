@@ -295,6 +295,7 @@ public class AuthController(
             HttpOnly = true,
             SameSite = sameSite,
             Secure = secure,
+            Path = "/",
             Expires = DateTimeOffset.UtcNow.AddHours(24)
         });
         Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
@@ -302,6 +303,7 @@ public class AuthController(
             HttpOnly = true,
             SameSite = sameSite,
             Secure = secure,
+            Path = "/",
             Expires = DateTimeOffset.UtcNow.AddDays(jwtService.RefreshTokenExpiryDays)
         });
     }
