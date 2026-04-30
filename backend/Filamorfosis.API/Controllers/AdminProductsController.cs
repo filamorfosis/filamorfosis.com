@@ -29,6 +29,8 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         var query = db.Products
             .Include(p => p.Process)
             .Include(p => p.Discounts)
+            .Include(p => p.CategoryAssignments)
+                .ThenInclude(ca => ca.Category)
             .Include(p => p.Variants)
                 .ThenInclude(v => v.Discounts)
             .Include(p => p.Variants)
@@ -402,6 +404,96 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         return Ok(new { imageUrls = p.ImageUrls });
     }
 
+    [HttpGet("{id:guid}/categories")]
+    public async Task<IActionResult> GetProductCategories(Guid id)
+    {
+        var product = await db.Products
+            .Include(p => p.CategoryAssignments)
+                .ThenInclude(ca => ca.Category)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (product is null)
+            return NotFound();
+
+        var categories = product.CategoryAssignments
+            .Select(ca => new CategoryDto
+            {
+                Id = ca.Category.Id,
+                Name = ca.Category.Name,
+                Slug = ca.Category.Slug,
+                Description = ca.Category.Description,
+                Icon = ca.Category.Icon
+            })
+            .ToList();
+
+        return Ok(categories);
+    }
+
+    [HttpPut("{id:guid}/categories")]
+    public async Task<IActionResult> UpdateProductCategories(Guid id, [FromBody] AssignCategoriesRequest req)
+    {
+        // Check if product exists
+        var product = await db.Products
+            .Include(p => p.CategoryAssignments)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (product is null)
+            return NotFound();
+
+        // Validate all category IDs exist in database
+        var categoryIds = req.CategoryIds.Distinct().ToList();
+        var existingCategories = await db.ProductCategories
+            .Where(c => categoryIds.Contains(c.Id))
+            .Select(c => c.Id)
+            .ToListAsync();
+
+        var invalidCategoryIds = categoryIds.Except(existingCategories).ToList();
+        if (invalidCategoryIds.Any())
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Type = "https://filamorfosis.com/errors/validation",
+                Title = "Validation Error",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = $"Las siguientes categorías no existen: {string.Join(", ", invalidCategoryIds)}"
+            });
+        }
+
+        // Remove all existing ProductCategoryAssignments for the product
+        db.ProductCategoryAssignments.RemoveRange(product.CategoryAssignments);
+
+        // Create new ProductCategoryAssignments for provided category IDs
+        foreach (var categoryId in categoryIds)
+        {
+            db.ProductCategoryAssignments.Add(new ProductCategoryAssignment
+            {
+                ProductId = id,
+                CategoryId = categoryId
+            });
+        }
+
+        await db.SaveChangesAsync();
+
+        // Return updated category list
+        var updatedProduct = await db.Products
+            .Include(p => p.CategoryAssignments)
+                .ThenInclude(ca => ca.Category)
+            .FirstAsync(p => p.Id == id);
+
+        var categories = updatedProduct.CategoryAssignments
+            .Select(ca => new CategoryDto
+            {
+                Id = ca.Category.Id,
+                Name = ca.Category.Name,
+                Slug = ca.Category.Slug,
+                Description = ca.Category.Description,
+                Icon = ca.Category.Icon
+            })
+            .ToList();
+
+        return Ok(categories);
+    }
+
     private async Task _saveMaterialUsages(Guid variantId, Dictionary<string, decimal> usages)
     {
         foreach (var (materialIdStr, qty) in usages)
@@ -470,7 +562,19 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             StartsAt = d.StartsAt,
             EndsAt = d.EndsAt,
             CreatedAt = d.CreatedAt
-        }).ToList()
+        }).ToList(),
+        CategoryAssignments = (p.CategoryAssignments ?? [])
+            .Where(ca => ca.Category != null)
+            .Select(ca => new CategoryDto
+            {
+                Id = ca.Category.Id,
+                Name = ca.Category.Name,
+                Slug = ca.Category.Slug,
+                Description = ca.Category.Description,
+                Icon = ca.Category.Icon
+            })
+            .OrderBy(c => c.Name)
+            .ToList()
         };
     }
 

@@ -172,6 +172,8 @@ builder.Services.AddScoped<IEmailService, NoOpEmailService>();
 builder.Services.AddScoped<IS3Service, NoOpS3Service>();
 builder.Services.AddScoped<IMercadoPagoService, NoOpMercadoPagoService>();
 builder.Services.AddScoped<ITotpService, OtpNetTotpService>();
+builder.Services.AddScoped<ISlugGenerationService, SlugGenerationService>();
+builder.Services.AddScoped<CategorySeedService>();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
@@ -239,6 +241,10 @@ if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
     await DbSeeder.SeedAsync(db, userManager, roleManager);
+    
+    // Seed product categories
+    var categorySeedService = scope.ServiceProvider.GetRequiredService<CategorySeedService>();
+    await categorySeedService.SeedCategoriesAsync();
 }
 
 app.Run();

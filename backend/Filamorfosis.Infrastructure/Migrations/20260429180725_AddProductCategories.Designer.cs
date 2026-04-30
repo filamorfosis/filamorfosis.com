@@ -3,6 +3,7 @@ using System;
 using Filamorfosis.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Filamorfosis.Infrastructure.Migrations
 {
     [DbContext(typeof(FilamorfosisDbContext))]
-    partial class FilamorfosisDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260429180725_AddProductCategories")]
+    partial class AddProductCategories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
@@ -629,11 +632,44 @@ namespace Filamorfosis.Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(999);
+
                     b.Property<string>("Icon")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Name")
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("NameDe")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NameEs")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NameJa")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NamePt")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NameZh")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("ParentId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Slug")
@@ -642,10 +678,19 @@ namespace Filamorfosis.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DisplayOrder");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("ParentId");
+
                     b.HasIndex("Slug")
                         .IsUnique();
 
-                    b.ToTable("ProductCategories");
+                    b.ToTable("ProductCategories", t =>
+                        {
+                            t.HasCheckConstraint("CK_ProductCategories_NoSelfReference", "\"Id\" != \"ParentId\"");
+                        });
                 });
 
             modelBuilder.Entity("Filamorfosis.Domain.Entities.ProductCategoryAssignment", b =>
@@ -661,39 +706,6 @@ namespace Filamorfosis.Infrastructure.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("ProductCategoryAssignments");
-                });
-
-            modelBuilder.Entity("Filamorfosis.Domain.Entities.ProductSubCategory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Icon")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ParentCategoryId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ParentCategoryId");
-
-                    b.HasIndex("Slug")
-                        .IsUnique();
-
-                    b.ToTable("ProductSubCategories");
                 });
 
             modelBuilder.Entity("Filamorfosis.Domain.Entities.ProductVariant", b =>
@@ -1246,6 +1258,16 @@ namespace Filamorfosis.Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Filamorfosis.Domain.Entities.ProductCategory", b =>
+                {
+                    b.HasOne("Filamorfosis.Domain.Entities.ProductCategory", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Parent");
+                });
+
             modelBuilder.Entity("Filamorfosis.Domain.Entities.ProductCategoryAssignment", b =>
                 {
                     b.HasOne("Filamorfosis.Domain.Entities.ProductCategory", "Category")
@@ -1263,17 +1285,6 @@ namespace Filamorfosis.Infrastructure.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("Filamorfosis.Domain.Entities.ProductSubCategory", b =>
-                {
-                    b.HasOne("Filamorfosis.Domain.Entities.ProductCategory", "ParentCategory")
-                        .WithMany("SubCategories")
-                        .HasForeignKey("ParentCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ParentCategory");
                 });
 
             modelBuilder.Entity("Filamorfosis.Domain.Entities.ProductVariant", b =>
@@ -1439,9 +1450,9 @@ namespace Filamorfosis.Infrastructure.Migrations
 
             modelBuilder.Entity("Filamorfosis.Domain.Entities.ProductCategory", b =>
                 {
-                    b.Navigation("ProductAssignments");
+                    b.Navigation("Children");
 
-                    b.Navigation("SubCategories");
+                    b.Navigation("ProductAssignments");
                 });
 
             modelBuilder.Entity("Filamorfosis.Domain.Entities.ProductVariant", b =>

@@ -833,3 +833,81 @@ span.req {
   background: rgba(139,92,246,0.3);
   color: #c4b5fd;
 }
+
+/* Category Assignment Section */
+.category-assignment-section {
+  margin-top: 20px;
+  border-top: 1px solid rgba(139,92,246,0.2);
+  padding-top: 16px;
+}
+
+.category-assignment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.category-assignment-header i {
+  color: #8b5cf6;
+  font-size: 1rem;
+}
+
+.category-assignment-header span {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #a78bfa;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.category-assignment-container {
+  min-height: 100px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.category-assignment-loading {
+  color: #64748b;
+  font-size: 1rem;
+  text-align: center;
+  padding: 20px;
+}
+
+.category-checkbox-row {
+  transition: background-color 0.2s ease;
+}
+
+.category-checkbox-row:hover {
+  background: rgba(139,92,246,0.05);
+  border-radius: 4px;
+}
+
+.category-checkbox-row label {
+  margin: 0;
+  padding: 4px 8px;
+  width: 100%;
+}
+
+.category-assignment-checkbox {
+  accent-color: #8b5cf6;
+}
+
+
+/* ——— Product Categories Display ——————————————————————————————————— */
+.category-none {
+  color: #64748b;
+  font-style: italic;
+}
+
+.category-list {
+  color: #94a3b8;
+}
+
+.category-more {
+  color: #8b5cf6;
+  font-weight: 600;
+  margin-left: 4px;
+}

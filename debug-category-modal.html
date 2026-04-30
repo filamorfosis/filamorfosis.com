@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Category Modal</title>
+  <link rel="stylesheet" href="assets/fonts/fontawesome/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <style>
+    .debug-info {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.9);
+      color: #0f0;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      max-width: 400px;
+      z-index: 10000;
+    }
+    .debug-info h3 {
+      margin: 0 0 10px 0;
+      color: #0ff;
+    }
+    .debug-info .ok { color: #0f0; }
+    .debug-info .error { color: #f00; }
+  </style>
+</head>
+<body class="admin-page">
+  <div class="debug-info" id="debug-info">
+    <h3>🔍 Debug Info</h3>
+    <div id="debug-output"></div>
+  </div>
+
+  <div style="padding: 40px; text-align: center;">
+    <h1 style="color: #e2e8f0; margin-bottom: 30px;">Category Modal Debug</h1>
+    <button onclick="openModal()" class="btn-admin btn-admin-primary" style="font-size: 1.2rem; padding: 15px 30px;">
+      <i class="fas fa-folder-open"></i> Open Category Modal
+    </button>
+    <div style="margin-top: 20px; color: #94a3b8;">
+      <p>This page tests the category modal structure.</p>
+      <p>Click the button above to open the modal and verify the "Agregar Subcategoría" button is visible.</p>
+    </div>
+  </div>
+
+  <!-- Category Modal (exact copy from admin.html) -->
+  <div id="category-modal" class="admin-modal-overlay" onclick="if(event.target===this)closeModal()" style="display:none">
+    <div class="admin-modal-box" style="max-width:700px">
+      <button class="admin-modal-close" onclick="closeModal()" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="admin-modal-title">
+        <i class="fas fa-folder-tree" style="margin-right:8px"></i>
+        <span id="category-modal-title">Categoría de Producto</span>
+      </div>
+      <div class="admin-modal-subtitle">Completa los datos de la categoría y sus subcategorías</div>
+
+      <form id="category-form" onsubmit="return false;" novalidate>
+        <!-- Category Name and Icon -->
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px">
+          <div class="modal-form-field">
+            <label for="cat-name">Nombre <span style="color:#f87171">*</span></label>
+            <input type="text" id="cat-name" placeholder="Regalos Personalizados" required>
+          </div>
+          <div class="modal-form-field">
+            <label for="cat-icon">Icono/Emoji</label>
+            <input type="text" id="cat-icon" placeholder="🎁" maxlength="10" style="text-align:center;font-size:1.5rem">
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="modal-form-field">
+          <label for="cat-description">Descripción <span style="color:#475569;font-weight:400;text-transform:none">(opcional)</span></label>
+          <textarea id="cat-description" rows="2" placeholder="Notas administrativas sobre esta categoría"></textarea>
+        </div>
+
+        <!-- Subcategories Section -->
+        <div class="modal-form-field">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <label style="margin:0">Subcategorías</label>
+            <button type="button" 
+                    id="add-subcategory-btn"
+                    class="btn-admin btn-admin-secondary btn-admin-sm" 
+                    onclick="addSubCategory()">
+              <i class="fas fa-plus"></i> Agregar Subcategoría
+            </button>
+          </div>
+          <div id="subcategories-list" style="border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:12px;background:rgba(255,255,255,0.02);min-height:100px">
+            <div style="color:#475569;font-size:1rem;padding:8px 0">
+              No hay subcategorías. Haz clic en "Agregar Subcategoría" para añadir una.
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-error" id="category-form-err" style="margin-top:10px"></div>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button type="button" class="btn-modal-ghost" style="flex:1" onclick="closeModal()">
+            <i class="fas fa-times"></i>&nbsp; Cancelar
+          </button>
+          <button type="submit" class="btn-modal-primary" style="flex:1;margin-top:0" id="category-save-btn">
+            <i class="fas fa-save"></i>&nbsp; Guardar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let subCategoryCount = 0;
+
+    function openModal() {
+      const modal = document.getElementById('category-modal');
+      modal.style.display = 'flex';
+      runDiagnostics();
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('category-modal');
+      modal.style.display = 'none';
+    }
+
+    function addSubCategory() {
+      subCategoryCount++;
+      const container = document.getElementById('subcategories-list');
+      const newRow = document.createElement('div');
+      newRow.style.cssText = 'padding:8px;margin:4px 0;background:rgba(139,92,246,0.1);border-radius:4px;color:#e2e8f0';
+      newRow.innerHTML = `<strong>Subcategoría ${subCategoryCount}</strong> - Agregada correctamente ✓`;
+      container.appendChild(newRow);
+      
+      updateDebug(`✓ Subcategory ${subCategoryCount} added`, 'ok');
+    }
+
+    function runDiagnostics() {
+      const output = document.getElementById('debug-output');
+      const checks = [];
+
+      // Check if modal exists
+      const modal = document.getElementById('category-modal');
+      checks.push({
+        test: 'Modal element exists',
+        result: modal !== null,
+        value: modal ? 'Found' : 'Not found'
+      });
+
+      // Check if button exists
+      const btn = document.getElementById('add-subcategory-btn');
+      checks.push({
+        test: 'Add button exists',
+        result: btn !== null,
+        value: btn ? 'Found' : 'Not found'
+      });
+
+      // Check button visibility
+      if (btn) {
+        const style = window.getComputedStyle(btn);
+        checks.push({
+          test: 'Button display',
+          result: style.display !== 'none',
+          value: style.display
+        });
+        checks.push({
+          test: 'Button visibility',
+          result: style.visibility !== 'hidden',
+          value: style.visibility
+        });
+        checks.push({
+          test: 'Button opacity',
+          result: parseFloat(style.opacity) > 0,
+          value: style.opacity
+        });
+      }
+
+      // Check subcategories container
+      const container = document.getElementById('subcategories-list');
+      checks.push({
+        test: 'Subcategories container exists',
+        result: container !== null,
+        value: container ? 'Found' : 'Not found'
+      });
+
+      // Render results
+      output.innerHTML = checks.map(check => {
+        const className = check.result ? 'ok' : 'error';
+        const icon = check.result ? '✓' : '✗';
+        return `<div class="${className}">${icon} ${check.test}: ${check.value}</div>`;
+      }).join('');
+    }
+
+    function updateDebug(msg, type = 'ok') {
+      const output = document.getElementById('debug-output');
+      const line = document.createElement('div');
+      line.className = type;
+      line.textContent = msg;
+      output.appendChild(line);
+    }
+
+    // Run diagnostics on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateDebug('Page loaded', 'ok');
+      updateDebug('Click "Open Category Modal" to test', 'ok');
+    });
+  </script>
+</body>
+</html>

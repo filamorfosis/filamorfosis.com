@@ -63,7 +63,7 @@
   async function loadProducts(params) {
     const tbody = document.getElementById('products-tbody');
     if (tbody) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#64748b">' +
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#64748b">' +
         '<i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>';
     }
     if (params) Object.assign(state, params);
@@ -84,7 +84,7 @@
       _populateAddProductCategoryDropdown();
     } catch (e) {
       if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="5" style="color:#f87171;text-align:center;padding:24px">' +
+        tbody.innerHTML = '<tr><td colspan="7" style="color:#f87171;text-align:center;padding:24px">' +
           '<i class="fas fa-exclamation-triangle"></i> Error al cargar productos</td></tr>';
       }
     }
@@ -121,7 +121,7 @@
     const items = state.filtered.slice(start, start + state.viewPageSize);
 
     if (!total) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;padding:24px">Sin productos</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;padding:24px">Sin productos</td></tr>';
       document.getElementById('products-pagination').innerHTML = '';
       return;
     }
@@ -149,10 +149,26 @@
         statusBorder = 'rgba(100,116,139,0.4)';
         statusLabel  = 'Inactivo';
       }
+      
+      // Format categories display (Requirements 6.2, 6.3, 6.4, 6.5)
+      const categories = p.categoryAssignments || [];
+      let categoriesDisplay;
+      if (categories.length === 0) {
+        categoriesDisplay = '<span class="category-none" data-translate="admin_no_categories">Sin categorías</span>';
+      } else if (categories.length <= 3) {
+        const names = categories.map(c => esc(c.name || '—')).join(', ');
+        categoriesDisplay = `<span class="category-list">${names}</span>`;
+      } else {
+        const firstThree = categories.slice(0, 3).map(c => esc(c.name || '—')).join(', ');
+        const remaining = categories.length - 3;
+        categoriesDisplay = `<span class="category-list">${firstThree} <span class="category-more">+${remaining} <span data-translate="admin_more_categories">más</span></span></span>`;
+      }
+      
       return `
       <tr>
         <td style="font-weight:600;color:#e2e8f0">${esc(p.titleEs || p.title || '—')}</td>
         <td style="color:#94a3b8;font-size:1rem">${esc(p.processNameEs || '—')}</td>
+        <td style="color:#94a3b8;font-size:1rem">${categoriesDisplay}</td>
         <td>
           <span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:1rem;font-weight:600;
             background:${statusBg};color:${statusColor};border:1px solid ${statusBorder}">
@@ -210,7 +226,7 @@
       return `
         <button class="prod-cat-filter-btn ${state.categoryId === c.id ? 'active' : ''}"
                 onclick="AdminProducts._filterByCategory('${esc(c.id)}')">
-          ${esc(c.nameEs)} <span class="prod-cat-filter-count">${count}</span>
+          ${esc(c.name)} <span class="prod-cat-filter-count">${count}</span>
         </button>`;
     }).join('');
 
@@ -235,7 +251,7 @@
 
     const currentValue = select.value;
     select.innerHTML = '<option value="">-- Seleccionar --</option>' +
-      categories.map(c => `<option value="${esc(c.id)}">${esc(c.nameEs)}</option>`).join('');
+      categories.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
     
     // Restore previous selection if it still exists
     if (currentValue && categories.some(c => c.id === currentValue)) {
@@ -363,7 +379,7 @@
       : [];
 
     const catOptions = categories.map(c =>
-      `<option value="${esc(c.id)}" ${product && product.processId === c.id ? 'selected' : ''}>${esc(c.nameEs)}</option>`
+      `<option value="${esc(c.id)}" ${product && product.processId === c.id ? 'selected' : ''}>${esc(c.name)}</option>`
     ).join('');
 
     const badgeOptions = [
@@ -520,6 +536,20 @@
         </div>
         <div class="form-error admin-form-full" id="pedit-err"></div>
       </form>
+      
+      <!-- Category Assignment Section -->
+      <div class="admin-form-full category-assignment-section">
+        <div class="category-assignment-header">
+          <i class="fas fa-tags"></i>
+          <span>Categorías</span>
+        </div>
+        <div id="product-categories-assignment" class="category-assignment-container">
+          <div class="category-assignment-loading">
+            <i class="fas fa-spinner fa-spin"></i> Cargando categorías...
+          </div>
+        </div>
+      </div>
+      
       ${variantsHtml}
       ${product ? `<div id="prod-discounts-body"></div>` : ''}
       <div class="form-actions" style="margin-top:20px">
@@ -537,6 +567,156 @@
 
     // Render product-level discounts
     if (product) _renderProductDiscounts(product);
+
+    // Render category assignment UI (Task 12.2)
+    await _renderCategoryAssignmentUI(product);
+  }
+
+  // -- Task 12.2 — _renderCategoryAssignmentUI ---------------------------------
+
+  /**
+   * Render the category assignment UI in the product editor modal.
+   * Fetches categories and subcategories from AdminCategories.getCategories() and currently assigned
+   * categories via adminApi.adminGetProductCategories(productId).
+   * Renders a simplified two-level structure: categories with their subcategories.
+   * Products are assigned to subcategories, which automatically inherit the parent category.
+   * 
+   * @param {Object} product - Product object (null for new products)
+   */
+  async function _renderCategoryAssignmentUI(product) {
+    const container = document.getElementById('product-categories-assignment');
+    if (!container) return;
+
+    // Show loading state
+    container.innerHTML = '<div class="category-assignment-loading">' +
+      '<i class="fas fa-spinner fa-spin"></i> Cargando categorías...' +
+      '</div>';
+
+    try {
+      // Fetch all categories from AdminCategories cache
+      const allCategories = (typeof AdminCategories !== 'undefined' && AdminCategories.getCategories)
+        ? AdminCategories.getCategories()
+        : [];
+
+      // Fetch currently assigned categories for this product (if editing)
+      let assignedCategoryIds = [];
+      if (product && product.id) {
+        try {
+          const assignedCategories = await adminApi.adminGetProductCategories(product.id);
+          assignedCategoryIds = assignedCategories.map(c => c.id);
+        } catch (e) {
+          console.error('Error loading assigned categories:', e);
+          // Continue with empty array if fetch fails
+        }
+      }
+
+      // Render simplified two-level category structure
+      const categoriesHtml = _renderSimplifiedCategoryTree(allCategories, assignedCategoryIds);
+
+      if (!allCategories.length) {
+        container.innerHTML = '<div style="text-align:center;color:#64748b;padding:20px;font-size:1rem">' +
+          '<i class="fas fa-folder-open" style="font-size:1.5rem;margin-bottom:8px;display:block;opacity:0.5"></i>' +
+          'No hay categorías disponibles' +
+          '</div>';
+      } else {
+        container.innerHTML = categoriesHtml;
+      }
+    } catch (e) {
+      console.error('Error rendering category assignment UI:', e);
+      container.innerHTML = '<div style="color:#f87171;text-align:center;padding:20px;font-size:1rem">' +
+        '<i class="fas fa-exclamation-triangle"></i> Error al cargar categorías' +
+        '</div>';
+    }
+  }
+
+  /**
+   * Render simplified two-level category structure.
+   * Shows categories with their subcategories as checkboxes.
+   * @param {Array} categories - Array of category objects
+   * @param {Array} assignedIds - Array of currently assigned category IDs
+   * @returns {string} HTML string for the category tree
+   */
+  function _renderSimplifiedCategoryTree(categories, assignedIds) {
+    if (!categories || !categories.length) return '';
+
+    return '<div class="simplified-category-tree" style="display:flex;flex-direction:column;gap:16px">' +
+      categories.map(category => {
+        const icon = category.icon || '📁';
+        const name = category.name || '(Sin nombre)';
+        const subcategories = category.subCategories || [];
+
+        let html = '<div class="category-group" style="border:1px solid rgba(139,92,246,0.2);border-radius:8px;padding:12px;background:rgba(139,92,246,0.05)">';
+        
+        // Category header
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:' + (subcategories.length ? '12px' : '0') + '">' +
+          '<span style="font-size:1.2rem">' + esc(icon) + '</span>' +
+          '<span style="color:#e2e8f0;font-size:1rem;font-weight:600">' + esc(name) + '</span>' +
+          '</div>';
+
+        // Subcategories as checkboxes
+        if (subcategories.length) {
+          html += '<div style="display:flex;flex-direction:column;gap:8px;padding-left:32px">';
+          subcategories.forEach(sub => {
+            const isChecked = assignedIds.includes(sub.id);
+            const subIcon = sub.icon || '📄';
+            const subName = sub.name || '(Sin nombre)';
+            
+            html += '<label style="display:flex;align-items:center;gap:8px;cursor:pointer">' +
+              '<input type="checkbox" ' +
+              'class="category-assignment-checkbox" ' +
+              'data-category-id="' + esc(sub.id) + '" ' +
+              'data-parent-category-id="' + esc(category.id) + '" ' +
+              (isChecked ? 'checked ' : '') +
+              'style="width:16px;height:16px;cursor:pointer">' +
+              '<span style="font-size:1rem">' + esc(subIcon) + '</span>' +
+              '<span style="color:#e2e8f0;font-size:1rem">' + esc(subName) + '</span>' +
+              '</label>';
+          });
+          html += '</div>';
+        } else {
+          html += '<div style="color:#64748b;font-size:1rem;padding-left:32px">Sin subcategorías</div>';
+        }
+
+        html += '</div>';
+        return html;
+      }).join('') +
+      '</div>';
+  }
+
+  /**
+   * Get selected category IDs from the category assignment checkboxes.
+   * Returns subcategory IDs (which automatically inherit parent categories).
+   * @returns {Array} Array of selected subcategory IDs
+   */
+  function _getSelectedCategoryIds() {
+    const checkboxes = document.querySelectorAll('.category-assignment-checkbox:checked');
+    return Array.from(checkboxes).map(cb => cb.dataset.categoryId);
+  }
+
+  // -- Task 12.3 — _saveCategoryAssignments ----------------------------------
+
+  /**
+   * Save category assignments for a product.
+   * Collects checked category IDs from checkbox tree and calls PUT /api/v1/admin/products/{id}/categories.
+   * Handles validation errors gracefully.
+   * 
+   * @param {string} productId - Product ID
+   * @param {Array} selectedCategoryIds - Array of selected category IDs
+   * @returns {Promise<void>}
+   * Requirements: 5.4, 5.5, 5.6
+   */
+  async function _saveCategoryAssignments(productId, selectedCategoryIds) {
+    if (!productId) {
+      throw new Error('Product ID is required to save category assignments');
+    }
+
+    try {
+      await adminApi.adminUpdateProductCategories(productId, selectedCategoryIds);
+    } catch (err) {
+      // Re-throw with user-friendly message
+      const errorMessage = err.detail || 'Error al guardar las categorías del producto.';
+      throw new Error(errorMessage);
+    }
   }
 
   // -- Task 4.2 — saveProductModal -------------------------------------------
@@ -577,13 +757,30 @@
     spin(btn, true);
 
     try {
+      let savedProductId;
       if (_editingProductId) {
         await adminApi.adminUpdateProduct(_editingProductId, data);
+        savedProductId = _editingProductId;
         toast('Producto actualizado');
       } else {
-        await adminApi.adminCreateProduct(data);
+        const result = await adminApi.adminCreateProduct(data);
+        savedProductId = result.id;
         toast('Producto creado');
       }
+
+      // Save category assignments for existing products only (Task 12.3)
+      if (_editingProductId) {
+        try {
+          const selectedCategoryIds = _getSelectedCategoryIds();
+          await _saveCategoryAssignments(savedProductId, selectedCategoryIds);
+        } catch (categoryErr) {
+          // Don't close modal if category assignment fails - allow user to retry
+          if (errEl) errEl.textContent = categoryErr.message || 'Error al guardar las categorías del producto.';
+          spin(btn, false);
+          return;
+        }
+      }
+
       spin(btn, false);
       _closeProductModal();
       await loadProducts();
@@ -1331,7 +1528,10 @@
     _deleteVariantDiscount,
     _renderProductDiscounts,
     _addProductDiscount,
-    _deleteProductDiscount
+    _deleteProductDiscount,
+    // Category assignment (Task 12.2)
+    _renderCategoryAssignmentUI,
+    _getSelectedCategoryIds
   };
 
 }(window));

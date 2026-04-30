@@ -111,8 +111,8 @@
     const container = document.getElementById('materials-process-filters');
     if (!container) return;
 
-    const categories = (typeof AdminCategories !== 'undefined' && AdminCategories.getCategories)
-      ? AdminCategories.getCategories()
+    const processes = (typeof AdminProcesses !== 'undefined' && AdminProcesses.getProcesses)
+      ? AdminProcesses.getProcesses()
       : [];
 
     // Build count map
@@ -127,16 +127,16 @@
         Todos <span class="prod-cat-filter-count">${materialsState.allItems.length}</span>
       </button>`;
 
-    const catBtns = categories.map(c => {
-      const count = countMap[c.id] || 0;
+    const procBtns = processes.map(p => {
+      const count = countMap[p.id] || 0;
       return `
-        <button class="prod-cat-filter-btn ${materialsState.processId === c.id ? 'active' : ''}"
-                onclick="AdminCosts._filterByProcess('${esc(c.id)}')">
-          ${esc(c.nameEs)} <span class="prod-cat-filter-count">${count}</span>
+        <button class="prod-cat-filter-btn ${materialsState.processId === p.id ? 'active' : ''}"
+                onclick="AdminCosts._filterByProcess('${esc(p.id)}')">
+          ${esc(p.nameEs)} <span class="prod-cat-filter-count">${count}</span>
         </button>`;
     }).join('');
 
-    container.innerHTML = allBtn + catBtns;
+    container.innerHTML = allBtn + procBtns;
   }
 
   // ── 12.2 renderMaterialsTable ─────────────────────────────────────────────
@@ -208,12 +208,12 @@
   function _populateCategorySelect(selectedId) {
     const select = document.getElementById('mat-category');
     if (!select) return;
-    const categories = (typeof AdminCategories !== 'undefined' && AdminCategories.getCategories)
-      ? AdminCategories.getCategories()
+    const processes = (typeof AdminProcesses !== 'undefined' && AdminProcesses.getProcesses)
+      ? AdminProcesses.getProcesses()
       : [];
     select.innerHTML = '<option value="">-- Seleccionar --</option>' +
-      categories.map(c =>
-        '<option value="' + esc(c.id) + '"' + (c.id === selectedId ? ' selected' : '') + '>' + esc(c.nameEs) + '</option>'
+      processes.map(p =>
+        '<option value="' + esc(p.id) + '"' + (p.id === selectedId ? ' selected' : '') + '>' + esc(p.nameEs) + '</option>'
       ).join('');
   }
 
@@ -569,15 +569,15 @@
       return;
     }
 
-    const catList = (typeof AdminCategories !== 'undefined' && AdminCategories.getCategories)
-      ? AdminCategories.getCategories() : [];
-    const catById = {};
-    catList.forEach(c => { catById[c.id] = c; });
+    const processList = (typeof AdminProcesses !== 'undefined' && AdminProcesses.getProcesses)
+      ? AdminProcesses.getProcesses() : [];
+    const procById = {};
+    processList.forEach(p => { procById[p.id] = p; });
 
     container.innerHTML = categories.map(cat => {
       const params = _costParams[cat];
-      const catObj = catById[cat];
-      const displayName = catObj ? catObj.nameEs : cat;
+      const procObj = procById[cat];
+      const displayName = procObj ? procObj.nameEs : cat;
 
       const rows = params.map(p =>
         '<tr>' +

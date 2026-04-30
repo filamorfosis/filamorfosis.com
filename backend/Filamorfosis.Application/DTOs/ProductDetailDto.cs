@@ -15,4 +15,5 @@ public class ProductDetailDto
     public List<ProductVariantDto> Variants { get; set; } = new();
     public List<AttributeDefinitionDto> AttributeDefinitions { get; set; } = new();
     public List<DiscountDto> Discounts { get; set; } = new();
+    public List<CategoryDto> CategoryAssignments { get; set; } = new();
 }

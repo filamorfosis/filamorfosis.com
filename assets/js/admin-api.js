@@ -398,6 +398,85 @@
     });
   }
 
+  // ── Product Categories ────────────────────────────────────────────────────
+
+  /** GET /api/v1/categories — returns all categories with their subcategories */
+  function adminGetCategories() {
+    return apiFetch('/categories');
+  }
+
+  /** GET /api/v1/categories/{id} — returns a single category by ID */
+  function adminGetCategory(id) {
+    return apiFetch(`/categories/${id}`);
+  }
+
+  /** POST /api/v1/categories — create a new category */
+  function adminCreateCategory(data) {
+    return apiFetch('/categories', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  /** PUT /api/v1/categories/{id} — update an existing category */
+  function adminUpdateCategory(id, data) {
+    return apiFetch(`/categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
+  /** DELETE /api/v1/categories/{id} — delete a category (cascade deletes subcategories) */
+  function adminDeleteCategory(id) {
+    return apiFetch(`/categories/${id}`, { method: 'DELETE' });
+  }
+
+  /** POST /api/v1/categories/{id}/subcategories — create a new subcategory under a category */
+  function adminCreateSubCategory(categoryId, data) {
+    return apiFetch(`/categories/${categoryId}/subcategories`, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  /** GET /api/v1/categories/subcategories/{id} — get a single subcategory by ID */
+  function adminGetSubCategory(id) {
+    return apiFetch(`/categories/subcategories/${id}`);
+  }
+
+  /** PUT /api/v1/categories/subcategories/{id} — update an existing subcategory */
+  function adminUpdateSubCategory(id, data) {
+    return apiFetch(`/categories/subcategories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
+  /** DELETE /api/v1/categories/subcategories/{id} — delete a subcategory */
+  function adminDeleteSubCategory(id) {
+    return apiFetch(`/categories/subcategories/${id}`, { method: 'DELETE' });
+  }
+
+  /**
+   * GET /api/v1/admin/products/{id}/categories — get all categories assigned to a product
+   * @param {string} productId
+   */
+  function adminGetProductCategories(productId) {
+    return apiFetch(`/admin/products/${productId}/categories`);
+  }
+
+  /**
+   * PUT /api/v1/admin/products/{id}/categories — replace all category assignments for a product
+   * @param {string} productId
+   * @param {string[]} categoryIds
+   */
+  function adminUpdateProductCategories(productId, categoryIds) {
+    return apiFetch(`/admin/products/${productId}/categories`, {
+      method: 'PUT',
+      body: JSON.stringify({ categoryIds })
+    });
+  }
+
   // ── Namespace export ──────────────────────────────────────────────────────
 
   window.adminApi = {
@@ -452,7 +531,19 @@
     adminDeleteProcessCost,
     // global parameters
     adminGetGlobalParameters,
-    adminUpdateGlobalParameter
+    adminUpdateGlobalParameter,
+    // product categories
+    adminGetCategories,
+    adminGetCategory,
+    adminCreateCategory,
+    adminUpdateCategory,
+    adminDeleteCategory,
+    adminCreateSubCategory,
+    adminGetSubCategory,
+    adminUpdateSubCategory,
+    adminDeleteSubCategory,
+    adminGetProductCategories,
+    adminUpdateProductCategories
   };
 
   // Also expose each function directly on window so existing admin.html inline

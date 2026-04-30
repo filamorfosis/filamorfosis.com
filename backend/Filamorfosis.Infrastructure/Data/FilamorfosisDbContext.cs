@@ -33,6 +33,9 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
     public DbSet<GlobalParameter> GlobalParameters => Set<GlobalParameter>();
     public DbSet<MaterialSupplyUsage> MaterialSupplyUsages => Set<MaterialSupplyUsage>();
     public DbSet<VariantMaterialUsage> VariantMaterialUsages => Set<VariantMaterialUsage>();
+    public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+    public DbSet<ProductSubCategory> ProductSubCategories => Set<ProductSubCategory>();
+    public DbSet<ProductCategoryAssignment> ProductCategoryAssignments => Set<ProductCategoryAssignment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -277,6 +280,56 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
         modelBuilder.Entity<GlobalParameter>()
             .HasIndex(gp => gp.Key)
             .IsUnique();
+
+        // ProductCategory — simplified structure (root categories only)
+        modelBuilder.Entity<ProductCategory>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+
+            entity.Property(c => c.Name).IsRequired();
+            entity.Property(c => c.Slug).IsRequired();
+
+            // Unique index on Slug
+            entity.HasIndex(c => c.Slug).IsUnique();
+        });
+
+        // ProductSubCategory — subcategories under root categories
+        modelBuilder.Entity<ProductSubCategory>(entity =>
+        {
+            entity.HasKey(sc => sc.Id);
+
+            entity.Property(sc => sc.Name).IsRequired();
+            entity.Property(sc => sc.Slug).IsRequired();
+            entity.Property(sc => sc.ParentCategoryId).IsRequired();
+
+            // Unique index on Slug
+            entity.HasIndex(sc => sc.Slug).IsUnique();
+
+            // Relationship to parent category (cascade delete)
+            entity.HasOne(sc => sc.ParentCategory)
+                .WithMany(c => c.SubCategories)
+                .HasForeignKey(sc => sc.ParentCategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ProductCategoryAssignment — composite PK with cascade delete
+        modelBuilder.Entity<ProductCategoryAssignment>(entity =>
+        {
+            // Composite primary key
+            entity.HasKey(pca => new { pca.ProductId, pca.CategoryId });
+
+            // Relationship to Product (cascade delete)
+            entity.HasOne(pca => pca.Product)
+                .WithMany(p => p.CategoryAssignments)
+                .HasForeignKey(pca => pca.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relationship to ProductCategory (cascade delete)
+            entity.HasOne(pca => pca.Category)
+                .WithMany(c => c.ProductAssignments)
+                .HasForeignKey(pca => pca.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
         // Seed data — GlobalParameters
         var seedDate = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc);
