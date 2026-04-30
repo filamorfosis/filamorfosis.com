@@ -309,7 +309,9 @@ public class AdminAuthController(
     {
         var isLocalhost = HttpContext.Request.Host.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase);
         var secure = !isLocalhost;
-        var sameSite = isLocalhost ? SameSiteMode.Lax : SameSiteMode.Strict;
+        // Use SameSite=None for production to allow cross-origin requests (frontend on filamorfosis.com, API on api.filamorfosis.com)
+        // Use SameSite=Lax for localhost to allow development without HTTPS
+        var sameSite = isLocalhost ? SameSiteMode.Lax : SameSiteMode.None;
 
         Response.Cookies.Append("access_token", accessToken, new CookieOptions
         {
