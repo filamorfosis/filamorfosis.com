@@ -151,18 +151,46 @@
         statusLabel  = 'Inactivo';
       }
       
-      // Format categories display (Requirements 6.2, 6.3, 6.4, 6.5)
+      // Format categories display - show only unique parent categories with icons
       const categories = p.categoryAssignments || [];
       let categoriesDisplay;
       if (categories.length === 0) {
         categoriesDisplay = '<span class="category-none" data-translate="admin_no_categories">Sin categorías</span>';
-      } else if (categories.length <= 3) {
-        const names = categories.map(c => esc(c.name || '—')).join(', ');
-        categoriesDisplay = `<span class="category-list">${names}</span>`;
       } else {
-        const firstThree = categories.slice(0, 3).map(c => esc(c.name || '—')).join(', ');
-        const remaining = categories.length - 3;
-        categoriesDisplay = `<span class="category-list">${firstThree} <span class="category-more">+${remaining} <span data-translate="admin_more_categories">más</span></span></span>`;
+        // Extract unique parent categories
+        const uniqueParents = {};
+        categories.forEach(c => {
+          const catId = c.categoryId || c.CategoryId;
+          const catName = c.categoryName || c.CategoryName;
+          const catIcon = c.categoryIcon || c.CategoryIcon || '📁';
+          if (catId && !uniqueParents[catId]) {
+            uniqueParents[catId] = { name: catName, icon: catIcon };
+          }
+        });
+        
+        const parentCategories = Object.values(uniqueParents);
+        
+        if (parentCategories.length <= 3) {
+          const chips = parentCategories.map(cat => 
+            '<span class="table-category-chip">' +
+              '<span class="table-category-icon">' + esc(cat.icon) + '</span>' +
+              '<span class="table-category-name">' + esc(cat.name || '—') + '</span>' +
+            '</span>'
+          ).join('');
+          categoriesDisplay = '<div style="display:flex;flex-wrap:wrap;gap:4px">' + chips + '</div>';
+        } else {
+          const firstThree = parentCategories.slice(0, 3).map(cat => 
+            '<span class="table-category-chip">' +
+              '<span class="table-category-icon">' + esc(cat.icon) + '</span>' +
+              '<span class="table-category-name">' + esc(cat.name || '—') + '</span>' +
+            '</span>'
+          ).join('');
+          const remaining = parentCategories.length - 3;
+          categoriesDisplay = '<div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">' + 
+            firstThree + 
+            '<span class="category-more">+' + remaining + ' <span data-translate="admin_more_categories">más</span></span>' +
+            '</div>';
+        }
       }
       
       return `
@@ -635,15 +663,44 @@
         summaryContainer.innerHTML = '<span style="color:#64748b;font-size:1rem">' +
           '<i class="fas fa-folder-open"></i> Sin categorías asignadas</span>';
       } else {
-        const categoryNames = assignedCategories.map(c => {
-          const icon = c.icon || '📄';
-          return '<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(139,92,246,0.15);border-radius:4px;margin:2px">' +
-            '<span style="font-size:1rem">' + esc(icon) + '</span>' +
-            '<span style="color:#e2e8f0;font-size:1rem">' + esc(c.name) + '</span>' +
-            '</span>';
-        }).join(' ');
+        // Group by parent category for elegant hierarchical display
+        const grouped = {};
+        assignedCategories.forEach(c => {
+          const catId = c.categoryId || c.CategoryId;
+          const catName = c.categoryName || c.CategoryName;
+          const catIcon = c.categoryIcon || c.CategoryIcon || '📁';
+          const subName = c.subCategoryName || c.SubCategoryName || c.name || c.Name;
+          const subIcon = c.subCategoryIcon || c.SubCategoryIcon || c.icon || c.Icon || '📄';
+          
+          if (!grouped[catId]) {
+            grouped[catId] = {
+              name: catName,
+              icon: catIcon,
+              subcategories: []
+            };
+          }
+          grouped[catId].subcategories.push({ name: subName, icon: subIcon });
+        });
         
-        summaryContainer.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:6px">' + categoryNames + '</div>';
+        // Render hierarchical chips
+        const hierarchicalChips = Object.values(grouped).map(cat => {
+          const subChips = cat.subcategories.map(sub => 
+            '<span class="category-subchip">' +
+              '<span class="category-subchip-icon">' + esc(sub.icon) + '</span>' +
+              '<span class="category-subchip-name">' + esc(sub.name) + '</span>' +
+            '</span>'
+          ).join('');
+          
+          return '<div class="category-group-chip">' +
+            '<div class="category-parent-chip">' +
+              '<span class="category-parent-icon">' + esc(cat.icon) + '</span>' +
+              '<span class="category-parent-name">' + esc(cat.name) + '</span>' +
+            '</div>' +
+            '<div class="category-subchips-container">' + subChips + '</div>' +
+          '</div>';
+        }).join('');
+        
+        summaryContainer.innerHTML = '<div class="category-hierarchy-display">' + hierarchicalChips + '</div>';
       }
     } catch (e) {
       console.error('Error rendering category summary:', e);
@@ -759,7 +816,14 @@
             <i class="fas fa-tags" style="margin-right:8px"></i>
             Asignar Categorías
           </div>
-          <div class="admin-modal-subtitle">Selecciona las categorías para este producto</div>
+          <div class="admin-modal-subtitle" style="display:flex;justify-content:space-between;align-items:center">
+            <span>Selecciona las categorías para este producto</span>
+            <button type="button" class="btn-admin btn-admin-danger btn-admin-sm" 
+                    onclick="AdminProducts._clearAllCategories()"
+                    title="Desmarcar todas las categorías">
+              <i class="fas fa-times-circle"></i> Limpiar todo
+            </button>
+          </div>
           
           <div id="category-assignment-modal-content" style="max-height:500px;overflow-y:auto;padding:12px 0">
             <div style="text-align:center;padding:24px;color:#64748b">
@@ -795,13 +859,23 @@
       '<i class="fas fa-spinner fa-spin"></i> Cargando categorías...</div>';
 
     try {
+      // Ensure categories are loaded before rendering
+      if (typeof AdminCategories !== 'undefined' && AdminCategories.loadCategories) {
+        const categories = AdminCategories.getCategories();
+        if (!categories || categories.length === 0) {
+          console.log('[AdminProducts] Categories not loaded, loading now...');
+          await AdminCategories.loadCategories();
+        }
+      }
+      
       // Fetch all categories
       const allCategories = (typeof AdminCategories !== 'undefined' && AdminCategories.getCategories)
         ? AdminCategories.getCategories()
         : [];
 
-      // Get assigned category IDs
-      const assignedIds = _currentProductAssignedCategories.map(c => c.id);
+      // Get assigned category/subcategory pairs
+      // _currentProductAssignedCategories now contains {categoryId, subCategoryId, ...}
+      const assignedIds = _currentProductAssignedCategories;
 
       if (!allCategories.length) {
         container.innerHTML = '<div style="text-align:center;color:#64748b;padding:24px;font-size:1rem">' +
@@ -858,7 +932,10 @@
           html += '<div style="display:flex;flex-direction:column;gap:8px">';
           
           subcategories.forEach(sub => {
-            const isChecked = assignedIds.includes(sub.id);
+            // Check if this specific subcategory is assigned (not just the parent category)
+            const isChecked = assignedIds.some(a => 
+              a.categoryId === category.id && a.subCategoryId === sub.id
+            );
             const subIcon = sub.icon || '📄';
             const subName = sub.name || '(Sin nombre)';
             
@@ -931,13 +1008,27 @@
   }
 
   /**
+   * Clear all category selections in the assignment modal.
+   */
+  function _clearAllCategories() {
+    const checkboxes = document.querySelectorAll('.category-assignment-checkbox:checked');
+    checkboxes.forEach(cb => {
+      cb.checked = false;
+    });
+    toast('Todas las categorías desmarcadas', true);
+  }
+
+  /**
    * Get selected category IDs from the category assignment checkboxes.
-   * Returns subcategory IDs (which automatically inherit parent categories).
-   * @returns {Array} Array of selected subcategory IDs
+   * Returns an array of objects with categoryId and subCategoryId.
+   * @returns {Array} Array of {categoryId, subCategoryId} objects
    */
   function _getSelectedCategoryIds() {
     const checkboxes = document.querySelectorAll('.category-assignment-checkbox:checked');
-    return Array.from(checkboxes).map(cb => cb.dataset.categoryId);
+    return Array.from(checkboxes).map(cb => ({
+      categoryId: cb.dataset.parentCategoryId,
+      subCategoryId: cb.dataset.categoryId
+    }));
   }
 
   // -- Task 12.3 — _saveCategoryAssignments ----------------------------------
@@ -1788,6 +1879,7 @@
     _closeCategoryAssignmentModal,
     _toggleCategoryCollapse,
     _saveCategoryAssignmentModal,
+    _clearAllCategories,
     // Expose editing state for external modules
     get _editingProductId() { return _editingProductId; }
   };

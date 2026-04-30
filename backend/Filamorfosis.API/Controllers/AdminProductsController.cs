@@ -31,6 +31,8 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             .Include(p => p.Discounts)
             .Include(p => p.CategoryAssignments)
                 .ThenInclude(ca => ca.Category)
+            .Include(p => p.CategoryAssignments)
+                .ThenInclude(ca => ca.SubCategory)
             .Include(p => p.Variants)
                 .ThenInclude(v => v.Discounts)
             .Include(p => p.Variants)
@@ -410,23 +412,31 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         var product = await db.Products
             .Include(p => p.CategoryAssignments)
                 .ThenInclude(ca => ca.Category)
+            .Include(p => p.CategoryAssignments)
+                .ThenInclude(ca => ca.SubCategory)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (product is null)
             return NotFound();
 
-        var categories = product.CategoryAssignments
-            .Select(ca => new CategoryDto
+        var assignments = product.CategoryAssignments
+            .Where(ca => ca.SubCategory != null)
+            .Select(ca => new
             {
-                Id = ca.Category.Id,
-                Name = ca.Category.Name,
-                Slug = ca.Category.Slug,
-                Description = ca.Category.Description,
-                Icon = ca.Category.Icon
+                CategoryId = ca.Category.Id,
+                CategoryName = ca.Category.Name,
+                CategoryIcon = ca.Category.Icon,
+                SubCategoryId = ca.SubCategory.Id,
+                SubCategoryName = ca.SubCategory.Name,
+                SubCategoryIcon = ca.SubCategory.Icon,
+                // For frontend compatibility - use subcategory as the primary display
+                Id = ca.SubCategory.Id,
+                Name = ca.SubCategory.Name,
+                Icon = ca.SubCategory.Icon
             })
             .ToList();
 
-        return Ok(categories);
+        return Ok(assignments);
     }
 
     [HttpPut("{id:guid}/categories")]
@@ -440,8 +450,14 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         if (product is null)
             return NotFound();
 
+        // Extract unique category and subcategory IDs
+        var categoryIds = req.Assignments.Select(a => a.CategoryId).Distinct().ToList();
+        var subCategoryIds = req.Assignments
+            .Select(a => a.SubCategoryId)
+            .Distinct()
+            .ToList();
+
         // Validate all category IDs exist in database
-        var categoryIds = req.CategoryIds.Distinct().ToList();
         var existingCategories = await db.ProductCategories
             .Where(c => categoryIds.Contains(c.Id))
             .Select(c => c.Id)
@@ -459,16 +475,35 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             });
         }
 
+        // Validate all subcategory IDs exist in database
+        var existingSubCategories = await db.ProductSubCategories
+            .Where(sc => subCategoryIds.Contains(sc.Id))
+            .Select(sc => sc.Id)
+            .ToListAsync();
+
+        var invalidSubCategoryIds = subCategoryIds.Except(existingSubCategories).ToList();
+        if (invalidSubCategoryIds.Any())
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Type = "https://filamorfosis.com/errors/validation",
+                Title = "Validation Error",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = $"Las siguientes subcategorías no existen: {string.Join(", ", invalidSubCategoryIds)}"
+            });
+        }
+
         // Remove all existing ProductCategoryAssignments for the product
         db.ProductCategoryAssignments.RemoveRange(product.CategoryAssignments);
 
-        // Create new ProductCategoryAssignments for provided category IDs
-        foreach (var categoryId in categoryIds)
+        // Create new ProductCategoryAssignments for provided assignments
+        foreach (var assignment in req.Assignments)
         {
             db.ProductCategoryAssignments.Add(new ProductCategoryAssignment
             {
                 ProductId = id,
-                CategoryId = categoryId
+                CategoryId = assignment.CategoryId,
+                SubCategoryId = assignment.SubCategoryId
             });
         }
 
@@ -478,6 +513,8 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         var updatedProduct = await db.Products
             .Include(p => p.CategoryAssignments)
                 .ThenInclude(ca => ca.Category)
+            .Include(p => p.CategoryAssignments)
+                .ThenInclude(ca => ca.SubCategory)
             .FirstAsync(p => p.Id == id);
 
         var categories = updatedProduct.CategoryAssignments
@@ -564,14 +601,18 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             CreatedAt = d.CreatedAt
         }).ToList(),
         CategoryAssignments = (p.CategoryAssignments ?? [])
-            .Where(ca => ca.Category != null)
-            .Select(ca => new CategoryDto
+            .Where(ca => ca.Category != null && ca.SubCategory != null)
+            .Select(ca => new ProductCategoryAssignmentDto
             {
-                Id = ca.Category.Id,
-                Name = ca.Category.Name,
-                Slug = ca.Category.Slug,
-                Description = ca.Category.Description,
-                Icon = ca.Category.Icon
+                CategoryId = ca.Category.Id,
+                CategoryName = ca.Category.Name,
+                CategoryIcon = ca.Category.Icon,
+                SubCategoryId = ca.SubCategory.Id,
+                SubCategoryName = ca.SubCategory.Name,
+                SubCategoryIcon = ca.SubCategory.Icon,
+                // For display purposes, show subcategory name
+                Name = ca.SubCategory.Name,
+                Icon = ca.SubCategory.Icon ?? ca.Category.Icon
             })
             .OrderBy(c => c.Name)
             .ToList()

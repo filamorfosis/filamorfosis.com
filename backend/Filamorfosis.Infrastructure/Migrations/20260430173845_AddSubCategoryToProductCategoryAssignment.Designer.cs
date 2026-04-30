@@ -3,6 +3,7 @@ using System;
 using Filamorfosis.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Filamorfosis.Infrastructure.Migrations
 {
     [DbContext(typeof(FilamorfosisDbContext))]
-    partial class FilamorfosisDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260430173845_AddSubCategoryToProductCategoryAssignment")]
+    partial class AddSubCategoryToProductCategoryAssignment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
@@ -656,10 +659,10 @@ namespace Filamorfosis.Infrastructure.Migrations
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("SubCategoryId")
+                    b.Property<Guid?>("SubCategoryId")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("ProductId", "CategoryId", "SubCategoryId");
+                    b.HasKey("ProductId", "CategoryId");
 
                     b.HasIndex("CategoryId");
 
@@ -1267,8 +1270,7 @@ namespace Filamorfosis.Infrastructure.Migrations
 
                     b.HasOne("Filamorfosis.Domain.Entities.ProductSubCategory", "SubCategory")
                         .WithMany()
-                        .HasForeignKey("SubCategoryId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("SubCategoryId");
 
                     b.Navigation("Category");
 

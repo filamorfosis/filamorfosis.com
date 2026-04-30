@@ -147,7 +147,7 @@ This implementation plan breaks down the Product Category Management System into
     - Test validation error responses (400/422)
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.8, 8.9, 8.10_
 
-- [-] 8. Implement product category assignment endpoints
+- [x] 8. Implement product category assignment endpoints
   - [x] 8.1 Add GET product categories endpoint to AdminProductsController
     - Implement `GET /api/v1/admin/products/{id}/categories` endpoint in existing AdminProductsController
     - Load product with CategoryAssignments.Category navigation property

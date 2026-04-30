@@ -79,7 +79,33 @@ public class UpdateSubCategoryRequest
 /// </summary>
 public class AssignCategoriesRequest
 {
-    public List<Guid> CategoryIds { get; set; } = new();
+    public List<CategoryAssignmentDto> Assignments { get; set; } = new();
+}
+
+/// <summary>
+/// DTO for a single category assignment (category + subcategory).
+/// </summary>
+public class CategoryAssignmentDto
+{
+    public Guid CategoryId { get; set; }
+    public Guid SubCategoryId { get; set; }
+}
+
+/// <summary>
+/// DTO for displaying a product's category assignment (includes names and icons).
+/// </summary>
+public class ProductCategoryAssignmentDto
+{
+    public Guid CategoryId { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
+    public string? CategoryIcon { get; set; }
+    public Guid SubCategoryId { get; set; }
+    public string SubCategoryName { get; set; } = string.Empty;
+    public string? SubCategoryIcon { get; set; }
+    
+    // For display purposes - shows subcategory name
+    public string Name { get; set; } = string.Empty;
+    public string? Icon { get; set; }
 }
 
 /// <summary>

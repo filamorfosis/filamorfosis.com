@@ -478,12 +478,12 @@
   /**
    * PUT /api/v1/admin/products/{id}/categories — replace all category assignments for a product
    * @param {string} productId
-   * @param {string[]} categoryIds
+   * @param {Array} assignments - Array of {categoryId, subCategoryId} objects
    */
-  function adminUpdateProductCategories(productId, categoryIds) {
+  function adminUpdateProductCategories(productId, assignments) {
     return apiFetch(`/admin/products/${productId}/categories`, {
       method: 'PUT',
-      body: JSON.stringify({ categoryIds })
+      body: JSON.stringify({ assignments })
     });
   }
 

@@ -315,8 +315,8 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
         // ProductCategoryAssignment — composite PK with cascade delete
         modelBuilder.Entity<ProductCategoryAssignment>(entity =>
         {
-            // Composite primary key
-            entity.HasKey(pca => new { pca.ProductId, pca.CategoryId });
+            // Composite primary key - now includes SubCategoryId to allow multiple subcategories per category
+            entity.HasKey(pca => new { pca.ProductId, pca.CategoryId, pca.SubCategoryId });
 
             // Relationship to Product (cascade delete)
             entity.HasOne(pca => pca.Product)
@@ -329,6 +329,13 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
                 .WithMany(c => c.ProductAssignments)
                 .HasForeignKey(pca => pca.CategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Relationship to ProductSubCategory (required, restrict delete)
+            entity.HasOne(pca => pca.SubCategory)
+                .WithMany()
+                .HasForeignKey(pca => pca.SubCategoryId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(true);
         });
 
         // Seed data — GlobalParameters
