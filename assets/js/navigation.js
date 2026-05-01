@@ -660,7 +660,7 @@
          * @returns {string}
          */
         buildCategoryUrl: function (slug) {
-            return '/store.html?category=' + encodeURIComponent(slug);
+            return '/tienda?category=' + encodeURIComponent(slug);
         }
     };
 

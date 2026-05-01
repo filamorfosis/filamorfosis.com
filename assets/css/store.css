@@ -3650,3 +3650,8 @@ img:not([alt]) { outline: 2px solid red; } /* dev helper — remove in prod */
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ── Promo slide background colour variants (replaces inline styles) ── */
+.promo-slide__bg--1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.promo-slide__bg--2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.promo-slide__bg--3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }

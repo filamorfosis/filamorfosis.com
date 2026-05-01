@@ -431,9 +431,9 @@
     //  CATALOG INITIALIZATION
     // ══════════════════════════════════════════════════════
     
-    // Initialize catalog on page load
+    // Initialize catalog on page load — only when the tienda template is in the DOM
     $(document).ready(function() {
-        if (typeof renderAll === 'function') {
+        if (typeof renderAll === 'function' && document.getElementById('catGrid')) {
             renderAll();
             
             // Animate product counter after products load
@@ -521,112 +521,132 @@
 
     // ── Navigate to catalog with a specific category pre-selected ────────────
     window._navToCat = function(catId) {
-        // After catalog initialises (renderAll runs), set the category
-        // Use a small delay to let renderAll complete if first visit
-        var attempt = 0;
-        function trySet() {
-            if (typeof window.setActiveCategory === 'function') {
-                window.setActiveCategory(catId);
-            } else if (attempt < 10) {
-                attempt++;
-                setTimeout(trySet, 100);
+        var targetPath = '/tienda' + (catId ? '?category=' + encodeURIComponent(catId) : '');
+
+        // If already on the tienda route, just set the category directly
+        if (window.location.pathname === '/tienda') {
+            var attempt = 0;
+            function trySet() {
+                if (typeof window.setActiveCategory === 'function') {
+                    window.setActiveCategory(catId);
+                } else if (attempt < 10) {
+                    attempt++;
+                    setTimeout(trySet, 100);
+                }
             }
+            trySet();
+        } else if (window.FilamorfosisRouter) {
+            // SPA navigation to tienda with category param
+            window.FilamorfosisRouter.navigate(targetPath);
+        } else {
+            window.location.href = targetPath;
         }
-        trySet();
     };
 
     // ── Convert showcase-media-grid to 2-row auto-scrolling slider ──────────
-    document.querySelectorAll('.showcase-media-grid').forEach(function(grid) {
-        var items = Array.from(grid.children);
-        if (!items.length) return;
+    // This is now called by window.initShowcase() after the servicios template
+    // is stamped into the DOM. The inline call below is kept for pages that
+    // already have the grid in the initial HTML (legacy support).
+    function _buildShowcaseSliders(root) {
+        (root || document).querySelectorAll('.showcase-media-grid').forEach(function(grid) {
+            if (grid.dataset.sliderBuilt) return; // avoid double-build
+            grid.dataset.sliderBuilt = '1';
+            var items = Array.from(grid.children);
+            if (!items.length) return;
 
-        // Build a single track with all items, duplicated for seamless loop
-        var track = document.createElement('div');
-        track.className = 'showcase-media-track';
-        items.forEach(function(item) { track.appendChild(item.cloneNode(true)); });
-        items.forEach(function(item) { track.appendChild(item.cloneNode(true)); });
+            var track = document.createElement('div');
+            track.className = 'showcase-media-track';
+            items.forEach(function(item) { track.appendChild(item.cloneNode(true)); });
+            items.forEach(function(item) { track.appendChild(item.cloneNode(true)); });
 
-        grid.innerHTML = '';
-        grid.appendChild(track);
+            grid.innerHTML = '';
+            grid.appendChild(track);
 
-        // Resolve lazy video sources — copy data-src → src and load
-        grid.querySelectorAll('video[data-lazy="true"] source[data-src]').forEach(function(source) {
-            source.src = source.getAttribute('data-src');
-            var video = source.parentElement;
-            if (video) {
-                video.removeAttribute('data-lazy');
-                video.load();
-            }
-        });
-    });
-    document.querySelectorAll('.showcase-tab, .service-sidebar__item').forEach(function(tab) {
-        tab.addEventListener('click', function() {
-            const target = this.dataset.tab;
-            if (!target) return;
-            // Deactivate all tabs and sidebar items
-            document.querySelectorAll('.showcase-tab').forEach(function(t) {
-                t.classList.remove('active');
-                t.setAttribute('aria-selected', 'false');
-            });
-            document.querySelectorAll('.service-sidebar__item').forEach(function(t) {
-                t.classList.remove('active');
-            });
-            document.querySelectorAll('.showcase-panel').forEach(function(p) {
-                p.classList.remove('active');
-            });
-            // Activate selected
-            document.querySelectorAll('[data-tab="' + target + '"]').forEach(function(t) {
-                t.classList.add('active');
-                if (t.getAttribute('aria-selected') !== null) t.setAttribute('aria-selected', 'true');
-            });
-            const panel = document.getElementById('showcase-' + target);
-            if (panel) panel.classList.add('active');
-
-            // Update sticky CTA bar
-            const stickyLabel = document.getElementById('showcaseStickyLabel');
-            const stickyBtn   = document.getElementById('showcaseStickyBtn');
-            const activeTab   = document.querySelector('.showcase-tab[data-tab="' + target + '"]');
-            if (stickyLabel && activeTab) {
-                const labelEl = activeTab.querySelector('.showcase-tab-label');
-                stickyLabel.textContent = labelEl ? labelEl.textContent : '';
-            }
-            if (stickyBtn) {
-                stickyBtn.setAttribute('onclick', "event.preventDefault();_navToCat('" + target + "');");
-            }
-
-            // Update sidebar catalog button to navigate to active category
-            const catBtn = document.querySelector('.service-sidebar__catalog');
-            if (catBtn) catBtn.setAttribute('onclick', "_navToCat('" + target + "')");
-
-            // Update sidebar active label row
-            const sidebarIcon = document.getElementById('sidebarActiveIcon');
-            const sidebarName = document.getElementById('sidebarActiveName');
-            const sidebarCta  = document.getElementById('sidebarActiveCta');
-            const sidebarBtn  = document.querySelector('.service-sidebar__item[data-tab="' + target + '"]');
-            if (sidebarIcon && sidebarBtn) sidebarIcon.textContent = sidebarBtn.textContent.trim();
-            if (sidebarName && sidebarBtn) {
-                // Use translation key if available, fall back to title
-                var labelKey = sidebarBtn.getAttribute('data-label-key');
-                var lang = window.currentLang || 'es';
-                var tl = window.translations && window.translations[lang];
-                var label = (tl && labelKey && tl[labelKey]) ? tl[labelKey] : (sidebarBtn.getAttribute('title') || '');
-                sidebarName.textContent = label;
-            }
-            if (sidebarCta) {
-                if (target === 'scan') {
-                    var contactText = (window.translations && window.translations[window.currentLang || 'es'] && window.translations[window.currentLang || 'es']['wa_btn']) || 'Contáctanos →';
-                    sidebarCta.textContent = contactText;
-                    sidebarCta.setAttribute('onclick', "var m=document.getElementById('waModal');if(m){m.style.display='flex';var msg=document.getElementById('waMessage');if(msg)msg.value='Hola, me interesa el servicio de Escaneo 3D';}");
-                } else {
-                    var viewText = (window.translations && window.translations[window.currentLang || 'es'] && window.translations[window.currentLang || 'es']['service.viewProducts']) || 'Ver productos →';
-                    sidebarCta.textContent = viewText;
-                    sidebarCta.setAttribute('onclick', "event.preventDefault();_navToCat('" + target + "');");
+            grid.querySelectorAll('video[data-lazy="true"] source[data-src]').forEach(function(source) {
+                source.src = source.getAttribute('data-src');
+                var video = source.parentElement;
+                if (video) {
+                    video.removeAttribute('data-lazy');
+                    video.load();
                 }
-            }
+            });
         });
-    });
+    }
+    window._buildShowcaseSliders = _buildShowcaseSliders;
+    _buildShowcaseSliders(); // run for any grids already in the DOM
+    // ── Showcase tab activation helper ───────────────────────────────────────
+    function _activateShowcaseTab(target) {
+        if (!target) return;
+        document.querySelectorAll('.showcase-tab').forEach(function(t) {
+            t.classList.remove('active');
+            t.setAttribute('aria-selected', 'false');
+        });
+        document.querySelectorAll('.service-sidebar__item').forEach(function(t) {
+            t.classList.remove('active');
+        });
+        document.querySelectorAll('.showcase-panel').forEach(function(p) {
+            p.classList.remove('active');
+        });
+        document.querySelectorAll('[data-tab="' + target + '"]').forEach(function(t) {
+            t.classList.add('active');
+            if (t.getAttribute('aria-selected') !== null) t.setAttribute('aria-selected', 'true');
+        });
+        var panel = document.getElementById('showcase-' + target);
+        if (panel) panel.classList.add('active');
 
-    // ── Service sidebar visibility — show when #services is in view ───────────
+        var stickyLabel = document.getElementById('showcaseStickyLabel');
+        var stickyBtn   = document.getElementById('showcaseStickyBtn');
+        var activeTab   = document.querySelector('.showcase-tab[data-tab="' + target + '"]');
+        if (stickyLabel && activeTab) {
+            var labelEl = activeTab.querySelector('.showcase-tab-label');
+            stickyLabel.textContent = labelEl ? labelEl.textContent : '';
+        }
+        if (stickyBtn) {
+            stickyBtn.setAttribute('onclick', "event.preventDefault();_navToCat('" + target + "');");
+        }
+
+        var catBtn = document.querySelector('.service-sidebar__catalog');
+        if (catBtn) catBtn.setAttribute('onclick', "_navToCat('" + target + "')");
+
+        var sidebarIcon = document.getElementById('sidebarActiveIcon');
+        var sidebarName = document.getElementById('sidebarActiveName');
+        var sidebarCta  = document.getElementById('sidebarActiveCta');
+        var sidebarBtn  = document.querySelector('.service-sidebar__item[data-tab="' + target + '"]');
+        if (sidebarIcon && sidebarBtn) sidebarIcon.textContent = sidebarBtn.textContent.trim();
+        if (sidebarName && sidebarBtn) {
+            var labelKey = sidebarBtn.getAttribute('data-label-key');
+            var lang = window.currentLang || 'es';
+            var tl = window.translations && window.translations[lang];
+            var label = (tl && labelKey && tl[labelKey]) ? tl[labelKey] : (sidebarBtn.getAttribute('title') || '');
+            sidebarName.textContent = label;
+        }
+        if (sidebarCta) {
+            if (target === 'scan') {
+                var contactText = (window.translations && window.translations[window.currentLang || 'es'] && window.translations[window.currentLang || 'es']['wa_btn']) || 'Contáctanos →';
+                sidebarCta.textContent = contactText;
+                sidebarCta.setAttribute('onclick', "var m=document.getElementById('waModal');if(m){m.style.display='flex';var msg=document.getElementById('waMessage');if(msg)msg.value='Hola, me interesa el servicio de Escaneo 3D';}");
+            } else {
+                var viewText = (window.translations && window.translations[window.currentLang || 'es'] && window.translations[window.currentLang || 'es']['service.viewProducts']) || 'Ver productos →';
+                sidebarCta.textContent = viewText;
+                sidebarCta.setAttribute('onclick', "event.preventDefault();_navToCat('" + target + "');");
+            }
+        }
+    }
+
+    // Expose for router.js to call after servicios template is stamped
+    window.activateShowcaseTab = _activateShowcaseTab;
+
+    // initShowcase — wires tab clicks and lazy-loads videos in the current DOM
+    window.initShowcase = function() {
+        document.querySelectorAll('.showcase-tab, .service-sidebar__item').forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                _activateShowcaseTab(this.dataset.tab);
+            });
+        });
+        // Build sliders and lazy-load videos now that the template is in the DOM
+        _buildShowcaseSliders();
+    };
+
     // ── Service sidebar — always visible, no scroll logic needed ─────────────
 
 })(jQuery);

@@ -2,17 +2,18 @@
 <html lang="es">
 <head>
     <title>Filamorfosis® | Impresión 3D, UV y Láser en México</title>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Transforma tus ideas en realidad con Filamorfosis®. Impresión 3D, UV, corte láser, escaneo 3D y más. Calidad garantizada, entregas rápidas en México.">
-    
+    <link rel="canonical" href="https://filamorfosis.com/">
+
     <!-- Favicons -->
     <link rel="apple-touch-icon" sizes="180x180" href="Resources/Images/favicon_io/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="Resources/Images/favicon_io/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="Resources/Images/favicon_io/favicon-16x16.png">
     <link rel="shortcut icon" href="Resources/Images/favicon_io/favicon.ico">
-    
-    <!-- Preload critical CSS and fonts to prevent layout shift -->
+
+    <!-- Preload critical CSS and fonts -->
     <link rel="preload" href="assets/css/navigation.css" as="style">
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" as="style">
 
@@ -26,322 +27,164 @@
     <link rel="stylesheet" href="assets/css/navigation.css">
 </head>
 <body>
-    <div class="page-wrap">
-        <!-- ══ SITE NAV ══ -->
-        <nav class="site-nav" aria-label="Navegación principal">
-            <div class="site-nav__inner">
+<div class="page-wrap">
 
-                <!-- Logo -->
-                <a class="site-nav__logo" href="index.html" aria-label="Filamorfosis — Inicio">
-                    <img class="site-nav__logo-img" src="Resources/Images/Circle_Transparent.png" alt="Filamorfosis Logo">
-                    <span class="site-nav__brand">Filamorfosis</span>
-                </a>
+    <!-- ══ SITE NAV ══ -->
+    <nav class="site-nav" aria-label="Navegación principal">
+        <div class="site-nav__inner">
 
-                <!-- Desktop menu -->
-                <ul class="site-nav__menu" role="list">
+            <!-- Logo -->
+            <a class="site-nav__logo" href="/" aria-label="Filamorfosis — Inicio">
+                <img class="site-nav__logo-img" src="Resources/Images/Circle_Transparent.png" alt="Filamorfosis Logo">
+                <span class="site-nav__brand">Filamorfosis</span>
+            </a>
 
-                    <!-- Tienda (mega menu) -->
-                    <li class="site-nav__item site-nav__item--has-mega">
-                        <button class="site-nav__trigger"
-                                aria-expanded="false"
-                                aria-haspopup="true"
-                                aria-label="Tienda"
-                                data-translate-aria-label="nav_tienda">
-                            <span class="site-nav__trigger-label" data-translate="nav_tienda">Tienda</span>
-                            <i class="fas fa-chevron-down site-nav__trigger-chevron" aria-hidden="true"></i>
-                        </button>
-                        <div class="mega-menu" id="mega-tienda" role="region" aria-label="Tienda">
-                          <div class="mega-menu__inner mega-menu__inner--tienda">
+            <!-- Desktop menu -->
+            <ul class="site-nav__menu" role="list">
 
-                            <!-- Col 1: Categories list -->
-                            <div class="mega-menu__col mega-menu__col--categories">
-                              <h3 class="mega-menu__heading" data-translate="nav_mega_store_heading"></h3>
-                              <ul class="nav-categories-list">
-                                <!-- populated by CategoryService.renderIntoMenu() -->
-                              </ul>
-                              <div class="mega-menu__loading" aria-live="polite">
-                                <div class="mega-menu__skeleton"></div>
-                                <div class="mega-menu__skeleton"></div>
-                                <div class="mega-menu__skeleton"></div>
-                              </div>
-                              <div class="mega-menu__error" role="alert">
-                                <span data-translate="nav_mega_store_error"></span>
-                                <button class="mega-menu__retry-btn" type="button" data-translate="nav_mega_store_retry"></button>
-                              </div>
-                              <div class="mega-menu__timeout" role="alert">
-                                <span data-translate="nav_mega_store_timeout"></span>
-                                <button class="mega-menu__retry-btn" type="button" data-translate="nav_mega_store_retry"></button>
-                              </div>
-                            </div>
-
-                            <!-- Col 2: Latest product placeholders -->
-                            <div class="mega-menu__col mega-menu__col--featured">
-                              <h3 class="mega-menu__heading">Productos destacados</h3>
-                              <div class="mega-menu__featured-grid">
-                                <!-- Placeholder 1 -->
-                                <div class="mega-menu__product-placeholder">
-                                  <div class="mega-menu__product-placeholder-img"></div>
-                                  <div class="mega-menu__product-placeholder-body">
-                                    <div class="mega-menu__product-placeholder-name"></div>
-                                    <div class="mega-menu__product-placeholder-price"></div>
-                                  </div>
-                                </div>
-                                <!-- Placeholder 2 -->
-                                <div class="mega-menu__product-placeholder">
-                                  <div class="mega-menu__product-placeholder-img"></div>
-                                  <div class="mega-menu__product-placeholder-body">
-                                    <div class="mega-menu__product-placeholder-name"></div>
-                                    <div class="mega-menu__product-placeholder-price"></div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                          </div><!-- /.mega-menu__inner -->
-                        </div>
-                    </li>
-
-                    <!-- Servicios (mega menu) -->
-                    <li class="site-nav__item site-nav__item--has-mega">
-                        <button class="site-nav__trigger"
-                                aria-expanded="false"
-                                aria-haspopup="true"
-                                aria-label="Servicios"
-                                data-translate-aria-label="nav_servicios">
-                            <span class="site-nav__trigger-label" data-translate="nav_servicios">Servicios</span>
-                            <i class="fas fa-chevron-down site-nav__trigger-chevron" aria-hidden="true"></i>
-                        </button>
-                        <div class="mega-menu" id="mega-servicios" role="region" aria-label="Servicios">
-                          <div class="mega-menu__inner mega-menu__inner--services">
-
-                            <h3 class="mega-menu__heading" data-translate="nav_mega_services_heading"></h3>
-
-                            <div class="mega-menu__services-grid">
-
-                              <!-- Impresión 3D -->
-                              <a class="service-card" href="store.html?category=impresion-3d">
-                                <i class="fas fa-cube service-card__icon" aria-hidden="true"></i>
-                                <h3 class="service-card__title" data-translate="nav_mega_svc_3d_title"></h3>
-                                <p class="service-card__desc" data-translate="nav_mega_svc_3d_desc"></p>
-                              </a>
-
-                              <!-- Impresión UV -->
-                              <a class="service-card" href="store.html?category=impresion-uv">
-                                <i class="fas fa-print service-card__icon" aria-hidden="true"></i>
-                                <h3 class="service-card__title" data-translate="nav_mega_svc_uv_title"></h3>
-                                <p class="service-card__desc" data-translate="nav_mega_svc_uv_desc"></p>
-                              </a>
-
-                              <!-- Corte Láser -->
-                              <a class="service-card" href="store.html?category=corte-laser">
-                                <i class="fas fa-bolt service-card__icon" aria-hidden="true"></i>
-                                <h3 class="service-card__title" data-translate="nav_mega_svc_laser_title"></h3>
-                                <p class="service-card__desc" data-translate="nav_mega_svc_laser_desc"></p>
-                              </a>
-
-                              <!-- Escaneo 3D -->
-                              <a class="service-card" href="store.html?category=escaneo-3d">
-                                <i class="fas fa-camera service-card__icon" aria-hidden="true"></i>
-                                <h3 class="service-card__title" data-translate="nav_mega_svc_scan_title"></h3>
-                                <p class="service-card__desc" data-translate="nav_mega_svc_scan_desc"></p>
-                              </a>
-
-                              <!-- Impresión Fotográfica -->
-                              <a class="service-card" href="store.html?category=impresion-fotografica">
-                                <i class="fas fa-image service-card__icon" aria-hidden="true"></i>
-                                <h3 class="service-card__title" data-translate="nav_mega_svc_photo_title"></h3>
-                                <p class="service-card__desc" data-translate="nav_mega_svc_photo_desc"></p>
-                              </a>
-
-                            </div><!-- /.mega-menu__services-grid -->
-
-                          </div><!-- /.mega-menu__inner -->
-                        </div>
-                    </li>
-
-                    <!-- Conócenos (mega menu) -->
-                    <li class="site-nav__item site-nav__item--has-mega">
-                        <button class="site-nav__trigger"
-                                aria-expanded="false"
-                                aria-haspopup="true"
-                                aria-label="Conócenos"
-                                data-translate-aria-label="nav_conocenos">
-                            <span class="site-nav__trigger-label" data-translate="nav_conocenos">Conócenos</span>
-                            <i class="fas fa-chevron-down site-nav__trigger-chevron" aria-hidden="true"></i>
-                        </button>
-                        <div class="mega-menu" id="mega-conocenos" role="region" aria-label="Conócenos">
-                          <div class="mega-menu__inner mega-menu__inner--about">
-
-                            <!-- Col 1: Company links -->
-                            <div class="mega-menu__col">
-                              <h3 class="mega-menu__heading" data-translate="nav_mega_about_heading"></h3>
-                              <ul class="mega-menu__links">
-                                <li><a class="mega-menu__link" href="#quienes-somos" data-translate="nav_mega_about_who"></a></li>
-                                <li><a class="mega-menu__link" href="#mision" data-translate="nav_mega_about_mission"></a></li>
-                                <li><a class="mega-menu__link" href="#proceso" data-translate="nav_mega_about_process"></a></li>
-                                <li><a class="mega-menu__link" href="#blog" data-translate="nav_mega_about_blog"></a></li>
-                              </ul>
-                            </div>
-
-                            <!-- Col 2: Social proof card -->
-                            <div class="mega-menu__col">
-                              <div class="social-proof-card">
-                                <span class="social-proof-card__count">100+</span>
-                                <p class="social-proof-card__label" data-translate="nav_mega_about_clients_label"></p>
-                                <blockquote class="social-proof-card__testimonial" data-translate="nav_mega_about_testimonial"></blockquote>
-                              </div>
-                            </div>
-
-                          </div><!-- /.mega-menu__inner -->
-                        </div>
-                    </li>
-
-                    <!-- Preguntas Frecuentes (plain link) -->
-                    <li class="site-nav__item">
-                        <a class="site-nav__link" href="#faq" data-translate="nav_faq">Preguntas Frecuentes</a>
-                    </li>
-
-                    <!-- Contacto (plain link) -->
-                    <li class="site-nav__item">
-                        <a class="site-nav__link" href="#contacto" data-translate="nav_contacto">Contacto</a>
-                    </li>
-
-                </ul>
-
-                <!-- Actions: lang switcher + cart + account + hamburger -->
-                <div class="site-nav__actions">
-
-                    <!-- Language switcher -->
-                    <div class="lang-switcher" aria-label="Idioma" data-translate-aria-label="nav_lang_label">
-                        <button class="lang-switcher__btn" data-lang="es" aria-label="Español">
-                            <span class="lang-switcher__flag">🇪🇸</span>
-                            <span class="lang-switcher__code">ES</span>
-                        </button>
-                        <button class="lang-switcher__btn" data-lang="en" aria-label="English">
-                            <span class="lang-switcher__flag">🇬🇧</span>
-                            <span class="lang-switcher__code">EN</span>
-                        </button>
-                        <button class="lang-switcher__btn" data-lang="de" aria-label="Deutsch">
-                            <span class="lang-switcher__flag">🇩🇪</span>
-                            <span class="lang-switcher__code">DE</span>
-                        </button>
-                        <button class="lang-switcher__btn" data-lang="pt" aria-label="Português">
-                            <span class="lang-switcher__flag">🇧🇷</span>
-                            <span class="lang-switcher__code">PT</span>
-                        </button>
-                        <button class="lang-switcher__btn" data-lang="ja" aria-label="日本語">
-                            <span class="lang-switcher__flag">🇯🇵</span>
-                            <span class="lang-switcher__code">JA</span>
-                        </button>
-                        <button class="lang-switcher__btn" data-lang="zh" aria-label="中文">
-                            <span class="lang-switcher__flag">🇨🇳</span>
-                            <span class="lang-switcher__code">ZH</span>
-                        </button>
-                    </div>
-
-                    <!-- Cart -->
-                    <a class="site-nav__cart" href="javascript:void(0)" onclick="FilamorfosisCart && FilamorfosisCart.openDrawer()" aria-label="Carrito" data-translate-aria-label="nav_cart_label">
-                        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
-                        <span class="cart-badge" id="cart-count">0</span>
-                    </a>
-
-                    <!-- Account -->
-                    <a class="site-nav__account" href="account.html" aria-label="Mi cuenta" data-translate-aria-label="nav_account_label">
-                        <i class="fas fa-user" aria-hidden="true"></i>
-                    </a>
-
-                    <!-- Hamburger (mobile only — CSS controls visibility) -->
-                    <button class="mobile-nav__hamburger"
+                <!-- Tienda (mega menu) -->
+                <li class="site-nav__item site-nav__item--has-mega" data-route="/tienda">
+                    <button class="site-nav__trigger"
                             aria-expanded="false"
                             aria-haspopup="true"
-                            aria-label="Abrir menú"
-                            data-translate="nav_open_menu">
-                        <i class="fas fa-bars" aria-hidden="true"></i>
-                    </button>
-
-                </div><!-- /.site-nav__actions -->
-
-            </div><!-- /.site-nav__inner -->
-
-            <!-- Backdrop overlay (shown when a mega menu is open) -->
-            <div class="site-nav__backdrop" aria-hidden="true"></div>
-
-            <!-- Screen reader live region — announces mega menu state changes -->
-            <div class="site-nav__live-region" aria-live="polite" aria-atomic="true"></div>
-
-        </nav><!-- /.site-nav -->
-
-        <!-- ══ MOBILE NAV ══ -->
-        <div class="mobile-nav" aria-hidden="true">
-
-            <!-- Header: brand + close button -->
-            <div class="mobile-nav__header">
-                <a class="mobile-nav__logo" href="index.html" aria-label="Filamorfosis — Inicio">
-                    <img class="mobile-nav__logo-img" src="Resources/Images/Circle_Transparent.png" alt="Filamorfosis Logo">
-                    <span class="mobile-nav__brand">Filamorfosis</span>
-                </a>
-                <button class="mobile-nav__close"
-                        aria-expanded="false"
-                        aria-label="Cerrar menú"
-                        data-translate="nav_close_menu">
-                    <i class="fas fa-times" aria-hidden="true"></i>
-                </button>
-            </div><!-- /.mobile-nav__header -->
-
-            <!-- Mobile menu -->
-            <ul class="mobile-nav__menu" role="list">
-
-                <!-- Tienda (accordion sub-menu) -->
-                <li class="mobile-nav__item mobile-nav__item--has-sub">
-                    <button class="mobile-nav__trigger"
-                            aria-expanded="false"
-                            aria-haspopup="true"
+                            aria-label="Tienda"
                             data-translate-aria-label="nav_tienda">
-                        <span class="mobile-nav__trigger-label" data-translate="nav_tienda">Tienda</span>
-                        <i class="fas fa-chevron-down mobile-nav__trigger-chevron" aria-hidden="true"></i>
+                        <span class="site-nav__trigger-label" data-translate="nav_tienda">Tienda</span>
+                        <i class="fas fa-chevron-down site-nav__trigger-chevron" aria-hidden="true"></i>
                     </button>
-                    <ul class="mobile-nav__sub" role="list"></ul>
+                    <div class="mega-menu" id="mega-tienda" role="region" aria-label="Tienda">
+                        <div class="mega-menu__inner mega-menu__inner--tienda">
+                            <div class="mega-menu__col mega-menu__col--categories">
+                                <h3 class="mega-menu__heading" data-translate="nav_mega_store_heading"></h3>
+                                <ul class="nav-categories-list"></ul>
+                                <div class="mega-menu__loading" aria-live="polite">
+                                    <div class="mega-menu__skeleton"></div>
+                                    <div class="mega-menu__skeleton"></div>
+                                    <div class="mega-menu__skeleton"></div>
+                                </div>
+                                <div class="mega-menu__error" role="alert">
+                                    <span data-translate="nav_mega_store_error"></span>
+                                    <button class="mega-menu__retry-btn" type="button" data-translate="nav_mega_store_retry"></button>
+                                </div>
+                                <div class="mega-menu__timeout" role="alert">
+                                    <span data-translate="nav_mega_store_timeout"></span>
+                                    <button class="mega-menu__retry-btn" type="button" data-translate="nav_mega_store_retry"></button>
+                                </div>
+                            </div>
+                            <div class="mega-menu__col mega-menu__col--featured">
+                                <h3 class="mega-menu__heading" data-translate="nav_mega_store_featured">Productos destacados</h3>
+                                <div class="mega-menu__featured-grid">
+                                    <div class="mega-menu__product-placeholder">
+                                        <div class="mega-menu__product-placeholder-img"></div>
+                                        <div class="mega-menu__product-placeholder-body">
+                                            <div class="mega-menu__product-placeholder-name"></div>
+                                            <div class="mega-menu__product-placeholder-price"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mega-menu__product-placeholder">
+                                        <div class="mega-menu__product-placeholder-img"></div>
+                                        <div class="mega-menu__product-placeholder-body">
+                                            <div class="mega-menu__product-placeholder-name"></div>
+                                            <div class="mega-menu__product-placeholder-price"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </li>
 
-                <!-- Servicios (accordion sub-menu) -->
-                <li class="mobile-nav__item mobile-nav__item--has-sub">
-                    <button class="mobile-nav__trigger"
+                <!-- Servicios (mega menu) -->
+                <li class="site-nav__item site-nav__item--has-mega" data-route="/servicios">
+                    <button class="site-nav__trigger"
                             aria-expanded="false"
                             aria-haspopup="true"
+                            aria-label="Servicios"
                             data-translate-aria-label="nav_servicios">
-                        <span class="mobile-nav__trigger-label" data-translate="nav_servicios">Servicios</span>
-                        <i class="fas fa-chevron-down mobile-nav__trigger-chevron" aria-hidden="true"></i>
+                        <span class="site-nav__trigger-label" data-translate="nav_servicios">Servicios</span>
+                        <i class="fas fa-chevron-down site-nav__trigger-chevron" aria-hidden="true"></i>
                     </button>
-                    <ul class="mobile-nav__sub" role="list"></ul>
+                    <div class="mega-menu" id="mega-servicios" role="region" aria-label="Servicios">
+                        <div class="mega-menu__inner mega-menu__inner--services">
+                            <h3 class="mega-menu__heading" data-translate="nav_mega_services_heading"></h3>
+                            <div class="mega-menu__services-grid">
+                                <a class="service-card" href="/servicios?tab=impresion-3d">
+                                    <i class="fas fa-cube service-card__icon" aria-hidden="true"></i>
+                                    <h3 class="service-card__title" data-translate="nav_mega_svc_3d_title"></h3>
+                                    <p class="service-card__desc" data-translate="nav_mega_svc_3d_desc"></p>
+                                </a>
+                                <a class="service-card" href="/servicios?tab=impresion-uv">
+                                    <i class="fas fa-print service-card__icon" aria-hidden="true"></i>
+                                    <h3 class="service-card__title" data-translate="nav_mega_svc_uv_title"></h3>
+                                    <p class="service-card__desc" data-translate="nav_mega_svc_uv_desc"></p>
+                                </a>
+                                <a class="service-card" href="/servicios?tab=corte-laser">
+                                    <i class="fas fa-bolt service-card__icon" aria-hidden="true"></i>
+                                    <h3 class="service-card__title" data-translate="nav_mega_svc_laser_title"></h3>
+                                    <p class="service-card__desc" data-translate="nav_mega_svc_laser_desc"></p>
+                                </a>
+                                <a class="service-card" href="/servicios?tab=escaneo-3d">
+                                    <i class="fas fa-camera service-card__icon" aria-hidden="true"></i>
+                                    <h3 class="service-card__title" data-translate="nav_mega_svc_scan_title"></h3>
+                                    <p class="service-card__desc" data-translate="nav_mega_svc_scan_desc"></p>
+                                </a>
+                                <a class="service-card" href="/servicios?tab=impresion-fotografica">
+                                    <i class="fas fa-image service-card__icon" aria-hidden="true"></i>
+                                    <h3 class="service-card__title" data-translate="nav_mega_svc_photo_title"></h3>
+                                    <p class="service-card__desc" data-translate="nav_mega_svc_photo_desc"></p>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </li>
 
-                <!-- Conócenos (accordion sub-menu) -->
-                <li class="mobile-nav__item mobile-nav__item--has-sub">
-                    <button class="mobile-nav__trigger"
+                <!-- Conócenos (mega menu) -->
+                <li class="site-nav__item site-nav__item--has-mega" data-route="/conocenos">
+                    <button class="site-nav__trigger"
                             aria-expanded="false"
                             aria-haspopup="true"
+                            aria-label="Conócenos"
                             data-translate-aria-label="nav_conocenos">
-                        <span class="mobile-nav__trigger-label" data-translate="nav_conocenos">Conócenos</span>
-                        <i class="fas fa-chevron-down mobile-nav__trigger-chevron" aria-hidden="true"></i>
+                        <span class="site-nav__trigger-label" data-translate="nav_conocenos">Conócenos</span>
+                        <i class="fas fa-chevron-down site-nav__trigger-chevron" aria-hidden="true"></i>
                     </button>
-                    <ul class="mobile-nav__sub" role="list"></ul>
+                    <div class="mega-menu" id="mega-conocenos" role="region" aria-label="Conócenos">
+                        <div class="mega-menu__inner mega-menu__inner--about">
+                            <div class="mega-menu__col">
+                                <h3 class="mega-menu__heading" data-translate="nav_mega_about_heading"></h3>
+                                <ul class="mega-menu__links">
+                                    <li><a class="mega-menu__link" href="/conocenos#quienes-somos" data-translate="nav_mega_about_who"></a></li>
+                                    <li><a class="mega-menu__link" href="/conocenos#mision" data-translate="nav_mega_about_mission"></a></li>
+                                    <li><a class="mega-menu__link" href="/conocenos#proceso" data-translate="nav_mega_about_process"></a></li>
+                                    <li><a class="mega-menu__link" href="/conocenos#blog" data-translate="nav_mega_about_blog"></a></li>
+                                </ul>
+                            </div>
+                            <div class="mega-menu__col">
+                                <div class="social-proof-card">
+                                    <span class="social-proof-card__count">100+</span>
+                                    <p class="social-proof-card__label" data-translate="nav_mega_about_clients_label"></p>
+                                    <blockquote class="social-proof-card__testimonial" data-translate="nav_mega_about_testimonial"></blockquote>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </li>
 
-                <!-- Preguntas Frecuentes (plain link) -->
-                <li class="mobile-nav__item">
-                    <a class="mobile-nav__link" href="#faq" data-translate="nav_faq">Preguntas Frecuentes</a>
+                <!-- Preguntas Frecuentes -->
+                <li class="site-nav__item">
+                    <a class="site-nav__link" href="/faq" data-route="/faq" data-translate="nav_faq">Preguntas Frecuentes</a>
                 </li>
 
-                <!-- Contacto (plain link) -->
-                <li class="mobile-nav__item">
-                    <a class="mobile-nav__link" href="#contacto" data-translate="nav_contacto">Contacto</a>
+                <!-- Contacto -->
+                <li class="site-nav__item">
+                    <a class="site-nav__link" href="/conocenos#contact" data-translate="nav_contacto">Contacto</a>
                 </li>
 
             </ul>
 
-            <!-- Footer: language switcher -->
-            <div class="mobile-nav__footer">
-                <div class="lang-switcher lang-switcher--mobile" aria-label="Idioma" data-translate-aria-label="nav_lang_label">
+            <!-- Actions: lang switcher + cart + account + hamburger -->
+            <div class="site-nav__actions">
+                <div class="lang-switcher" aria-label="Idioma" data-translate-aria-label="nav_lang_label">
                     <button class="lang-switcher__btn" data-lang="es" aria-label="Español">
                         <span class="lang-switcher__flag">🇪🇸</span>
                         <span class="lang-switcher__code">ES</span>
@@ -367,256 +210,1033 @@
                         <span class="lang-switcher__code">ZH</span>
                     </button>
                 </div>
-            </div><!-- /.mobile-nav__footer -->
+                <a class="site-nav__cart" href="javascript:void(0)" onclick="FilamorfosisCart && FilamorfosisCart.openDrawer()" aria-label="Carrito" data-translate-aria-label="nav_cart_label">
+                    <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                    <span class="cart-badge" id="cart-count">0</span>
+                </a>
+                <a class="site-nav__account" href="account.html" data-no-spa aria-label="Mi cuenta" data-translate-aria-label="nav_account_label">
+                    <i class="fas fa-user" aria-hidden="true"></i>
+                </a>
+                <button class="mobile-nav__hamburger"
+                        aria-expanded="false"
+                        aria-haspopup="true"
+                        aria-label="Abrir menú"
+                        data-translate="nav_open_menu">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
+            </div>
 
-        </div><!-- /.mobile-nav -->
+        </div><!-- /.site-nav__inner -->
 
-        <!-- Mobile nav overlay (tap outside to close) -->
-        <div class="mobile-nav__overlay" aria-hidden="true"></div>
-        <!-- Mobile floating cart button -->
-        <button class="mobile-cart-fab" aria-label="Ver carrito" onclick="FilamorfosisCart && FilamorfosisCart.openDrawer()">
-            <i class="fas fa-shopping-cart"></i>
-            <span id="mobile-cart-count" class="cart-badge">0</span>
+        <div class="site-nav__backdrop" aria-hidden="true"></div>
+        <div class="site-nav__live-region" aria-live="polite" aria-atomic="true"></div>
+
+    </nav><!-- /.site-nav -->
+
+    <!-- ══ MOBILE NAV ══ -->
+    <div class="mobile-nav" aria-hidden="true">
+        <div class="mobile-nav__header">
+            <a class="mobile-nav__logo" href="/" aria-label="Filamorfosis — Inicio">
+                <img class="mobile-nav__logo-img" src="Resources/Images/Circle_Transparent.png" alt="Filamorfosis Logo">
+                <span class="mobile-nav__brand">Filamorfosis</span>
+            </a>
+            <button class="mobile-nav__close"
+                    aria-expanded="false"
+                    aria-label="Cerrar menú"
+                    data-translate="nav_close_menu">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <ul class="mobile-nav__menu" role="list">
+            <li class="mobile-nav__item mobile-nav__item--has-sub">
+                <button class="mobile-nav__trigger" aria-expanded="false" aria-haspopup="true" data-translate-aria-label="nav_tienda">
+                    <span class="mobile-nav__trigger-label" data-translate="nav_tienda">Tienda</span>
+                    <i class="fas fa-chevron-down mobile-nav__trigger-chevron" aria-hidden="true"></i>
+                </button>
+                <ul class="mobile-nav__sub" role="list"></ul>
+            </li>
+            <li class="mobile-nav__item mobile-nav__item--has-sub">
+                <button class="mobile-nav__trigger" aria-expanded="false" aria-haspopup="true" data-translate-aria-label="nav_servicios">
+                    <span class="mobile-nav__trigger-label" data-translate="nav_servicios">Servicios</span>
+                    <i class="fas fa-chevron-down mobile-nav__trigger-chevron" aria-hidden="true"></i>
+                </button>
+                <ul class="mobile-nav__sub" role="list">
+                    <li><a class="mobile-nav__sub-link" href="/servicios?tab=impresion-3d" data-translate="nav_mega_svc_3d_title">Impresión 3D</a></li>
+                    <li><a class="mobile-nav__sub-link" href="/servicios?tab=impresion-uv" data-translate="nav_mega_svc_uv_title">Impresión UV</a></li>
+                    <li><a class="mobile-nav__sub-link" href="/servicios?tab=corte-laser" data-translate="nav_mega_svc_laser_title">Corte Láser</a></li>
+                    <li><a class="mobile-nav__sub-link" href="/servicios?tab=escaneo-3d" data-translate="nav_mega_svc_scan_title">Escaneo 3D</a></li>
+                    <li><a class="mobile-nav__sub-link" href="/servicios?tab=impresion-fotografica" data-translate="nav_mega_svc_photo_title">Impresión Fotográfica</a></li>
+                </ul>
+            </li>
+            <li class="mobile-nav__item mobile-nav__item--has-sub">
+                <button class="mobile-nav__trigger" aria-expanded="false" aria-haspopup="true" data-translate-aria-label="nav_conocenos">
+                    <span class="mobile-nav__trigger-label" data-translate="nav_conocenos">Conócenos</span>
+                    <i class="fas fa-chevron-down mobile-nav__trigger-chevron" aria-hidden="true"></i>
+                </button>
+                <ul class="mobile-nav__sub" role="list">
+                    <li><a class="mobile-nav__sub-link" href="/conocenos#quienes-somos" data-translate="nav_mega_about_who">Quiénes somos</a></li>
+                    <li><a class="mobile-nav__sub-link" href="/conocenos#mision" data-translate="nav_mega_about_mission">Misión</a></li>
+                    <li><a class="mobile-nav__sub-link" href="/conocenos#proceso" data-translate="nav_mega_about_process">Proceso</a></li>
+                </ul>
+            </li>
+            <li class="mobile-nav__item">
+                <a class="mobile-nav__link" href="/faq" data-route="/faq" data-translate="nav_faq">Preguntas Frecuentes</a>
+            </li>
+            <li class="mobile-nav__item">
+                <a class="mobile-nav__link" href="/conocenos#contact" data-translate="nav_contacto">Contacto</a>
+            </li>
+        </ul>
+
+        <div class="mobile-nav__footer">
+            <div class="lang-switcher lang-switcher--mobile" aria-label="Idioma" data-translate-aria-label="nav_lang_label">
+                <button class="lang-switcher__btn" data-lang="es" aria-label="Español">
+                    <span class="lang-switcher__flag">🇪🇸</span>
+                    <span class="lang-switcher__code">ES</span>
+                </button>
+                <button class="lang-switcher__btn" data-lang="en" aria-label="English">
+                    <span class="lang-switcher__flag">🇬🇧</span>
+                    <span class="lang-switcher__code">EN</span>
+                </button>
+                <button class="lang-switcher__btn" data-lang="de" aria-label="Deutsch">
+                    <span class="lang-switcher__flag">🇩🇪</span>
+                    <span class="lang-switcher__code">DE</span>
+                </button>
+                <button class="lang-switcher__btn" data-lang="pt" aria-label="Português">
+                    <span class="lang-switcher__flag">🇧🇷</span>
+                    <span class="lang-switcher__code">PT</span>
+                </button>
+                <button class="lang-switcher__btn" data-lang="ja" aria-label="日本語">
+                    <span class="lang-switcher__flag">🇯🇵</span>
+                    <span class="lang-switcher__code">JA</span>
+                </button>
+                <button class="lang-switcher__btn" data-lang="zh" aria-label="中文">
+                    <span class="lang-switcher__flag">🇨🇳</span>
+                    <span class="lang-switcher__code">ZH</span>
+                </button>
+            </div>
+        </div>
+    </div><!-- /.mobile-nav -->
+
+    <div class="mobile-nav__overlay" aria-hidden="true"></div>
+
+    <!-- Mobile floating cart button -->
+    <button class="mobile-cart-fab" aria-label="Ver carrito" onclick="FilamorfosisCart && FilamorfosisCart.openDrawer()">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="mobile-cart-count" class="cart-badge">0</span>
+    </button>
+
+    <!-- ══ SPA VIEW CONTAINER ══ -->
+    <main id="app-view" role="main" aria-live="polite">
+        <!-- Page content is injected here by router.js -->
+    </main>
+
+    <!-- ══ SHARED FOOTER ══ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p class="footer-copyright">
+                    &copy; 2026 Filamorfosis. <span data-translate="footer_rights">Todos los derechos reservados.</span>
+                </p>
+                <p class="footer-trademark" data-translate="footer_trademark">
+                    Filamorfosis® es una marca registrada.
+                </p>
+                <div class="footer-contact">
+                    <a href="https://wa.me/13152071586" target="_blank" rel="noopener" class="footer-contact-link" aria-label="WhatsApp">
+                        <i class="fab fa-whatsapp footer-contact-icon footer-contact-icon--whatsapp"></i> WhatsApp
+                    </a>
+                    <a href="mailto:contacto@filamorfosis.com" class="footer-contact-link" aria-label="Email">
+                        <i class="fas fa-envelope footer-contact-icon footer-contact-icon--email"></i> Email
+                    </a>
+                    <a href="https://instagram.com/filamorfosis" target="_blank" rel="noopener" class="footer-contact-link" aria-label="Instagram">
+                        <i class="fab fa-instagram footer-contact-icon footer-contact-icon--instagram"></i> Instagram
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</div><!-- /.page-wrap -->
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     PAGE TEMPLATES — content is cloned into #app-view by router.js
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<!-- ── INICIO ─────────────────────────────────────────────────────────── -->
+<template id="tpl-inicio">
+
+    <!-- Modern Promo Banner Slider -->
+    <section id="promo-slider" class="promo-slider">
+        <div class="promo-slider__track">
+            <div class="promo-slide promo-slide--active">
+                <div class="promo-slide__bg promo-slide__bg--1"></div>
+                <div class="container">
+                    <div class="promo-slide__content">
+                        <span class="promo-slide__badge">🔥 Destacado</span>
+                        <h2 class="promo-slide__title">Productos Únicos, Hechos para Ti</h2>
+                        <p class="promo-slide__desc">Personaliza tazas, vasos, figuras 3D y más. Desde 1 pieza.</p>
+                        <div class="promo-slide__cta">
+                            <a href="/tienda" class="btn btn-primary">Ver Productos</a>
+                        </div>
+                    </div>
+                    <div class="promo-slide__image">
+                        <img src="Resources/hero/product-showcase.jpg" alt="Productos destacados" onerror="this.style.display='none'">
+                    </div>
+                </div>
+            </div>
+            <div class="promo-slide">
+                <div class="promo-slide__bg promo-slide__bg--2"></div>
+                <div class="container">
+                    <div class="promo-slide__content">
+                        <span class="promo-slide__badge">✨ Nuevo</span>
+                        <h2 class="promo-slide__title">Nuevos Productos Cada Semana</h2>
+                        <p class="promo-slide__desc">Descubre las últimas novedades en impresión 3D y UV.</p>
+                        <div class="promo-slide__cta">
+                            <a href="/tienda" class="btn btn-primary">Ver Novedades</a>
+                        </div>
+                    </div>
+                    <div class="promo-slide__image">
+                        <img src="Resources/hero/new-products.jpg" alt="Nuevos productos" onerror="this.style.display='none'">
+                    </div>
+                </div>
+            </div>
+            <div class="promo-slide">
+                <div class="promo-slide__bg promo-slide__bg--3"></div>
+                <div class="container">
+                    <div class="promo-slide__content">
+                        <span class="promo-slide__badge">🚚 Envío Gratis</span>
+                        <h2 class="promo-slide__title">Envío Gratis en Pedidos +$500</h2>
+                        <p class="promo-slide__desc">Recibe tus productos en la puerta de tu casa sin costo adicional.</p>
+                        <div class="promo-slide__cta">
+                            <a href="/tienda" class="btn btn-primary">Comprar Ahora</a>
+                        </div>
+                    </div>
+                    <div class="promo-slide__image">
+                        <img src="Resources/hero/shipping.jpg" alt="Envío gratis" onerror="this.style.display='none'">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="promo-slider__dots">
+            <button class="promo-slider__dot promo-slider__dot--active" data-slide="0" aria-label="Slide 1"></button>
+            <button class="promo-slider__dot" data-slide="1" aria-label="Slide 2"></button>
+            <button class="promo-slider__dot" data-slide="2" aria-label="Slide 3"></button>
+        </div>
+        <button class="promo-slider__arrow promo-slider__arrow--prev" aria-label="Previous slide">
+            <i class="fas fa-chevron-left"></i>
         </button>
+        <button class="promo-slider__arrow promo-slider__arrow--next" aria-label="Next slide">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </section>
 
-        <!-- Modern Promo Banner Slider -->
-        <section id="promo-slider" class="promo-slider">
-            <div class="promo-slider__track">
-                <!-- Slide 1: Featured Products -->
-                <div class="promo-slide promo-slide--active">
-                    <div class="promo-slide__bg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                    <div class="container">
-                        <div class="promo-slide__content">
-                            <span class="promo-slide__badge">🔥 Destacado</span>
-                            <h2 class="promo-slide__title">Productos Únicos, Hechos para Ti</h2>
-                            <p class="promo-slide__desc">Personaliza tazas, vasos, figuras 3D y más. Desde 1 pieza.</p>
-                            <div class="promo-slide__cta">
-                                <a href="#catalog" class="btn btn-primary" onclick="event.preventDefault(); document.querySelector('#catalog').scrollIntoView({ behavior: 'smooth' });">Ver Productos</a>
-                            </div>
-                        </div>
-                        <div class="promo-slide__image">
-                            <img src="Resources/hero/product-showcase.jpg" alt="Productos destacados" onerror="this.style.display='none'">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide 2: New Arrivals -->
-                <div class="promo-slide">
-                    <div class="promo-slide__bg" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
-                    <div class="container">
-                        <div class="promo-slide__content">
-                            <span class="promo-slide__badge">✨ Nuevo</span>
-                            <h2 class="promo-slide__title">Nuevos Productos Cada Semana</h2>
-                            <p class="promo-slide__desc">Descubre las últimas novedades en impresión 3D y UV.</p>
-                            <div class="promo-slide__cta">
-                                <a href="#catalog" class="btn btn-primary" onclick="event.preventDefault(); document.querySelector('#catalog').scrollIntoView({ behavior: 'smooth' });">Ver Novedades</a>
-                            </div>
-                        </div>
-                        <div class="promo-slide__image">
-                            <img src="Resources/hero/new-products.jpg" alt="Nuevos productos" onerror="this.style.display='none'">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide 3: Free Shipping -->
-                <div class="promo-slide">
-                    <div class="promo-slide__bg" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
-                    <div class="container">
-                        <div class="promo-slide__content">
-                            <span class="promo-slide__badge">🚚 Envío Gratis</span>
-                            <h2 class="promo-slide__title">Envío Gratis en Pedidos +$500</h2>
-                            <p class="promo-slide__desc">Recibe tus productos en la puerta de tu casa sin costo adicional.</p>
-                            <div class="promo-slide__cta">
-                                <a href="#catalog" class="btn btn-primary" onclick="event.preventDefault(); document.querySelector('#catalog').scrollIntoView({ behavior: 'smooth' });">Comprar Ahora</a>
-                            </div>
-                        </div>
-                        <div class="promo-slide__image">
-                            <img src="Resources/hero/shipping.jpg" alt="Envío gratis" onerror="this.style.display='none'">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation Dots -->
-            <div class="promo-slider__dots">
-                <button class="promo-slider__dot promo-slider__dot--active" data-slide="0" aria-label="Slide 1"></button>
-                <button class="promo-slider__dot" data-slide="1" aria-label="Slide 2"></button>
-                <button class="promo-slider__dot" data-slide="2" aria-label="Slide 3"></button>
-            </div>
-
-            <!-- Navigation Arrows -->
-            <button class="promo-slider__arrow promo-slider__arrow--prev" aria-label="Previous slide">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="promo-slider__arrow promo-slider__arrow--next" aria-label="Next slide">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </section>
-
-
-
-
-
-        <!-- Reviews Section -->
-        <section class="reviews-section">
-          <div class="container">
+    <!-- Reviews Section -->
+    <section class="reviews-section">
+        <div class="container">
             <h2 class="section-title reviews-section__title" data-translate="reviews.title">Lo que dicen nuestros clientes</h2>
-          </div>
-          <div class="reviews-marquee-wrap">
+        </div>
+        <div class="reviews-marquee-wrap">
             <div class="reviews-marquee">
-              <!-- card 1 -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Recomiendo ampliamente a mis amigos de Filamorfosis que se rifaron con esta impresión UV sobre una placa de acero con excelentes detalles. Muy satisfecho con el trabajo realizado, de 10!! 👌👌👌"</p>
-                <p class="review-author">— Mauricio A. · Impresión UV</p>
-              </div>
-              <!-- card 2 -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Excelente servicio y atención. Los vasos personalizados quedaron increíbles, el diseño se ve muy profesional. Definitivamente volvería a pedir."</p>
-                <p class="review-author">— Galo M. · Impresión UV</p>
-              </div>
-              <!-- card 3 -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Excelente calidad en la impresión 3D. Mi figura quedó perfecta, con todos los detalles que pedí. Sí volvería a pedir."</p>
-                <p class="review-author">— Carlos M. · Impresión 3D</p>
-              </div>
-              <!-- card 4 -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐</div>
-                <p class="review-text">"Los vasos quedaron muy padres para un evento que tuve. El diseño se ve muy profesional. Uno llegó roto pero me enviaron uno nuevo sin problema."</p>
-                <p class="review-author">— Ana L. · Impresión UV</p>
-              </div>
-              <!-- card 5 -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"El corte láser en madera fue preciso y el acabado es hermoso. Muy recomendados para proyectos personalizados."</p>
-                <p class="review-author">— Roberto S. · Corte Láser</p>
-              </div>
-              <!-- duplicate set for seamless loop -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Recomiendo ampliamente a mis amigos de Filamorfosis que se rifaron con esta impresión UV sobre una placa de acero con excelentes detalles. Muy satisfecho con el trabajo realizado, de 10!! 👌👌👌"</p>
-                <p class="review-author">— Mauricio A. · Impresión UV</p>
-              </div>
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Excelente servicio y atención. Los vasos personalizados quedaron increíbles, el diseño se ve muy profesional. Definitivamente volvería a pedir."</p>
-                <p class="review-author">— Galo M. · Impresión UV</p>
-              </div>
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Excelente calidad en la impresión 3D. Mi figura quedó perfecta, con todos los detalles que pedí. Sí volvería a pedir."</p>
-                <p class="review-author">— Carlos M. · Impresión 3D</p>
-              </div>
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐</div>
-                <p class="review-text">"Los vasos quedaron muy padres para un evento que tuve. El diseño se ve muy profesional. Uno llegó roto pero me enviaron uno nuevo sin problema."</p>
-                <p class="review-author">— Ana L. · Impresión UV</p>
-              </div>
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"El corte láser en madera fue preciso y el acabado es hermoso. Muy recomendados para proyectos personalizados."</p>
-                <p class="review-author">— Roberto S. · Corte Láser</p>
-              </div>
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Recomiendo ampliamente a mis amigos de Filamorfosis que se rifaron con esta impresión UV sobre una placa de acero con excelentes detalles. Muy satisfecho con el trabajo realizado, de 10!! 👌👌👌"</p>
+                    <p class="review-author">— Mauricio A. · Impresión UV</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Excelente servicio y atención. Los vasos personalizados quedaron increíbles, el diseño se ve muy profesional. Definitivamente volvería a pedir."</p>
+                    <p class="review-author">— Galo M. · Impresión UV</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Excelente calidad en la impresión 3D. Mi figura quedó perfecta, con todos los detalles que pedí. Sí volvería a pedir."</p>
+                    <p class="review-author">— Carlos M. · Impresión 3D</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐</div>
+                    <p class="review-text">"Los vasos quedaron muy padres para un evento que tuve. El diseño se ve muy profesional. Uno llegó roto pero me enviaron uno nuevo sin problema."</p>
+                    <p class="review-author">— Ana L. · Impresión UV</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"El corte láser en madera fue preciso y el acabado es hermoso. Muy recomendados para proyectos personalizados."</p>
+                    <p class="review-author">— Roberto S. · Corte Láser</p>
+                </div>
+                <!-- duplicate set for seamless loop -->
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Recomiendo ampliamente a mis amigos de Filamorfosis que se rifaron con esta impresión UV sobre una placa de acero con excelentes detalles. Muy satisfecho con el trabajo realizado, de 10!! 👌👌👌"</p>
+                    <p class="review-author">— Mauricio A. · Impresión UV</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Excelente servicio y atención. Los vasos personalizados quedaron increíbles, el diseño se ve muy profesional. Definitivamente volvería a pedir."</p>
+                    <p class="review-author">— Galo M. · Impresión UV</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Excelente calidad en la impresión 3D. Mi figura quedó perfecta, con todos los detalles que pedí. Sí volvería a pedir."</p>
+                    <p class="review-author">— Carlos M. · Impresión 3D</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐</div>
+                    <p class="review-text">"Los vasos quedaron muy padres para un evento que tuve. El diseño se ve muy profesional. Uno llegó roto pero me enviaron uno nuevo sin problema."</p>
+                    <p class="review-author">— Ana L. · Impresión UV</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"El corte láser en madera fue preciso y el acabado es hermoso. Muy recomendados para proyectos personalizados."</p>
+                    <p class="review-author">— Roberto S. · Corte Láser</p>
+                </div>
             </div>
-          </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Certifications Section -->
-        <section class="certifications-section">
-          <div class="container">
+    <!-- Certifications Section -->
+    <section class="certifications-section">
+        <div class="container">
             <div class="certifications-grid">
-              <div class="certification-item">
-                <i class="fas fa-flag certification-icon"></i>
-                <span class="certification-label" data-translate="cert_mexico">Producción en México</span>
-              </div>
-              <div class="certification-item">
-                <i class="fas fa-certificate certification-icon"></i>
-                <span class="certification-label" data-translate="cert_materials">Materiales certificados</span>
-              </div>
-              <div class="certification-item">
-                <i class="fas fa-star certification-icon"></i>
-                <span class="certification-label" data-translate="cert_quality">Calidad garantizada</span>
-              </div>
+                <div class="certification-item">
+                    <i class="fas fa-flag certification-icon"></i>
+                    <span class="certification-label" data-translate="cert_mexico">Producción en México</span>
+                </div>
+                <div class="certification-item">
+                    <i class="fas fa-certificate certification-icon"></i>
+                    <span class="certification-label" data-translate="cert_materials">Materiales certificados</span>
+                </div>
+                <div class="certification-item">
+                    <i class="fas fa-star certification-icon"></i>
+                    <span class="certification-label" data-translate="cert_quality">Calidad garantizada</span>
+                </div>
             </div>
-          </div>
-        </section>
+        </div>
+    </section>
 
+    <!-- WhatsApp popup modal -->
+    <div class="wa-modal-overlay" id="waModal">
+        <div class="wa-modal">
+            <button class="wa-modal-close" id="waModalClose">&times;</button>
+            <div class="wa-modal-header">
+                <div class="wa-modal-icon"><i class="fab fa-whatsapp"></i></div>
+                <div>
+                    <div class="wa-modal-title">Filamorfosis</div>
+                    <div class="wa-modal-subtitle" data-translate="wa_subtitle">Normalmente responde en minutos</div>
+                </div>
+            </div>
+            <div class="wa-modal-bubble">
+                <p data-translate="wa_greeting">¿Estás listo para llevar tu idea a la realidad? 🚀</p>
+            </div>
+            <textarea class="wa-modal-input" id="waMessage" rows="3"></textarea>
+            <button class="wa-modal-btn" id="waStartChat" data-translate="wa_btn">Iniciar Chat</button>
+        </div>
+    </div>
 
-                <!-- WhatsApp popup modal (opened by the FAB) -->
-        <div class="wa-modal-overlay" id="waModal" style="display:none">
-            <div class="wa-modal">
-                <button class="wa-modal-close" id="waModalClose">&times;</button>
-                <div class="wa-modal-header">
-                    <div class="wa-modal-icon"><i class="fab fa-whatsapp"></i></div>
-                    <div>
-                        <div class="wa-modal-title">Filamorfosis</div>
-                        <div class="wa-modal-subtitle" data-translate="wa_subtitle">Normalmente responde en minutos</div>
+</template>
+
+<!-- ── TIENDA ───────────────────────────────────────────────────────────── -->
+<template id="tpl-tienda">
+
+    <!-- Modern Promo Banner Slider -->
+    <section id="promo-slider" class="promo-slider">
+        <div class="promo-slider__track">
+            <div class="promo-slide promo-slide--active">
+                <div class="promo-slide__bg promo-slide__bg--1"></div>
+                <div class="container">
+                    <div class="promo-slide__content">
+                        <span class="promo-slide__badge">🔥 Destacado</span>
+                        <h2 class="promo-slide__title">Productos Únicos, Hechos para Ti</h2>
+                        <p class="promo-slide__desc">Personaliza tazas, vasos, figuras 3D y más. Desde 1 pieza.</p>
+                        <div class="promo-slide__cta">
+                            <a href="#catalog" class="btn btn-primary">Ver Productos</a>
+                        </div>
+                    </div>
+                    <div class="promo-slide__image">
+                        <img src="Resources/hero/product-showcase.jpg" alt="Productos destacados" onerror="this.style.display='none'">
                     </div>
                 </div>
-                <div class="wa-modal-bubble">
-                    <p data-translate="wa_greeting">¿Estás listo para llevar tu idea a la realidad? 🚀</p>
+            </div>
+            <div class="promo-slide">
+                <div class="promo-slide__bg promo-slide__bg--2"></div>
+                <div class="container">
+                    <div class="promo-slide__content">
+                        <span class="promo-slide__badge">✨ Nuevo</span>
+                        <h2 class="promo-slide__title">Nuevos Productos Cada Semana</h2>
+                        <p class="promo-slide__desc">Descubre las últimas novedades en impresión 3D y UV.</p>
+                        <div class="promo-slide__cta">
+                            <a href="#catalog" class="btn btn-primary">Ver Novedades</a>
+                        </div>
+                    </div>
+                    <div class="promo-slide__image">
+                        <img src="Resources/hero/new-products.jpg" alt="Nuevos productos" onerror="this.style.display='none'">
+                    </div>
                 </div>
-                <textarea class="wa-modal-input" id="waMessage" rows="3"></textarea>
-                <button class="wa-modal-btn" id="waStartChat" data-translate="wa_btn">Iniciar Chat</button>
+            </div>
+            <div class="promo-slide">
+                <div class="promo-slide__bg promo-slide__bg--3"></div>
+                <div class="container">
+                    <div class="promo-slide__content">
+                        <span class="promo-slide__badge">🚚 Envío Gratis</span>
+                        <h2 class="promo-slide__title">Envío Gratis en Pedidos +$500</h2>
+                        <p class="promo-slide__desc">Recibe tus productos en la puerta de tu casa sin costo adicional.</p>
+                        <div class="promo-slide__cta">
+                            <a href="#catalog" class="btn btn-primary">Comprar Ahora</a>
+                        </div>
+                    </div>
+                    <div class="promo-slide__image">
+                        <img src="Resources/hero/shipping.jpg" alt="Envío gratis" onerror="this.style.display='none'">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="promo-slider__dots">
+            <button class="promo-slider__dot promo-slider__dot--active" data-slide="0" aria-label="Slide 1"></button>
+            <button class="promo-slider__dot" data-slide="1" aria-label="Slide 2"></button>
+            <button class="promo-slider__dot" data-slide="2" aria-label="Slide 3"></button>
+        </div>
+        <button class="promo-slider__arrow promo-slider__arrow--prev" aria-label="Previous slide">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="promo-slider__arrow promo-slider__arrow--next" aria-label="Next slide">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </section>
+
+    <!-- Store Stats Bar -->
+    <section class="store-stats-bar">
+        <div class="container">
+            <div class="store-stats-grid">
+                <div class="store-stat-item">
+                    <div class="store-stat-icon"><i class="fas fa-box-open"></i></div>
+                    <div class="store-stat-content">
+                        <span class="store-stat-num" id="statProducts">0</span>
+                        <span class="store-stat-label" data-translate="stat_products">Productos</span>
+                    </div>
+                </div>
+                <div class="store-stat-divider"></div>
+                <div class="store-stat-item">
+                    <div class="store-stat-icon"><i class="fas fa-shopping-bag"></i></div>
+                    <div class="store-stat-content">
+                        <span class="store-stat-num">1</span>
+                        <span class="store-stat-label" data-translate="stat_min">Pieza mínima</span>
+                    </div>
+                </div>
+                <div class="store-stat-divider"></div>
+                <div class="store-stat-item">
+                    <div class="store-stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="store-stat-content">
+                        <span class="store-stat-num">24h</span>
+                        <span class="store-stat-label" data-translate="stat_response">Respuesta</span>
+                    </div>
+                </div>
+                <div class="store-stat-divider"></div>
+                <div class="store-stat-item">
+                    <div class="store-stat-icon"><i class="fas fa-truck"></i></div>
+                    <div class="store-stat-content">
+                        <span class="store-stat-num" data-translate="stat_shipping_value">Gratis</span>
+                        <span class="store-stat-label" data-translate="stat_shipping">Envío +$500</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Catalog Section -->
+    <section id="catalog" class="catalog-section">
+        <div class="cat-filter-bar" id="catFilterBar">
+            <div class="cat-filter-inner">
+                <div class="cat-search-wrap">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="catSearch" placeholder="Buscar producto...">
+                </div>
+            </div>
+        </div>
+        <div class="cat-main">
+            <div class="cat-section-header" id="catSectionHeader">
+                <h2 id="catSectionTitle"></h2>
+                <p id="catSectionDesc"></p>
+            </div>
+            <div class="cat-grid" id="catGrid"></div>
+            <div class="cat-empty" id="catEmpty">
+                <i class="fas fa-box-open"></i>
+                <p data-translate="empty_text">No se encontraron productos</p>
+            </div>
+        </div>
+        <div class="cat-modal-overlay" id="catModal">
+            <div class="cat-modal">
+                <button class="cat-modal-close" id="catModalClose"><i class="fas fa-times"></i></button>
+                <div class="cat-modal-inner" id="catModalInner"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="reviews-section">
+        <div class="container">
+            <h2 class="section-title reviews-section__title" data-translate="reviews.title">Lo que dicen nuestros clientes</h2>
+        </div>
+        <div class="reviews-marquee-wrap">
+            <div class="reviews-marquee">
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Recomiendo ampliamente a mis amigos de Filamorfosis que se rifaron con esta impresión UV sobre una placa de acero con excelentes detalles. Muy satisfecho con el trabajo realizado, de 10!! 👌👌👌"</p>
+                    <p class="review-author">— Mauricio A. · Impresión UV</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Me sorprendió mucho la calidad del cuadro, el relieve le da una profundidad increíble y hace que los detalles resalten. Los colores están increíbles y el diseño es espectacular, tiene mucha personalidad."</p>
+                    <p class="review-author">— Galo M. · Impresión UV</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"Excelente calidad en la impresión 3D. Mi figura quedó perfecta, con todos los detalles que pedí. Sí volvería a pedir."</p>
+                    <p class="review-author">— Carlos M. · Impresión 3D</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐</div>
+                    <p class="review-text">"Los vasos quedaron muy padres para un evento que tuve. El diseño se ve muy profesional. Uno llegó roto pero me enviaron uno nuevo sin problema."</p>
+                    <p class="review-author">— Ana L. · Impresión UV</p>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="review-text">"El corte láser en madera fue preciso y el acabado es hermoso. Muy recomendados para proyectos personalizados."</p>
+                    <p class="review-author">— Roberto S. · Corte Láser</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Certifications Section -->
+    <section class="certifications-section">
+        <div class="container">
+            <div class="certifications-grid">
+                <div class="certification-item">
+                    <i class="fas fa-flag certification-icon"></i>
+                    <span class="certification-label" data-translate="cert_mexico">Producción en México</span>
+                </div>
+                <div class="certification-item">
+                    <i class="fas fa-certificate certification-icon"></i>
+                    <span class="certification-label" data-translate="cert_materials">Materiales certificados</span>
+                </div>
+                <div class="certification-item">
+                    <i class="fas fa-star certification-icon"></i>
+                    <span class="certification-label" data-translate="cert_quality">Calidad garantizada</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WhatsApp popup modal -->
+    <div class="wa-modal-overlay" id="waModal">
+        <div class="wa-modal">
+            <button class="wa-modal-close" id="waModalClose">&times;</button>
+            <div class="wa-modal-header">
+                <div class="wa-modal-icon"><i class="fab fa-whatsapp"></i></div>
+                <div>
+                    <div class="wa-modal-title">Filamorfosis</div>
+                    <div class="wa-modal-subtitle" data-translate="wa_subtitle">Normalmente responde en minutos</div>
+                </div>
+            </div>
+            <div class="wa-modal-bubble">
+                <p data-translate="wa_greeting">¿Estás listo para llevar tu idea a la realidad? 🚀</p>
+            </div>
+            <textarea class="wa-modal-input" id="waMessage" rows="3"></textarea>
+            <button class="wa-modal-btn" id="waStartChat" data-translate="wa_btn">Iniciar Chat</button>
+        </div>
+    </div>
+
+</template>
+<!-- ── SERVICIOS ─────────────────────────────────────────────────────── -->
+<template id="tpl-servicios">
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <video class="hero-video-bg hero-video-bg--a" id="heroBgA" autoplay muted playsinline>
+            <source src="Resources/hero/FilamorfosisBanner_Low.mp4" type="video/mp4">
+        </video>
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title animate-fade-in" data-translate="hero_title">Tus Ideas. Tu Realidad.</h1>
+                <p class="hero-subtitle animate-fade-in-delay" data-translate="hero_subtitle">Transformamos tu imaginación en objetos tangibles, <strong>capa</strong> por <strong>capa.</strong></p>
+                <hr class="hero-divider">
+                <div class="hero-cta animate-fade-in-delay-2">
+                    <a href="/tienda" class="btn btn-primary" data-translate="hero_cta_primary">Explorar Productos</a>
+                    <a href="#services" class="btn btn-secondary" data-translate="hero_cta_secondary">Ver Servicios</a>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator"><div class="mouse"></div></div>
+    </section>
+
+    <section id="services" class="showcase-section">
+        <div class="service-sidebar" id="serviceSidebar">
+            <div class="service-sidebar__header">
+                <span class="service-sidebar__title" data-translate="services_title">Servicios a tu Medida</span>
+            </div>
+            <div class="service-sidebar__icons">
+                <button class="service-sidebar__item active" data-tab="engrave" data-label-key="gallery_filter_engrave" title="Grabado Láser">✒</button>
+                <button class="service-sidebar__item" data-tab="uv" data-label-key="gallery_filter_uv" title="Impresión UV">🎨</button>
+                <button class="service-sidebar__item" data-tab="3d" data-label-key="gallery_filter_3d" title="Impresión 3D">🌀</button>
+                <button class="service-sidebar__item" data-tab="laser" data-label-key="gallery_filter_laser" title="Corte Láser">✂</button>
+                <button class="service-sidebar__item" data-tab="scan" data-label-key="gallery_filter_scan" title="Escaneo 3D">🗿</button>
+                <button class="service-sidebar__item" data-tab="photo" data-label-key="gallery_filter_photo" title="Fotografía">🖨️</button>
+            </div>
+            <div class="service-sidebar__active-label" id="sidebarActiveLabel">
+                <span class="service-sidebar__active-icon" id="sidebarActiveIcon">🔆</span>
+                <span class="service-sidebar__active-name" id="sidebarActiveName">Grabado Láser</span>
+                <a href="/tienda" class="service-sidebar__active-cta" id="sidebarActiveCta" data-t="service.viewProducts">Ver productos →</a>
+            </div>
+            <span class="service-sidebar__subtitle" data-translate="services_subtitle">Productos listos para personalizar — o diseñamos juntos algo único para ti.</span>
+        </div>
+
+        <!-- Laser Engraving -->
+        <div class="showcase-panel active" id="showcase-engrave" role="tabpanel">
+            <div class="showcase-service-info">
+                <div class="showcase-service-text">
+                    <h3 data-translate="service_engrave_title">Grabado Láser</h3>
+                    <p data-translate="service_engrave_desc">Grabado de alta precisión sobre madera, metal, vidrio, cuero y más.</p>
+                    <ul class="showcase-features">
+                        <li data-translate="service_engrave_feat1">Detalle fotográfico y vectorial</li>
+                        <li data-translate="service_engrave_feat2">Permanente — no se borra ni desvanece</li>
+                        <li data-translate="service_engrave_feat3">Madera, metal, vidrio, cuero, piedra</li>
+                    </ul>
+                </div>
+                <div class="showcase-service-tags">
+                    <span class="showcase-tag" data-translate="service_engrave_ex1">🎁 Regalos personalizados</span>
+                    <span class="showcase-tag" data-translate="service_engrave_ex2">🏅 Trofeos y placas</span>
+                    <span class="showcase-tag" data-translate="service_engrave_ex3">🔑 Llaveros y accesorios</span>
+                    <span class="showcase-tag" data-translate="service_engrave_ex4">🍾 Botellas y vasos</span>
+                    <span class="showcase-tag" data-translate="service_engrave_ex5">📱 Gadgets y electrónicos</span>
+                </div>
+            </div>
+            <div class="showcase-media-grid" id="Showcase_Services">
+                <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserENGRAVE/xtollPrecision.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserENGRAVE/xtoolCeramica.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserENGRAVE/xtoolGlass.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserENGRAVE/xtoolMetal.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserENGRAVE/xtoolVidrio.mp4" type="video/mp4"></video></div>
             </div>
         </div>
 
+        <!-- UV Printing -->
+        <div class="showcase-panel" id="showcase-uv" role="tabpanel">
+            <div class="showcase-service-info">
+                <div class="showcase-service-text">
+                    <h3 data-translate="service_uv_title">Impresión UV</h3>
+                    <p data-translate="service_uv_desc">Personaliza casi cualquier superficie con colores vibrantes y duraderos.</p>
+                    <ul class="showcase-features">
+                        <li data-translate="service_uv_feat1">Imprime en objetos cilíndricos</li>
+                        <li data-translate="service_uv_feat2">Colores que no se desvanecen</li>
+                        <li data-translate="service_uv_feat3">Stickers resistentes al agua</li>
+                    </ul>
+                </div>
+                <div class="showcase-service-tags">
+                    <span class="showcase-tag" data-translate="service_uv_ex1">☕ Tazas y vasos térmicos</span>
+                    <span class="showcase-tag" data-translate="service_uv_ex2">🏷️ Stickers UV DTF</span>
+                    <span class="showcase-tag" data-translate="service_uv_ex3">🧲 Magnetos personalizados</span>
+                    <span class="showcase-tag" data-translate="service_uv_ex4">🪵 Placas de madera</span>
+                    <span class="showcase-tag" data-translate="service_uv_ex5">🎨 Objetos decorativos</span>
+                </div>
+            </div>
+            <div class="showcase-media-grid">
+                <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/UV/eufy.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/UV/20260414_161455.jpg" alt="Impresión UV"></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/UV/20260318_083251.jpg" alt="Impresión UV"></div>
+                <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/UV/Alquimia.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/UV/Cantina.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/UV/20260320_121700.jpg" alt="Impresión UV"></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/UV/20260414_211301.jpg" alt="Impresión UV"></div>
+                <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/UV/Spider.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/UV/Termo.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/UV/20260409_141044.jpg" alt="Impresión UV"></div>
+            </div>
+        </div>
 
-        <footer class="footer">
-            <div class="container">
-                <div class="footer-content">
-                    <p class="footer-copyright">
-                        &copy; 2026 Filamorfosis. <span data-translate="footer_rights">Todos los derechos reservados.</span>
-                    </p>
-                    <p class="footer-trademark" data-translate="footer_trademark">
-                        Filamorfosis® es una marca registrada.
-                    </p>
-                    <div class="footer-contact">
-                      <a href="https://wa.me/13152071586" target="_blank" rel="noopener" class="footer-contact-link" aria-label="WhatsApp">
-                        <i class="fab fa-whatsapp footer-contact-icon footer-contact-icon--whatsapp"></i> WhatsApp
-                      </a>
-                      <a href="mailto:contacto@filamorfosis.com" class="footer-contact-link" aria-label="Email">
-                        <i class="fas fa-envelope footer-contact-icon footer-contact-icon--email"></i> Email
-                      </a>
-                      <a href="https://instagram.com/filamorfosis" target="_blank" rel="noopener" class="footer-contact-link" aria-label="Instagram">
-                        <i class="fab fa-instagram footer-contact-icon footer-contact-icon--instagram"></i> Instagram
-                      </a>
+        <!-- 3D Printing -->
+        <div class="showcase-panel" id="showcase-3d" role="tabpanel">
+            <div class="showcase-service-info">
+                <div class="showcase-service-text">
+                    <h3 data-translate="service_3d_title">Impresión 3D</h3>
+                    <p data-translate="service_3d_desc">Dale vida a tus ideas con impresión multicolor y multimaterial.</p>
+                    <ul class="showcase-features">
+                        <li data-translate="service_3d_feat1">Hasta 5 colores en una pieza</li>
+                        <li data-translate="service_3d_feat2">Materiales flexibles y resistentes</li>
+                        <li data-translate="service_3d_feat3">Precisión milimétrica</li>
+                    </ul>
+                </div>
+                <div class="showcase-service-tags">
+                    <span class="showcase-tag" data-translate="service_3d_ex1">🎮 Figuras y juguetes</span>
+                    <span class="showcase-tag" data-translate="service_3d_ex2">🏠 Decoración del hogar</span>
+                    <span class="showcase-tag" data-translate="service_3d_ex3">🔧 Piezas de repuesto</span>
+                    <span class="showcase-tag" data-translate="service_3d_ex4">📱 Accesorios tech</span>
+                    <span class="showcase-tag" data-translate="service_3d_ex5">🎁 Regalos personalizados</span>
+                </div>
+            </div>
+            <div class="showcase-media-grid">
+                <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3D/prusa.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/3D/Balon.jpeg" alt="Impresión 3D"></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/3D/CajaOasis.jpeg" alt="Impresión 3D"></div>
+                <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3D/Mano.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/3D/pexels-jakubzerdzicki-17509941.jpg" alt="Impresión 3D"></div>
+                <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3D/Balon.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/3D/pexels-mikhail-nilov-9242925.jpg" alt="Impresión 3D"></div>
+                <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3D/Pelota.mp4" type="video/mp4"></video></div>
+            </div>
+        </div>
+
+        <!-- Laser Cutting -->
+        <div class="showcase-panel" id="showcase-laser" role="tabpanel">
+            <div class="showcase-service-info">
+                <div class="showcase-service-text">
+                    <h3 data-translate="service_laser_title">Corte Láser</h3>
+                    <p data-translate="service_laser_desc">Corta y graba con precisión quirúrgica.</p>
+                    <ul class="showcase-features">
+                        <li data-translate="service_laser_feat1">Cortes limpios y precisos</li>
+                        <li data-translate="service_laser_feat2">Grabados con detalles increíbles</li>
+                        <li data-translate="service_laser_feat3">Madera, acrílico, cuero y más</li>
+                    </ul>
+                </div>
+                <div class="showcase-service-tags">
+                    <span class="showcase-tag" data-translate="service_laser_ex1">🪵 Letreros de madera</span>
+                    <span class="showcase-tag" data-translate="service_laser_ex2">👜 Accesorios de cuero</span>
+                    <span class="showcase-tag" data-translate="service_laser_ex3">💎 Piezas de acrílico</span>
+                    <span class="showcase-tag" data-translate="service_laser_ex4">🏢 Señalética empresarial</span>
+                    <span class="showcase-tag" data-translate="service_laser_ex5">🎁 Regalos grabados</span>
+                </div>
+            </div>
+            <div class="showcase-media-grid">
+                <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserCUT/laser.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/LaserCUT/xtool.webp" alt="Corte Láser"></div>
+                <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/LaserCUT/UVLaser.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/LaserCUT/download.jpg" alt="Corte Láser"></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/LaserCUT/pexels-karola-g2-6272.jpg" alt="Corte Láser"></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/LaserCUT/pexels-optlasers-7097316.jpg" alt="Corte Láser"></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/LaserCUT/pexels-optlasers-7254428.jpg" alt="Corte Láser"></div>
+            </div>
+        </div>
+
+        <!-- 3D Scanning -->
+        <div class="showcase-panel" id="showcase-scan" role="tabpanel">
+            <div class="showcase-service-info">
+                <div class="showcase-service-text">
+                    <h3 data-translate="service_scan_title">Escaneo 3D</h3>
+                    <p data-translate="service_scan_desc">Convertimos objetos físicos en modelos digitales 3D.</p>
+                    <ul class="showcase-features">
+                        <li data-translate="service_scan_feat1">Escanea desde joyería hasta muebles</li>
+                        <li data-translate="service_scan_feat2">Captura color y textura real</li>
+                        <li data-translate="service_scan_feat3">Listo para imprimir en 3D</li>
+                    </ul>
+                </div>
+                <div class="showcase-service-tags">
+                    <span class="showcase-tag" data-translate="service_scan_ex1">🏺 Figuras y esculturas</span>
+                    <span class="showcase-tag" data-translate="service_scan_ex2">🔩 Piezas y repuestos</span>
+                    <span class="showcase-tag" data-translate="service_scan_ex3">👤 Bustos y retratos</span>
+                    <span class="showcase-tag" data-translate="service_scan_ex4">🎁 Objetos para replicar</span>
+                    <span class="showcase-tag" data-translate="service_scan_ex5">🚗 Partes de vehículos</span>
+                </div>
+            </div>
+            <div class="showcase-media-grid">
+                <div class="showcase-media-item showcase-media-item--wide"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3DScan/3DScanner.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3DScan/3DScanner2.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><video autoplay muted loop playsinline preload="none" data-lazy="true"><source data-src="Resources/Banners/3DScan/3DScanner3.mp4" type="video/mp4"></video></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/3DScan/Blending_Tradition_and_Technology-The_Evolution_of_Wood_Sculpture_f62f8841-d18c-4a2b-8d3e-780feb82b0ef.webp" alt="Escaneo 3D"></div>
+                <div class="showcase-media-item"><img src="Resources/Banners/3DScan/Is_Face_Scanning_with_the_Toucan_3D_Scanner_Safe_8880194e-fc29-4851-b876-d9fa17a54f28.webp" alt="Escaneo 3D"></div>
+            </div>
+        </div>
+
+        <!-- Photo Printing -->
+        <div class="showcase-panel" id="showcase-photo" role="tabpanel">
+            <div class="showcase-service-info">
+                <div class="showcase-service-text">
+                    <h3 data-translate="service_photo_title">Impresión Fotográfica</h3>
+                    <p data-translate="service_photo_desc">Tus recuerdos merecen la mejor calidad.</p>
+                    <ul class="showcase-features">
+                        <li data-translate="service_photo_feat1">Calidad profesional</li>
+                        <li data-translate="service_photo_feat2">Papel de primera calidad</li>
+                        <li data-translate="service_photo_feat3">Todos los tamaños</li>
+                    </ul>
+                </div>
+                <div class="showcase-service-tags">
+                    <span class="showcase-tag" data-translate="service_photo_ex1">📸 Fotos familiares</span>
+                    <span class="showcase-tag" data-translate="service_photo_ex2">🖼️ Cuadros decorativos</span>
+                    <span class="showcase-tag" data-translate="service_photo_ex3">📅 Calendarios personalizados</span>
+                    <span class="showcase-tag" data-translate="service_photo_ex4">💼 Material promocional</span>
+                    <span class="showcase-tag" data-translate="service_photo_ex5">🎨 Arte y posters</span>
+                </div>
+            </div>
+            <div class="showcase-media-grid">
+                <div class="showcase-media-item showcase-media-item--wide" style="background:#0f172a;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#64748b">
+                    <span style="font-size:4rem">📸</span><span style="font-size:1rem">Próximamente</span>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Clients Section -->
+    <section id="clients" class="clients-section">
+        <div class="container">
+            <h2 class="section-title" data-translate="clients_title">Nuestros Clientes</h2>
+            <p class="section-subtitle" data-translate="clients_subtitle">Empresas que confían en nosotros</p>
+        </div>
+        <div class="clients-marquee-wrap">
+            <div class="clients-grid clients-marquee" id="clientsGrid"></div>
+        </div>
+    </section>
+
+    <!-- WhatsApp popup modal -->
+    <div class="wa-modal-overlay" id="waModal">
+        <div class="wa-modal">
+            <button class="wa-modal-close" id="waModalClose">&times;</button>
+            <div class="wa-modal-header">
+                <div class="wa-modal-icon"><i class="fab fa-whatsapp"></i></div>
+                <div>
+                    <div class="wa-modal-title">Filamorfosis</div>
+                    <div class="wa-modal-subtitle" data-translate="wa_subtitle">Normalmente responde en minutos</div>
+                </div>
+            </div>
+            <div class="wa-modal-bubble">
+                <p data-translate="wa_greeting">¿Estás listo para llevar tu idea a la realidad? 🚀</p>
+            </div>
+            <textarea class="wa-modal-input" id="waMessage" rows="3"></textarea>
+            <button class="wa-modal-btn" id="waStartChat" data-translate="wa_btn">Iniciar Chat</button>
+        </div>
+    </div>
+
+</template>
+
+<!-- ── CONÓCENOS ─────────────────────────────────────────────────────── -->
+<template id="tpl-conocenos">
+
+    <section class="brand-story-section" id="brand-story">
+        <div class="container">
+            <div class="brand-story-grid">
+                <div class="brand-story-text">
+                    <p class="brand-story-eyebrow">Nuestra historia</p>
+                    <h2>Tus Ideas. Tu Realidad.</h2>
+                    <p>Somos un equipo apasionado por la fabricacion digital. Desde impresion 3D multicolor hasta grabado laser de precision, transformamos tus ideas en objetos reales con tecnologia de vanguardia.</p>
+                    <p>Ofrecemos impresion 3D, impresion UV, corte laser, escaneo 3D e impresion fotografica, todo bajo un mismo techo, con calidad garantizada y entregas rapidas.</p>
+                </div>
+                <div class="brand-story-image">
+                    <div>
+                        <div style="font-size:4rem;margin-bottom:1rem">🖨️</div>
+                        <p>Filamorfosis® — Fabricacion Digital</p>
                     </div>
                 </div>
             </div>
-        </footer>
+        </div>
+    </section>
+
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2 class="section-title" data-translate="contact_title">Contactanos</h2>
+            <p class="section-subtitle" data-translate="contact_subtitle">Cuentanos sobre tu proyecto</p>
+            <div class="contact-centered">
+                <form id="contactForm" class="contact-form" action="https://api.web3forms.com/submit" method="POST">
+                    <input type="hidden" name="access_key" value="cf4a2e4d-c358-4b12-a9c2-e5833fd1dc00">
+                    <input type="hidden" name="from_name" value="Filamorfosis Website">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name" data-translate="form_name">Nombre</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" data-translate="form_email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone" data-translate="form_phone">Telefono</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="service" data-translate="form_service">Servicio</label>
+                        <select id="service" name="service" required>
+                            <option value="" data-translate="form_select">Selecciona</option>
+                            <option value="Impresion 3D" data-translate="form_opt_3d">Impresion 3D</option>
+                            <option value="Impresion UV" data-translate="form_opt_uv">Impresion UV</option>
+                            <option value="Corte Laser" data-translate="form_opt_laser">Corte Laser</option>
+                            <option value="Grabado Laser" data-translate="form_opt_engrave">Grabado Laser</option>
+                            <option value="Impresion Fotografica" data-translate="form_opt_photo">Foto</option>
+                            <option value="Otro" data-translate="form_opt_other">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message" data-translate="form_message">Mensaje</label>
+                        <textarea id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <input type="checkbox" name="botcheck">
+                    <button type="submit" class="btn btn-primary btn-block" data-translate="form_submit">Enviar</button>
+                    <div id="formMessage" class="form-message"></div>
+                </form>
+                <div class="contact-below">
+                    <a href="mailto:filamorfosis@gmail.com" class="contact-below-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>filamorfosis@gmail.com</span>
+                    </a>
+                    <a href="https://www.instagram.com/filamorfosis" target="_blank" rel="noopener" class="contact-below-item">
+                        <i class="fab fa-instagram"></i>
+                        <span>@filamorfosis</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="wa-modal-overlay" id="waModal">
+        <div class="wa-modal">
+            <button class="wa-modal-close" id="waModalClose">&times;</button>
+            <div class="wa-modal-header">
+                <div class="wa-modal-icon"><i class="fab fa-whatsapp"></i></div>
+                <div>
+                    <div class="wa-modal-title">Filamorfosis</div>
+                    <div class="wa-modal-subtitle" data-translate="wa_subtitle">Normalmente responde en minutos</div>
+                </div>
+            </div>
+            <div class="wa-modal-bubble">
+                <p data-translate="wa_greeting">Estas listo para llevar tu idea a la realidad?</p>
+            </div>
+            <textarea class="wa-modal-input" id="waMessage" rows="3"></textarea>
+            <button class="wa-modal-btn" id="waStartChat" data-translate="wa_btn">Iniciar Chat</button>
+        </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="Resources/Clients/clients.js"></script>
-    <!-- Catalog core: CATEGORIES, translations, lang engine -->
-    <script src="products/data/catalog.js"></script>
-    <!-- E-commerce modules — must load BEFORE products.js and main.js -->
-    <script>
-      if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-        window.FILAMORFOSIS_API_BASE = 'http://localhost:5205/api/v1';
-      }
-    </script>
-    <script src="assets/js/api.js"></script>
-    <script src="assets/js/auth.js"></script>
-    <script src="assets/js/cart.js"></script>
-    <!-- Catalog render engine -->
-    <script src="assets/js/products.js"></script>
-    <!-- i18n language files — must load before main.js -->
-    <script src="assets/js/i18n/lang.es.js"></script>
-    <script src="assets/js/i18n/lang.en.js"></script>
-    <script src="assets/js/i18n/lang.de.js"></script>
-    <script src="assets/js/i18n/lang.pt.js"></script>
-    <script src="assets/js/i18n/lang.ja.js"></script>
-    <script src="assets/js/i18n/lang.zh.js"></script>
-    <script src="assets/js/main.js"></script>
-    <script src="assets/js/store-i18n.js"></script>
-    <script src="assets/js/promo-banner.js" defer></script>
-    <script src="assets/js/whatsapp-fab.js" defer></script>
-    <script src="assets/js/cookie-consent.js" defer></script>
-    <script src="assets/js/toast.js" defer></script>
-    <script src="assets/js/navigation.js" defer></script>
+
+</template>
+
+<!-- ── FAQ ───────────────────────────────────────────────────────────── -->
+<template id="tpl-faq">
+
+    <section class="faq-hero">
+        <div class="faq-hero-bg"></div>
+        <div class="faq-hero-content">
+            <div class="faq-badge"><i class="fas fa-circle-question"></i> Preguntas Frecuentes</div>
+            <h1>Tienes <span>dudas?</span><br>Aqui las resolvemos</h1>
+            <p>Encuentra respuestas sobre nuestros servicios, tiempos de entrega, materiales y mas.</p>
+        </div>
+    </section>
+
+    <main class="faq-main">
+
+        <div class="faq-category"><i class="fas fa-box"></i> Pedidos y proceso</div>
+
+        <details class="faq-item">
+            <summary><span class="faq-q-icon">Q</span> Como hago un pedido? <i class="fas fa-chevron-down faq-chevron"></i></summary>
+            <div class="faq-answer">Puedes hacer tu pedido directamente desde nuestro catalogo en linea. Selecciona el producto, elige el material y tamano, agrega al carrito y completa el proceso de pago. Tambien puedes contactarnos por WhatsApp para pedidos personalizados.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary><span class="faq-q-icon">Q</span> Cuanto tiempo tarda mi pedido? <i class="fas fa-chevron-down faq-chevron"></i></summary>
+            <div class="faq-answer">Los tiempos de produccion varian segun el servicio: impresion UV 1-3 dias habiles, impresion 3D 2-5 dias habiles, corte laser 1-3 dias habiles. El envio se agrega al tiempo de produccion.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary><span class="faq-q-icon">Q</span> Puedo cancelar o modificar mi pedido? <i class="fas fa-chevron-down faq-chevron"></i></summary>
+            <div class="faq-answer">Puedes cancelar o modificar tu pedido dentro de las primeras 2 horas despues de realizarlo, siempre que la produccion no haya comenzado. Contactanos lo antes posible por WhatsApp o correo electronico.</div>
+        </details>
+
+        <div class="faq-category"><i class="fas fa-pen-ruler"></i> Disenos y archivos</div>
+
+        <details class="faq-item">
+            <summary><span class="faq-q-icon">Q</span> Que formatos de archivo aceptan? <i class="fas fa-chevron-down faq-chevron"></i></summary>
+            <div class="faq-answer">Aceptamos PNG, JPG, SVG y PDF. Para mejores resultados recomendamos archivos vectoriales (SVG o PDF) o imagenes de alta resolucion (minimo 300 DPI). El tamano maximo por archivo es de 20 MB.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary><span class="faq-q-icon">Q</span> Ofrecen servicio de diseno? <i class="fas fa-chevron-down faq-chevron"></i></summary>
+            <div class="faq-answer">Si, contamos con servicio de diseno grafico. Si no tienes tu archivo listo, podemos ayudarte a crear o adaptar tu diseno. Contactanos para cotizar este servicio adicional.</div>
+        </details>
+
+        <div class="faq-category"><i class="fas fa-layer-group"></i> Materiales y productos</div>
+
+        <details class="faq-item">
+            <summary><span class="faq-q-icon">Q</span> Que materiales usan para impresion 3D? <i class="fas fa-chevron-down faq-chevron"></i></summary>
+            <div class="faq-answer">Trabajamos con PLA, PETG, TPU (flexible), ABS y PA+CF (nylon con fibra de carbono). Cada material tiene propiedades distintas de resistencia, flexibilidad y acabado.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary><span class="faq-q-icon">Q</span> La impresion UV es resistente al agua? <i class="fas fa-chevron-down faq-chevron"></i></summary>
+            <div class="faq-answer">Si, la impresion UV es resistente al agua y a la mayoria de los solventes comunes. Es ideal para tazas, vasos y articulos que requieren limpieza frecuente. Sin embargo, no recomendamos el lavado en lavavajillas.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary><span class="faq-q-icon">Q</span> Tienen pedido minimo? <i class="fas fa-chevron-down faq-chevron"></i></summary>
+            <div class="faq-answer">La mayoria de nuestros productos tienen un minimo de 1 pieza, lo que nos permite atender tanto pedidos individuales como corporativos.</div>
+        </details>
+
+        <div class="faq-category"><i class="fas fa-credit-card"></i> Pagos y envios</div>
+
+        <details class="faq-item">
+            <summary><span class="faq-q-icon">Q</span> Que metodos de pago aceptan? <i class="fas fa-chevron-down faq-chevron"></i></summary>
+            <div class="faq-answer">Aceptamos tarjetas de credito y debito (Visa, Mastercard, American Express), transferencia bancaria, OXXO Pay y carteras digitales a traves de MercadoPago.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary><span class="faq-q-icon">Q</span> Hacen envios a toda la Republica Mexicana? <i class="fas fa-chevron-down faq-chevron"></i></summary>
+            <div class="faq-answer">Si, enviamos a toda la Republica Mexicana a traves de paqueterias confiables. El costo y tiempo de envio varia segun tu ubicacion. Tambien ofrecemos recoleccion en nuestro taller sin costo adicional.</div>
+        </details>
+
+        <details class="faq-item">
+            <summary><span class="faq-q-icon">Q</span> Ofrecen descuentos por volumen? <i class="fas fa-chevron-down faq-chevron"></i></summary>
+            <div class="faq-answer">Si, contamos con precios especiales para pedidos de volumen. Contactanos con los detalles de tu pedido para recibir una cotizacion personalizada.</div>
+        </details>
+
+        <div class="faq-cta">
+            <h3>No encontraste tu respuesta?</h3>
+            <p>Nuestro equipo esta listo para ayudarte.</p>
+            <div class="faq-cta-btns">
+                <a href="https://wa.me/13152071586?text=Hola%2C+tengo+una+pregunta" target="_blank" class="faq-btn-primary">
+                    <i class="fab fa-whatsapp"></i> Escribir por WhatsApp
+                </a>
+                <a href="/tienda" class="faq-btn-secondary">
+                    <i class="fas fa-store"></i> Ver catalogo
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+</template>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     SCRIPTS
+     ══════════════════════════════════════════════════════════════════════ -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="Resources/Clients/clients.js"></script>
+
+<!-- Catalog core: CATEGORIES, translations, lang engine -->
+<script src="products/data/catalog.js"></script>
+
+<!-- E-commerce modules -->
+<script>
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    window.FILAMORFOSIS_API_BASE = 'http://localhost:5205/api/v1';
+  }
+</script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/cart.js"></script>
+
+<!-- Catalog render engine -->
+<script src="assets/js/products.js"></script>
+
+<!-- i18n language files -->
+<script src="assets/js/i18n/lang.es.js"></script>
+<script src="assets/js/i18n/lang.en.js"></script>
+<script src="assets/js/i18n/lang.de.js"></script>
+<script src="assets/js/i18n/lang.pt.js"></script>
+<script src="assets/js/i18n/lang.ja.js"></script>
+<script src="assets/js/i18n/lang.zh.js"></script>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/store-i18n.js"></script>
+<script src="assets/js/promo-banner.js" defer></script>
+<script src="assets/js/whatsapp-fab.js" defer></script>
+<script src="assets/js/cookie-consent.js" defer></script>
+<script src="assets/js/toast.js" defer></script>
+<script src="assets/js/navigation.js" defer></script>
+
+<!-- SPA Router — must load last -->
+<script src="assets/js/router.js" defer></script>
+
 </body>
 </html>

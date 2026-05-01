@@ -1,0 +1,18 @@
+# Filamorfosis SPA fallback routing
+# Serves index.html for all clean-URL routes so the History API router works.
+# Static assets (js, css, images, fonts) are served directly.
+
+Options -MultiViews
+RewriteEngine On
+
+# Serve existing files and directories directly
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Skip non-SPA pages
+RewriteCond %{REQUEST_URI} !^/admin
+RewriteCond %{REQUEST_URI} !^/account
+RewriteCond %{REQUEST_URI} !^/order-confirmation
+
+# Rewrite everything else to index.html
+RewriteRule ^ index.html [L]
