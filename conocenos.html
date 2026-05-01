@@ -379,171 +379,83 @@
             <span id="mobile-cart-count" class="cart-badge">0</span>
         </button>
 
-        <!-- Modern Promo Banner Slider -->
-        <section id="promo-slider" class="promo-slider">
-            <div class="promo-slider__track">
-                <!-- Slide 1: Featured Products -->
-                <div class="promo-slide promo-slide--active">
-                    <div class="promo-slide__bg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                    <div class="container">
-                        <div class="promo-slide__content">
-                            <span class="promo-slide__badge">🔥 Destacado</span>
-                            <h2 class="promo-slide__title">Productos Únicos, Hechos para Ti</h2>
-                            <p class="promo-slide__desc">Personaliza tazas, vasos, figuras 3D y más. Desde 1 pieza.</p>
-                            <div class="promo-slide__cta">
-                                <a href="#catalog" class="btn btn-primary" onclick="event.preventDefault(); document.querySelector('#catalog').scrollIntoView({ behavior: 'smooth' });">Ver Productos</a>
-                            </div>
-                        </div>
-                        <div class="promo-slide__image">
-                            <img src="Resources/hero/product-showcase.jpg" alt="Productos destacados" onerror="this.style.display='none'">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide 2: New Arrivals -->
-                <div class="promo-slide">
-                    <div class="promo-slide__bg" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
-                    <div class="container">
-                        <div class="promo-slide__content">
-                            <span class="promo-slide__badge">✨ Nuevo</span>
-                            <h2 class="promo-slide__title">Nuevos Productos Cada Semana</h2>
-                            <p class="promo-slide__desc">Descubre las últimas novedades en impresión 3D y UV.</p>
-                            <div class="promo-slide__cta">
-                                <a href="#catalog" class="btn btn-primary" onclick="event.preventDefault(); document.querySelector('#catalog').scrollIntoView({ behavior: 'smooth' });">Ver Novedades</a>
-                            </div>
-                        </div>
-                        <div class="promo-slide__image">
-                            <img src="Resources/hero/new-products.jpg" alt="Nuevos productos" onerror="this.style.display='none'">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide 3: Free Shipping -->
-                <div class="promo-slide">
-                    <div class="promo-slide__bg" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
-                    <div class="container">
-                        <div class="promo-slide__content">
-                            <span class="promo-slide__badge">🚚 Envío Gratis</span>
-                            <h2 class="promo-slide__title">Envío Gratis en Pedidos +$500</h2>
-                            <p class="promo-slide__desc">Recibe tus productos en la puerta de tu casa sin costo adicional.</p>
-                            <div class="promo-slide__cta">
-                                <a href="#catalog" class="btn btn-primary" onclick="event.preventDefault(); document.querySelector('#catalog').scrollIntoView({ behavior: 'smooth' });">Comprar Ahora</a>
-                            </div>
-                        </div>
-                        <div class="promo-slide__image">
-                            <img src="Resources/hero/shipping.jpg" alt="Envío gratis" onerror="this.style.display='none'">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation Dots -->
-            <div class="promo-slider__dots">
-                <button class="promo-slider__dot promo-slider__dot--active" data-slide="0" aria-label="Slide 1"></button>
-                <button class="promo-slider__dot" data-slide="1" aria-label="Slide 2"></button>
-                <button class="promo-slider__dot" data-slide="2" aria-label="Slide 3"></button>
-            </div>
-
-            <!-- Navigation Arrows -->
-            <button class="promo-slider__arrow promo-slider__arrow--prev" aria-label="Previous slide">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="promo-slider__arrow promo-slider__arrow--next" aria-label="Next slide">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </section>
-
-
-
-
-
-        <!-- Reviews Section -->
-        <section class="reviews-section">
+         <section class="brand-story-section" id="brand-story" style="background:var(--dark-bg,#0f172a);padding:5rem 0">
           <div class="container">
-            <h2 class="section-title reviews-section__title" data-translate="reviews.title">Lo que dicen nuestros clientes</h2>
-          </div>
-          <div class="reviews-marquee-wrap">
-            <div class="reviews-marquee">
-              <!-- card 1 -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Recomiendo ampliamente a mis amigos de Filamorfosis que se rifaron con esta impresión UV sobre una placa de acero con excelentes detalles. Muy satisfecho con el trabajo realizado, de 10!! 👌👌👌"</p>
-                <p class="review-author">— Mauricio A. · Impresión UV</p>
+            <div class="brand-story-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center">
+              <div class="brand-story-text">
+                <p class="brand-story-eyebrow" style="color:#8b5cf6;font-size: 1rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.75rem">Nuestra historia</p>
+                <h2 style="font-size:clamp(1.8rem,3vw,2.5rem);font-weight:800;color:#fff;margin-bottom:1rem;line-height:1.2">Tus Ideas. Tu Realidad.</h2>
+                <p style="color:#94a3b8;line-height:1.8;margin-bottom:1.5rem">Somos un equipo apasionado por la fabricación digital. Desde impresión 3D multicolor hasta grabado láser de precisión, transformamos tus ideas en objetos reales con tecnología de vanguardia.</p>
+                <p style="color:#94a3b8;line-height:1.8;margin-bottom:2rem">Ofrecemos impresión 3D, impresión UV, corte láser, escaneo 3D e impresión fotográfica — todo bajo un mismo techo, con calidad garantizada y entregas rápidas.</p>
+                <a href="#catalog" class="btn-ghost" style="display:inline-flex;display:none; align-items:center;gap:0.5rem;color:#8b5cf6;border:1px solid rgba(139,92,246,0.4);padding:0.75rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;transition:all 0.2s" data-translate="brandStory.learnMore">Conoce nuestra historia →</a>
               </div>
-              <!-- card 2 -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Excelente servicio y atención. Los vasos personalizados quedaron increíbles, el diseño se ve muy profesional. Definitivamente volvería a pedir."</p>
-                <p class="review-author">— Galo M. · Impresión UV</p>
-              </div>
-              <!-- card 3 -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Excelente calidad en la impresión 3D. Mi figura quedó perfecta, con todos los detalles que pedí. Sí volvería a pedir."</p>
-                <p class="review-author">— Carlos M. · Impresión 3D</p>
-              </div>
-              <!-- card 4 -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐</div>
-                <p class="review-text">"Los vasos quedaron muy padres para un evento que tuve. El diseño se ve muy profesional. Uno llegó roto pero me enviaron uno nuevo sin problema."</p>
-                <p class="review-author">— Ana L. · Impresión UV</p>
-              </div>
-              <!-- card 5 -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"El corte láser en madera fue preciso y el acabado es hermoso. Muy recomendados para proyectos personalizados."</p>
-                <p class="review-author">— Roberto S. · Corte Láser</p>
-              </div>
-              <!-- duplicate set for seamless loop -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Recomiendo ampliamente a mis amigos de Filamorfosis que se rifaron con esta impresión UV sobre una placa de acero con excelentes detalles. Muy satisfecho con el trabajo realizado, de 10!! 👌👌👌"</p>
-                <p class="review-author">— Mauricio A. · Impresión UV</p>
-              </div>
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Excelente servicio y atención. Los vasos personalizados quedaron increíbles, el diseño se ve muy profesional. Definitivamente volvería a pedir."</p>
-                <p class="review-author">— Galo M. · Impresión UV</p>
-              </div>
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Excelente calidad en la impresión 3D. Mi figura quedó perfecta, con todos los detalles que pedí. Sí volvería a pedir."</p>
-                <p class="review-author">— Carlos M. · Impresión 3D</p>
-              </div>
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐</div>
-                <p class="review-text">"Los vasos quedaron muy padres para un evento que tuve. El diseño se ve muy profesional. Uno llegó roto pero me enviaron uno nuevo sin problema."</p>
-                <p class="review-author">— Ana L. · Impresión UV</p>
-              </div>
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"El corte láser en madera fue preciso y el acabado es hermoso. Muy recomendados para proyectos personalizados."</p>
-                <p class="review-author">— Roberto S. · Corte Láser</p>
+              <div class="brand-story-image" style="border-radius:16px;overflow:hidden;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center">
+                <div style="text-align:center;padding:2rem">
+                  <div style="font-size:4rem;margin-bottom:1rem">🖨️</div>
+                  <p style="color:#94a3b8;font-size: 1rem">Filamorfosis® — Fabricación Digital</p>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Certifications Section -->
-        <section class="certifications-section">
-          <div class="container">
-            <div class="certifications-grid">
-              <div class="certification-item">
-                <i class="fas fa-flag certification-icon"></i>
-                <span class="certification-label" data-translate="cert_mexico">Producción en México</span>
-              </div>
-              <div class="certification-item">
-                <i class="fas fa-certificate certification-icon"></i>
-                <span class="certification-label" data-translate="cert_materials">Materiales certificados</span>
-              </div>
-              <div class="certification-item">
-                <i class="fas fa-star certification-icon"></i>
-                <span class="certification-label" data-translate="cert_quality">Calidad garantizada</span>
-              </div>
+                <!-- Contact Section -->
+        <section id="contact" class="contact-section">
+            <div class="container">
+                <h2 class="section-title" data-translate="contact_title">Contáctanos</h2>
+                <p class="section-subtitle" data-translate="contact_subtitle">Cuéntanos sobre tu proyecto</p>
+                <div class="contact-centered">
+                    <form id="contactForm" class="contact-form" action="https://api.web3forms.com/submit" method="POST">
+                        <input type="hidden" name="access_key" value="cf4a2e4d-c358-4b12-a9c2-e5833fd1dc00">
+                        <input type="hidden" name="redirect" value="https://filamorfosis.github.io/services.html?success=true">
+                        <input type="hidden" name="from_name" value="Filamorfosis Website">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name" data-translate="form_name">Nombre</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email" data-translate="form_email">Email</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone" data-translate="form_phone">Teléfono</label>
+                            <input type="tel" id="phone" name="phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="service" data-translate="form_service">Servicio</label>
+                            <select id="service" name="service" required>
+                                <option value="" data-translate="form_select">Selecciona</option>
+                                <option value="Impresión 3D" data-translate="form_opt_3d">Impresión 3D</option>
+                                <option value="Impresión UV" data-translate="form_opt_uv">Impresión UV</option>
+                                <option value="Corte Láser" data-translate="form_opt_laser">Corte Láser</option>
+                                <option value="Grabado Láser" data-translate="form_opt_engrave">Grabado Láser</option>
+                                <option value="Impresión Fotográfica" data-translate="form_opt_photo">Foto</option>
+                                <option value="Otro" data-translate="form_opt_other">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message" data-translate="form_message">Mensaje</label>
+                            <textarea id="message" name="message" rows="5" required></textarea>
+                        </div>
+                        <input type="checkbox" name="botcheck">
+                        <button type="submit" class="btn btn-primary btn-block" data-translate="form_submit">Enviar</button>
+                        <div id="formMessage" class="form-message"></div>
+                    </form>
+                    <div class="contact-below">
+                        <a href="mailto:filamorfosis@gmail.com" class="contact-below-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>filamorfosis@gmail.com</span>
+                        </a>
+                        <a href="https://www.instagram.com/filamorfosis" target="_blank" rel="noopener" class="contact-below-item">
+                            <i class="fab fa-instagram"></i>
+                            <span>@filamorfosis</span>
+                        </a>
+                    </div>
+                </div>
             </div>
-          </div>
         </section>
-
 
                 <!-- WhatsApp popup modal (opened by the FAB) -->
         <div class="wa-modal-overlay" id="waModal" style="display:none">

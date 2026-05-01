@@ -453,8 +453,109 @@
             </button>
         </section>
 
+        <!-- ══ STORE STATS BAR ══ -->
+        <section class="store-stats-bar">
+            <div class="container">
+                <div class="store-stats-grid">
+                    <div class="store-stat-item">
+                        <div class="store-stat-icon">
+                            <i class="fas fa-box-open"></i>
+                        </div>
+                        <div class="store-stat-content">
+                            <span class="store-stat-num" id="statProducts">0</span>
+                            <span class="store-stat-label" data-translate="stat_products">Productos</span>
+                        </div>
+                    </div>
+                    <div class="store-stat-divider"></div>
+                    <div class="store-stat-item">
+                        <div class="store-stat-icon">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <div class="store-stat-content">
+                            <span class="store-stat-num">1</span>
+                            <span class="store-stat-label" data-translate="stat_min">Pieza mínima</span>
+                        </div>
+                    </div>
+                    <div class="store-stat-divider"></div>
+                    <div class="store-stat-item">
+                        <div class="store-stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="store-stat-content">
+                            <span class="store-stat-num">24h</span>
+                            <span class="store-stat-label" data-translate="stat_response">Respuesta</span>
+                        </div>
+                    </div>
+                    <div class="store-stat-divider"></div>
+                    <div class="store-stat-item">
+                        <div class="store-stat-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="store-stat-content">
+                            <span class="store-stat-num" data-translate="stat_shipping_value">Gratis</span>
+                            <span class="store-stat-label" data-translate="stat_shipping">Envío +$500</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
+        <!-- ══ CATALOG SECTION ══ -->
+        <section id="catalog" class="catalog-section">
+<!-- ── FILTER BAR ── -->
+<div class="cat-filter-bar" id="catFilterBar">
+    <div class="cat-filter-inner">
+        <div class="cat-search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="catSearch" placeholder="Buscar producto...">
+        </div>
+    </div>
+</div>
 
+<!-- ── CATALOG GRID ── -->
+<main class="cat-main">
+    <div class="cat-section-header" id="catSectionHeader">
+        <h2 id="catSectionTitle"></h2>
+        <p id="catSectionDesc"></p>
+    </div>
+    <div class="cat-grid" id="catGrid">
+        <!-- injected by JS -->
+    </div>
+    <div class="cat-empty" id="catEmpty" style="display:none">
+        <i class="fas fa-box-open"></i>
+        <p data-translate="empty_text">No se encontraron productos</p>
+    </div>
+</main>
+
+<!-- ── PRODUCT MODAL ── -->
+<div class="cat-modal-overlay" id="catModal">
+    <div class="cat-modal">
+        <button class="cat-modal-close" id="catModalClose"><i class="fas fa-times"></i></button>
+        <div class="cat-modal-inner" id="catModalInner">
+            <!-- injected by JS -->
+        </div>
+    </div>
+</div>
+        </section>
+
+        <!-- WhatsApp popup modal (opened by the FAB) -->
+        <div class="wa-modal-overlay" id="waModal" style="display:none">
+            <div class="wa-modal">
+                <button class="wa-modal-close" id="waModalClose">&times;</button>
+                <div class="wa-modal-header">
+                    <div class="wa-modal-icon"><i class="fab fa-whatsapp"></i></div>
+                    <div>
+                        <div class="wa-modal-title">Filamorfosis</div>
+                        <div class="wa-modal-subtitle" data-translate="wa_subtitle">Normalmente responde en minutos</div>
+                    </div>
+                </div>
+                <div class="wa-modal-bubble">
+                    <p data-translate="wa_greeting">¿Estás listo para llevar tu idea a la realidad? 🚀</p>
+                </div>
+                <textarea class="wa-modal-input" id="waMessage" rows="3"></textarea>
+                <button class="wa-modal-btn" id="waStartChat" data-translate="wa_btn">Iniciar Chat</button>
+            </div>
+        </div>
 
 
         <!-- Reviews Section -->
@@ -473,7 +574,7 @@
               <!-- card 2 -->
               <div class="review-card">
                 <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Excelente servicio y atención. Los vasos personalizados quedaron increíbles, el diseño se ve muy profesional. Definitivamente volvería a pedir."</p>
+                <p class="review-text">"Me sorprendió mucho la calidad del cuadro, el relieve le da una profundidad increíble y hace que los detalles resalten. Los colores están increíbles y el diseño es espectacular, tiene mucha personalidad. El tamaño es perfecto para cualquier espacio y el soporte incluido es un gran detalle para colocarlo fácilmente. Además, es resistente y tiene excelentes acabados. Es una excelente opción de regalo que luce increíble y definitivamente destaca."</p>
                 <p class="review-author">— Galo M. · Impresión UV</p>
               </div>
               <!-- card 3 -->
@@ -489,32 +590,6 @@
                 <p class="review-author">— Ana L. · Impresión UV</p>
               </div>
               <!-- card 5 -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"El corte láser en madera fue preciso y el acabado es hermoso. Muy recomendados para proyectos personalizados."</p>
-                <p class="review-author">— Roberto S. · Corte Láser</p>
-              </div>
-              <!-- duplicate set for seamless loop -->
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Recomiendo ampliamente a mis amigos de Filamorfosis que se rifaron con esta impresión UV sobre una placa de acero con excelentes detalles. Muy satisfecho con el trabajo realizado, de 10!! 👌👌👌"</p>
-                <p class="review-author">— Mauricio A. · Impresión UV</p>
-              </div>
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Excelente servicio y atención. Los vasos personalizados quedaron increíbles, el diseño se ve muy profesional. Definitivamente volvería a pedir."</p>
-                <p class="review-author">— Galo M. · Impresión UV</p>
-              </div>
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐⭐</div>
-                <p class="review-text">"Excelente calidad en la impresión 3D. Mi figura quedó perfecta, con todos los detalles que pedí. Sí volvería a pedir."</p>
-                <p class="review-author">— Carlos M. · Impresión 3D</p>
-              </div>
-              <div class="review-card">
-                <div class="review-stars">⭐⭐⭐⭐</div>
-                <p class="review-text">"Los vasos quedaron muy padres para un evento que tuve. El diseño se ve muy profesional. Uno llegó roto pero me enviaron uno nuevo sin problema."</p>
-                <p class="review-author">— Ana L. · Impresión UV</p>
-              </div>
               <div class="review-card">
                 <div class="review-stars">⭐⭐⭐⭐⭐</div>
                 <p class="review-text">"El corte láser en madera fue preciso y el acabado es hermoso. Muy recomendados para proyectos personalizados."</p>
@@ -543,27 +618,6 @@
             </div>
           </div>
         </section>
-
-
-                <!-- WhatsApp popup modal (opened by the FAB) -->
-        <div class="wa-modal-overlay" id="waModal" style="display:none">
-            <div class="wa-modal">
-                <button class="wa-modal-close" id="waModalClose">&times;</button>
-                <div class="wa-modal-header">
-                    <div class="wa-modal-icon"><i class="fab fa-whatsapp"></i></div>
-                    <div>
-                        <div class="wa-modal-title">Filamorfosis</div>
-                        <div class="wa-modal-subtitle" data-translate="wa_subtitle">Normalmente responde en minutos</div>
-                    </div>
-                </div>
-                <div class="wa-modal-bubble">
-                    <p data-translate="wa_greeting">¿Estás listo para llevar tu idea a la realidad? 🚀</p>
-                </div>
-                <textarea class="wa-modal-input" id="waMessage" rows="3"></textarea>
-                <button class="wa-modal-btn" id="waStartChat" data-translate="wa_btn">Iniciar Chat</button>
-            </div>
-        </div>
-
 
         <footer class="footer">
             <div class="container">
