@@ -175,8 +175,6 @@
         $('.lang-option-mobile').on('click', function() {
             const lang = $(this).data('lang');
             switchLanguage(lang);
-            $('.navbar__toggle').removeClass('active');
-            $('.navbar__menu').removeClass('active');
         });
 
         // Close dropdowns when clicking outside
@@ -190,18 +188,6 @@
         });
     });
 
-    // Mobile Menu Toggle
-    $('.navbar__toggle').on('click', function() {
-        $(this).toggleClass('active');
-        $('.navbar__menu').toggleClass('active');
-    });
-
-    // Close mobile menu on link click
-    $('.navbar__menu a').on('click', function() {
-        $('.navbar__menu').removeClass('active');
-        $('.navbar__toggle').removeClass('active');
-    });
-
     // Smooth Scrolling
     $('a[href^="#"]').on('click', function(e) {
         e.preventDefault();
@@ -212,11 +198,6 @@
                 scrollTop: target.offset().top - 70
             }, 1000);
         }
-    });
-
-    // Navbar scroll effect — toggle class, style handled in CSS
-    $(window).on('scroll', function() {
-        $('.navbar').toggleClass('navbar--scrolled', $(window).scrollTop() > 50);
     });
 
     // Contact Form Handling with Web3Forms
@@ -699,21 +680,6 @@
     // Expose for dynamic content (e.g., SPA navigation)
     window._loadLazyVideos = loadLazyVideos;
 })();
-
-// Navbar scroll blur
-(function() {
-  var navbar = document.querySelector('.navbar');
-  if (!navbar) return;
-  window.addEventListener('scroll', function() {
-    if (window.scrollY > 80) {
-      navbar.classList.add('navbar--scrolled');
-    } else {
-      navbar.classList.remove('navbar--scrolled');
-    }
-  }, { passive: true });
-})();
-
-// Mobile nav — handled by navbar__menu.active toggle in the jQuery block above
 
 // Profile dropdown toggle
 (function() {

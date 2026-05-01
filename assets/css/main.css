@@ -260,18 +260,6 @@ img {
 }
 
 /* Language Switcher in Mobile Menu */
-.navbar__menu-lang {
-    display: none;
-    padding: 20px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: 20px;
-}
-
-@media (max-width: 992px) {
-    .navbar__menu-lang {
-        display: block;
-    }
-}
 
 .lang-selector-mobile {
     display: flex;
@@ -316,106 +304,6 @@ img {
 .lang-option-mobile .lang-name {
     flex: 1;
     text-align: left;
-}
-
-/* Navigation */
-.navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: var(--z-navbar);
-    background: var(--color-bg-secondary, #0f172a);
-    backdrop-filter: blur(10px);
-    padding: 15px 0;
-    transition: all 0.3s ease;
-}
-
-/* Shift navbar down when promo banner is visible */
-.navbar { top: var(--promo-banner-height, 0px); }
-.navbar .container { 
-    margin-left: 0 !important;
-    width: 100% !important;
-max-width: 100% !important;}
-
-
-/* Scrolled state ï¿½ stronger blur + near-opaque bg */
-.navbar--scrolled {
-    backdrop-filter: blur(12px);
-    background: rgba(15, 23, 42, 0.98);
-}
-
-.navbar__content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.navbar__logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.navbar__logo img {
-    height: 40px;
-    width: 40px;
-    object-fit: contain;
-}
-
-.navbar__brand {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--white);
-    background: var(--gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.navbar__menu {
-    display: flex;
-    list-style: none;
-    gap: 30px;
-    align-items: center;
-}
-
-.navbar__menu a {
-    color: var(--white);
-    font-weight: 500;
-    position: relative;
-}
-
-.navbar__menu a::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: var(--gradient);
-    transition: width 0.3s ease;
-}
-
-.navbar__menu a:hover::after {
-    width: 100%;
-}
-
-.navbar__toggle {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
-.navbar__toggle span {
-    width: 25px;
-    height: 3px;
-    background: var(--white);
-    border-radius: 3px;
-    transition: all 0.3s ease;
 }
 
 /* Hero Section */
@@ -1049,34 +937,6 @@ section {
 
 /* Responsive */
 @media (max-width: 992px) {
-    /* Menu hidden off-screen by default, slides in when .active */
-    .navbar__menu {
-        position: fixed;
-        top: 70px;
-        left: -100%;
-        width: 100%;
-        height: calc(100vh - 70px);
-        background: rgba(15, 23, 42, 0.98);
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        transition: left 0.3s ease;
-        z-index: 999;
-    }
-
-    .navbar__menu.active {
-        left: 0;
-    }
-
-    /* Hamburger ï¿½ top-right corner */
-    .navbar__toggle {
-        display: flex;
-        position: fixed;
-        top: 16px;
-        right: 16px;
-        z-index: 1100;
-    }
-
     .contact-wrapper {
         grid-template-columns: 1fr;
     }
@@ -2823,18 +2683,6 @@ section {
     opacity: 0.75;
 }
 
-/* ===== NAVBAR LANG ITEM ===== */
-.navbar__lang-item {
-    display: flex;
-    align-items: center;
-}
-
-@media (max-width: 992px) {
-    .navbar__lang-item {
-        display: none;
-    }
-}
-
 .nav-lang-select {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.25);
@@ -4105,25 +3953,9 @@ section {
 /* Tabs sticky offset matches navbar height */
 .cat-tabs-wrap { top: 70px !important; }
 
-/* Hamburger ? X animation for catalog page */
-.navbar__toggle.active span:nth-child(1) {
-    transform: translateY(8px) rotate(45deg);
-}
-.navbar__toggle.active span:nth-child(2) {
-    opacity: 0;
-}
-.navbar__toggle.active span:nth-child(3) {
-    transform: translateY(-8px) rotate(-45deg);
-}
-
 /* -- CATALOG PAGE OVERRIDES -- */
 /* Tabs sticky offset matches navbar height */
 .cat-tabs-wrap { top: 70px !important; }
-
-/* Hamburger X animation */
-.navbar__toggle.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-.navbar__toggle.active span:nth-child(2) { opacity: 0; }
-.navbar__toggle.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
 /* Catalog page: no extra padding-top on page-wrap */
 /* page-wrap: handled by main.css */
@@ -4140,14 +3972,6 @@ section {
     -webkit-text-fill-color: transparent !important;
     background-clip: text !important;
     font-weight: 700 !important;
-}
-
-/* Active nav link indicator */
-.navbar__menu a.spa-active {
-    color: var(--primary-color);
-}
-.navbar__menu a.spa-active::after {
-    width: 100%;
 }
 
 /* SPA section hidden by default */
@@ -4617,7 +4441,7 @@ textarea:focus-visible {
    TASK 24 ï¿½ PERFORMANCE AUDIT & FIXES
    ----------------------------------------------- */
 
-/* PERFORMANCE NOTE: Inline critical above-the-fold CSS (navbar + hero) in <style> in <head> for each page to eliminate render-blocking. The .navbar and .hero-section rules above are candidates for inlining. */
+/* PERFORMANCE NOTE: Inline critical above-the-fold CSS (hero) in <style> in <head> for each page to eliminate render-blocking. The .hero-section rules above are candidates for inlining. */
 
 /* PERFORMANCE NOTE: All non-critical JS files should use defer attribute. Verify: api.js, auth.js, cart.js, store-i18n.js, toast.js, and all new modules have defer in their <script> tags. */
 
@@ -5025,24 +4849,9 @@ textarea:focus-visible {
     color: #fff;
 }
 
-/* -- Navbar logo always left-aligned -- */
-.navbar__logo {
-    margin-right: auto;
-}
-
-@media (max-width: 992px) {
-    .navbar__content {
-        justify-content: flex-start !important;
-    }
-    .navbar__logo {
-        margin-right: auto !important;
-        flex-shrink: 0;
-    }
-}
-
-/* -- Fixed navbar offset ï¿½ push content below the navbar -- */
+/* -- Fixed navbar offset — push content below the promo banner + navbar -- */
 .page-wrap {
-    padding-top: 70px;
+    padding-top: calc(var(--promo-banner-height, 0px) + var(--nav-height, 72px));
 }
 
 /* -- Smooth scrolling -- */
@@ -5238,11 +5047,6 @@ html { scroll-behavior: smooth; }
     transform: scale(1.1);
 }
 
-/* -- Fixed navbar offset -- */
-.page-wrap {
-    padding-top: 70px;
-}
-
 @media (max-width: 480px) {
     .service-sidebar { padding: 8px 10px 6px; }
     .service-sidebar__item,
@@ -5305,11 +5109,6 @@ body.service-bar-visible .showcase-service-info {
     visibility: hidden !important;
 } */
 
-/* -- Navbar menu always right-aligned -- */
-.navbar__menu {
-    margin-left: auto;
-}
-
 /* ── Icon hover state (replaces JS .css() calls) ── */
 .service-icon,
 .equipment-badge {
@@ -5317,9 +5116,4 @@ body.service-bar-visible .showcase-service-info {
 }
 .icon--hovered {
     transform: scale(1.1) rotate(5deg);
-}
-
-/* ── Navbar toggle span base transitions (replaces JS .css() calls) ── */
-.navbar__toggle span {
-    transition: transform 0.3s ease, opacity 0.3s ease;
 }

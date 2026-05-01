@@ -1,0 +1,1317 @@
+/*
+ * navigation.css
+ * Filamorfosis® — Superside-Inspired Navigation
+ *
+ * Companion stylesheet for assets/js/navigation.js.
+ * All visual state changes are CSS-class-driven; no inline styles are
+ * ever set from JavaScript.
+ *
+ * Load order: after main.css (relies on design-system.css custom properties).
+ *
+ * Sections
+ * ─────────────────────────────────────────────────────────────────────────────
+ *  1. Base Nav          — .site-nav shell, logo, actions bar
+ *  2. Mega Menus        — .mega-menu panels and column layouts
+ *  3. Mobile Nav        — .mobile-nav off-canvas panel and accordion
+ *  4. Backdrop          — .site-nav__backdrop full-viewport overlay
+ *  5. Scroll State      — .site-nav--scrolled modifier
+ *  6. Animations        — keyframes and transition helpers
+ *  7. Responsive        — breakpoint overrides (≤ 768 px)
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. BASE NAV
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── .site-nav shell ───────────────────────────────────────────────────────── */
+.site-nav {
+  --nav-height: 72px; /* updated to 60px by .site-nav--scrolled */
+  position: fixed;
+  top: var(--promo-banner-height, 0px); /* sit below the promo banner */
+  left: 0;
+  width: 100%;
+  z-index: var(--z-navbar);
+  background: #0a0e1a;
+  font-family: var(--font-family-heading);
+  color: var(--color-text-primary);
+  border-bottom: 1px solid transparent;
+  transition:
+    height var(--transition-base),
+    border-color var(--transition-base),
+    background var(--transition-base);
+}
+
+/* ── .site-nav__inner — three-region flex row ──────────────────────────────── */
+.site-nav__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 var(--space-xl);
+  gap: var(--space-lg);
+}
+
+/* ── .site-nav__logo — left region ────────────────────────────────────────── */
+.site-nav__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.site-nav__logo-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.site-nav__brand {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  background: var(--color-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* ── .site-nav__menu — center region ──────────────────────────────────────── */
+.site-nav__menu {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: var(--space-xs);
+  flex: 1;
+  justify-content: center;
+}
+
+.site-nav__item {
+  position: relative;
+}
+
+/* Plain link items (FAQ, Contacto) */
+.site-nav__link {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  white-space: nowrap;
+}
+
+.site-nav__link:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.site-nav__link:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* ── .site-nav__trigger — mega menu trigger buttons ───────────────────────── */
+.site-nav__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.site-nav__trigger .site-nav__trigger-chevron {
+  font-size: var(--font-size-sm);
+  transition: transform var(--transition-fast);
+  opacity: 0.7;
+}
+
+.site-nav__trigger:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Gradient text on hover */
+.site-nav__trigger:hover .site-nav__trigger-label {
+  background: var(--color-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Rotate chevron when open */
+.site-nav__item.is-open > .site-nav__trigger .site-nav__trigger-chevron {
+  transform: rotate(180deg);
+}
+
+/* Active/open state — gradient accent on trigger label */
+.site-nav__item.is-open > .site-nav__trigger {
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.site-nav__item.is-open > .site-nav__trigger .site-nav__trigger-label {
+  background: var(--color-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.site-nav__trigger:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* ── .site-nav__actions — right region ────────────────────────────────────── */
+.site-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+/* Language switcher */
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.lang-switcher__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px var(--space-sm);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  line-height: 1;
+}
+
+.lang-switcher__flag {
+  font-size: var(--font-size-base);
+  line-height: 1;
+}
+
+.lang-switcher__code {
+  font-size: var(--font-size-base);
+  letter-spacing: 0.03em;
+}
+
+.lang-switcher__btn:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.lang-switcher__btn.is-active {
+  color: var(--color-accent-purple);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.lang-switcher__btn:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* Cart icon link */
+.site-nav__cart {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  font-size: var(--font-size-base);
+}
+
+.site-nav__cart:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.site-nav__cart:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* Cart badge */
+.cart-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background: var(--color-gradient-brand);
+  color: #fff;
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  line-height: 18px;
+  text-align: center;
+  pointer-events: none;
+  /* Scale down visually while keeping font-size ≥ 1rem via transform */
+  transform: scale(0.75);
+  transform-origin: top right;
+}
+
+.cart-badge[data-count="0"],
+.cart-badge:empty {
+  display: none;
+}
+
+/* Account icon link */
+.site-nav__account {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  font-size: var(--font-size-base);
+}
+
+.site-nav__account:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.site-nav__account:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* Hamburger button — visible only on mobile (see Section 7) */
+.mobile-nav__hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  transition: background var(--transition-fast);
+}
+
+.mobile-nav__hamburger:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mobile-nav__hamburger:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* Screen reader live region — visually hidden, announces mega menu state changes */
+.site-nav__live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. MEGA MENUS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── .mega-menu — panel shell (hidden by default) ─────────────────────────── */
+/*
+ * State machine:
+ *   default  → hidden (opacity 0, pointer-events none, shifted up 8px)
+ *   .is-open → visible (opacity 1, pointer-events auto, natural position)
+ *
+ * Visibility is toggled exclusively by adding/removing .is-open on the
+ * parent .site-nav__item via MegaMenuController — no inline styles ever.
+ */
+.mega-menu {
+  /* Positioning — full-width bar anchored below the nav bar.
+   * Uses position:fixed so it breaks out of the <li> stacking context
+   * and always spans the full viewport width regardless of where the
+   * trigger <li> sits in the flex row. */
+  position: fixed;
+  top: calc(var(--promo-banner-height, 0px) + var(--nav-height, 72px));
+  left: 0;
+  width: 100%;
+
+  /* Hidden state */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  visibility: hidden;
+
+  /* Smooth reveal — ≤ 300ms per Requirement 5.8 */
+  transition:
+    opacity    250ms ease,
+    transform  250ms ease,
+    visibility 250ms ease;
+
+  /* Visual design */
+  background: #0a0e1a;
+  border-bottom: 1px solid transparent;
+  /* Gradient accent border-bottom via background-image trick */
+  background-image: linear-gradient(#0a0e1a, #0a0e1a),
+                    linear-gradient(90deg, #a855f7, #ec4899);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.6),
+    0 4px 16px rgba(168, 85, 247, 0.12);
+
+  /* Ensure panel sits above page content but below the nav bar itself */
+  z-index: calc(var(--z-navbar) - 1);
+}
+
+/* ── Open state — triggered by JS adding .is-open to the parent <li> ──────── */
+.site-nav__item.is-open > .mega-menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+/* ── .mega-menu__inner — default layout ───────────────────────────────────── */
+.mega-menu__inner {
+  display: grid;
+  gap: var(--space-xl);
+  padding: var(--space-xl);
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* ── .mega-menu__inner--tienda — categories left, featured right ──────────── */
+.mega-menu__inner--tienda {
+  grid-template-columns: 280px 1fr;
+}
+
+/* ── .mega-menu__inner--services — Servicios layout override ──────────────── */
+.mega-menu__inner--services {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ── .mega-menu__services-grid — 2-column card grid ──────────────────────── */
+.mega-menu__services-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+/* ── .service-card — individual service card ─────────────────────────────── */
+.service-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    background 200ms ease;
+}
+
+.service-card:hover {
+  transform: scale(1.03);
+  background: rgba(139, 92, 246, 0.08);
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.25);
+}
+
+.service-card:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* Icon — purple/pink gradient */
+.service-card__icon {
+  font-size: var(--font-size-xl);
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  line-height: 1;
+}
+
+/* Title */
+.service-card__title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Description */
+.service-card__desc {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── .mega-menu__heading — column heading ─────────────────────────────────── */
+.mega-menu__heading {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 var(--space-md) 0;
+}
+
+/* ── .nav-categories-list — Col 1 category links ─────────────────────────── */
+.nav-categories-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── .nav-category-item — single category row ────────────────────────────── */
+.nav-category-item__link {
+  display: flex;
+  align-items: flex-start; /* icon aligns to top of text block */
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.nav-category-item__link:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-category-item__link:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+.nav-category-item__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  flex-shrink: 0;
+  font-size: var(--font-size-base);
+  color: var(--color-accent-purple);
+  margin-top: 2px; /* optical alignment with the name text */
+}
+
+/* Text block: name + description stacked */
+.nav-category-item__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-category-item__name {
+  line-height: 1.3;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.nav-category-item__link:hover .nav-category-item__name {
+  color: var(--color-text-primary);
+}
+
+.nav-category-item__desc {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular, 400);
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  transition: color var(--transition-fast);
+}
+
+.nav-category-item__link:hover .nav-category-item__desc {
+  color: var(--color-text-secondary);
+}
+
+/* Empty state message */
+.nav-category-item--empty {
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ── Loading / Error / Timeout states — hidden by default ─────────────────── */
+.mega-menu__loading,
+.mega-menu__error,
+.mega-menu__timeout {
+  display: none;
+}
+
+/* Shown when JS adds the matching state class to .mega-menu */
+.mega-menu--loading .mega-menu__loading {
+  display: block;
+}
+
+.mega-menu--error .mega-menu__error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  align-items: flex-start;
+}
+
+.mega-menu--timeout .mega-menu__timeout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  align-items: flex-start;
+}
+
+/* Error / timeout text */
+.mega-menu__error span,
+.mega-menu__timeout span {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+/* ── .mega-menu__skeleton — shimmer placeholder bars ─────────────────────── */
+.mega-menu__skeleton {
+  height: 1.25rem;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: mega-shimmer 1.4s ease-in-out infinite;
+  margin-bottom: var(--space-sm);
+}
+
+.mega-menu__skeleton:nth-child(2) {
+  width: 80%;
+}
+
+.mega-menu__skeleton:nth-child(3) {
+  width: 60%;
+}
+
+@keyframes mega-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── .mega-menu__retry-btn — small accent button ─────────────────────────── */
+.mega-menu__retry-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-xs) var(--space-md);
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent-purple);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.mega-menu__retry-btn:hover {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(139, 92, 246, 0.7);
+}
+
+.mega-menu__retry-btn:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* ── .mega-menu__inner--about — Conócenos 2-column layout ────────────────── */
+.mega-menu__inner--about {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  padding: var(--space-xl);
+}
+
+/* ── .mega-menu__featured-grid — 2 product placeholders side by side ─────── */
+.mega-menu__featured-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  margin-top: var(--space-md);
+}
+
+/* ── .mega-menu__product-placeholder — shimmer card for upcoming products ── */
+.mega-menu__product-placeholder {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.mega-menu__product-placeholder-img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.12) 0%,
+    rgba(236, 72, 153, 0.08) 50%,
+    rgba(139, 92, 246, 0.06) 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer sweep animation */
+.mega-menu__product-placeholder-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 100%
+  );
+  animation: placeholder-shimmer 1.8s ease-in-out infinite;
+}
+
+@keyframes placeholder-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.mega-menu__product-placeholder-body {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.mega-menu__product-placeholder-name {
+  height: 1rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+  width: 75%;
+}
+
+.mega-menu__product-placeholder-price {
+  height: 1rem;
+  border-radius: var(--radius-sm);
+  background: rgba(139, 92, 246, 0.15);
+  width: 40%;
+}
+
+/* ── .mega-menu__col — generic column wrapper ─────────────────────────────── */
+.mega-menu__col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── .mega-menu__links — company links list ───────────────────────────────── */
+.mega-menu__links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.mega-menu__link {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.mega-menu__link:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mega-menu__link:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* ── .social-proof-card — Col 2 card ─────────────────────────────────────── */
+/*
+ * Gradient border technique: wrap with a gradient background, then use an
+ * inner element with a dark background and a small inset to reveal the border.
+ * Here we use box-shadow + border approach for simplicity.
+ */
+.social-proof-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-xl);
+  background: #0d1224;
+  border-radius: var(--radius-lg);
+  position: relative;
+  /* Gradient border via box-shadow */
+  box-shadow:
+    0 0 0 1px rgba(168, 85, 247, 0.5),
+    0 0 24px rgba(168, 85, 247, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  height: 100%;
+}
+
+/* Subtle gradient overlay on top edge */
+.social-proof-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(236, 72, 153, 0.04) 100%);
+  pointer-events: none;
+}
+
+/* ── .social-proof-card__count — large bold number ───────────────────────── */
+.social-proof-card__count {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  line-height: 1;
+}
+
+/* ── .social-proof-card__label — client count label ──────────────────────── */
+.social-proof-card__label {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── .social-proof-card__testimonial — italic quote ──────────────────────── */
+.social-proof-card__testimonial {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-style: italic;
+  color: var(--color-text-muted);
+  margin: 0;
+  padding: var(--space-md) 0 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  line-height: 1.5;
+  position: relative;
+}
+
+/* Decorative quote mark */
+.social-proof-card__testimonial::before {
+  content: '\201C';
+  font-size: var(--font-size-xl);
+  font-style: normal;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  line-height: 1;
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. MOBILE NAV
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/*
+ * .mobile-nav — off-canvas slide-in panel
+ *
+ * Hidden by default via translateX(-100%). JS adds .is-open to slide it in.
+ * z-index sits above the backdrop (--z-navbar - 1) so it renders on top.
+ */
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 280px;
+  z-index: calc(var(--z-navbar) - 1);
+
+  /* Off-canvas hidden state */
+  transform: translateX(-100%);
+  transition: transform 300ms ease;
+
+  /* Visual design — Filamorfosis dark theme */
+  background: #0a0e1a;
+  border-right: 1px solid rgba(139, 92, 246, 0.2);
+  box-shadow: 4px 0 32px rgba(0, 0, 0, 0.6);
+
+  /* Internal layout */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  font-family: var(--font-family-heading);
+  color: var(--color-text-primary);
+}
+
+/* Slide in when .is-open is added by MobileMenuController.open() */
+.mobile-nav.is-open {
+  transform: translateX(0);
+}
+
+/* ── .mobile-nav__header — brand + close button row ──────────────────────── */
+.mobile-nav__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+  min-height: 64px;
+}
+
+/* Logo link inside mobile header */
+.mobile-nav__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  text-decoration: none;
+}
+
+.mobile-nav__logo-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.mobile-nav__brand {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  background: var(--color-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  white-space: nowrap;
+}
+
+/* Close button */
+.mobile-nav__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.mobile-nav__close:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mobile-nav__close:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* ── .mobile-nav__menu — scrollable nav list ──────────────────────────────── */
+.mobile-nav__menu {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-md) 0;
+  flex: 1;
+  overflow-y: auto;
+  /* Custom scrollbar — subtle */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+}
+
+.mobile-nav__menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mobile-nav__menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mobile-nav__menu::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 2px;
+}
+
+/* ── .mobile-nav__item — list item ───────────────────────────────────────── */
+.mobile-nav__item {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── .mobile-nav__link — plain link items (FAQ, Contacto) ────────────────── */
+.mobile-nav__link {
+  display: flex;
+  align-items: center;
+  padding: var(--space-sm) var(--space-xl);
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.mobile-nav__link:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mobile-nav__link:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* ── .mobile-nav__trigger — accordion trigger buttons ────────────────────── */
+.mobile-nav__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-sm) var(--space-xl);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-align: left;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.mobile-nav__trigger:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Gradient accent on trigger label when expanded */
+.mobile-nav__item--has-sub.is-expanded > .mobile-nav__trigger {
+  color: var(--color-text-primary);
+  background: rgba(139, 92, 246, 0.06);
+}
+
+.mobile-nav__item--has-sub.is-expanded > .mobile-nav__trigger .mobile-nav__trigger-label {
+  background: var(--color-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Chevron icon inside trigger */
+.mobile-nav__trigger .mobile-nav__trigger-chevron {
+  font-size: var(--font-size-base);
+  opacity: 0.6;
+  transition: transform 300ms ease;
+  flex-shrink: 0;
+}
+
+/* Rotate chevron when expanded */
+.mobile-nav__item--has-sub.is-expanded > .mobile-nav__trigger .mobile-nav__trigger-chevron {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+.mobile-nav__trigger:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* ── .mobile-nav__sub — accordion submenu ────────────────────────────────── */
+/*
+ * Hidden by default via max-height: 0 + overflow: hidden.
+ * JS adds .is-expanded to the parent .mobile-nav__item--has-sub to reveal it.
+ * max-height: 500px is a safe upper bound for any submenu length.
+ */
+.mobile-nav__item--has-sub .mobile-nav__sub {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 300ms ease;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid transparent;
+}
+
+.mobile-nav__item--has-sub.is-expanded .mobile-nav__sub {
+  max-height: 500px;
+  border-top-color: rgba(255, 255, 255, 0.04);
+}
+
+/* Submenu items */
+.mobile-nav__sub-item {
+  display: flex;
+}
+
+.mobile-nav__sub-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm) var(--space-xl);
+  padding-left: calc(var(--space-xl) + var(--space-md));
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular, 400);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.mobile-nav__sub-link:hover {
+  color: var(--color-text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.mobile-nav__sub-link:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* ── .mobile-nav__footer — language switcher ─────────────────────────────── */
+.mobile-nav__footer {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+/* Mobile lang switcher — wraps to allow more buttons */
+.lang-switcher--mobile {
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+/* ── .mobile-nav__overlay — tap-outside-to-close backdrop ────────────────── */
+/*
+ * Full-viewport fixed overlay that sits between the page content and the
+ * mobile nav panel. Clicking it calls MobileMenuController.close().
+ *
+ * Hidden by default. Becomes visible via the CSS adjacent sibling selector
+ * when .mobile-nav.is-open is present in the DOM.
+ */
+.mobile-nav__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-navbar) - 2);
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity    300ms ease,
+    visibility 300ms ease;
+}
+
+/* Show overlay when mobile nav is open (adjacent sibling in DOM) */
+.mobile-nav.is-open + .mobile-nav__overlay {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* ── Body scroll lock ─────────────────────────────────────────────────────── */
+/*
+ * Applied to <body> by MobileMenuController.open() via classList.add('no-scroll').
+ * Prevents the page from scrolling behind the open mobile nav panel.
+ */
+body.no-scroll {
+  overflow: hidden;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. BACKDROP
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/*
+ * .site-nav__backdrop — full-viewport semi-transparent overlay
+ *
+ * Sits directly inside <nav class="site-nav"> as its last child.
+ * z-index is below the mega menu panels (--z-navbar - 2) so the panels
+ * render on top, but above all page content.
+ *
+ * Visibility is toggled exclusively by JS adding/removing
+ * .site-nav__backdrop--visible — no inline styles ever.
+ */
+.site-nav__backdrop {
+  /* Full-viewport fixed overlay */
+  position: fixed;
+  inset: 0;
+
+  /* Stack below the nav bar and mega menu panels */
+  z-index: calc(var(--z-navbar) - 2);
+
+  /* Hidden by default */
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+
+  /* Smooth fade — matches mega menu timing */
+  transition:
+    opacity    250ms ease,
+    visibility 250ms ease;
+}
+
+/* Visible state — added by MegaMenuController.open() */
+.site-nav__backdrop--visible {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. SCROLL STATE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Added by JS when window.scrollY > 50 */
+.site-nav--scrolled {
+  background: rgba(10, 14, 26, 0.85);
+  border-bottom-color: var(--color-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  --nav-height: 60px; /* shrinks the mega menu top offset too */
+}
+
+.site-nav--scrolled .site-nav__inner {
+  height: 60px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7. RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Mobile: hide desktop menu, show hamburger ─────────────────────────────── */
+@media (max-width: 767px) {
+  .site-nav__menu {
+    display: none;
+  }
+
+  .lang-switcher {
+    display: none;
+  }
+
+  .site-nav__cart,
+  .site-nav__account {
+    display: none;
+  }
+
+  .mobile-nav__hamburger {
+    display: inline-flex;
+  }
+
+  .site-nav__inner {
+    padding: 0 var(--space-base);
+  }
+}
+
+/* ── Tablet: compact lang switcher ─────────────────────────────────────────── */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .lang-switcher__code {
+    display: none;
+  }
+
+  .site-nav__inner {
+    padding: 0 var(--space-lg);
+  }
+}

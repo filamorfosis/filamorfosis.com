@@ -1,0 +1,282 @@
+# Implementation Plan: Superside-Inspired Navigation
+
+## Overview
+
+Replace the existing `.navbar` in `index.html` with a Superside-inspired mega menu navigation system. The implementation introduces two new files (`assets/css/navigation.css` and `assets/js/navigation.js`), adds translation keys to all six i18n language files, and removes the superseded navbar markup and JS from `index.html` and `main.js`. All state changes are CSS-class-driven; no inline styles are ever set from JavaScript.
+
+## Tasks
+
+- [x] 1. Scaffold new files and wire them into index.html
+  - Create empty `assets/css/navigation.css` with a file-level comment block and section delimiters for: Base Nav, Mega Menus, Mobile Nav, Backdrop, Scroll State, Animations, Responsive
+  - Create empty `assets/js/navigation.js` as an IIFE that exposes `window.FilamorfosisNav = {}` and declares the four sub-controller stubs: `MegaMenuController`, `MobileMenuController`, `CategoryService`, `LangSwitcherNav`
+  - Add `<link rel="stylesheet" href="assets/css/navigation.css">` to `index.html` after the existing CSS links
+  - Add `<script src="assets/js/navigation.js" defer></script>` to `index.html` after the existing JS scripts
+  - _Requirements: 11.8_
+
+- [x] 2. Add translation keys to all six i18n language files
+  - [x] 2.1 Add all 36 new `nav_*` keys to `assets/js/i18n/lang.es.js`
+    - Keys: `nav_tienda`, `nav_servicios`, `nav_conocenos`, `nav_faq`, `nav_contacto`, `nav_mega_store_heading`, `nav_mega_store_promo_title`, `nav_mega_store_promo_desc`, `nav_mega_store_cta`, `nav_mega_store_loading`, `nav_mega_store_error`, `nav_mega_store_retry`, `nav_mega_store_timeout`, `nav_mega_services_heading`, `nav_mega_svc_3d_title`, `nav_mega_svc_3d_desc`, `nav_mega_svc_uv_title`, `nav_mega_svc_uv_desc`, `nav_mega_svc_laser_title`, `nav_mega_svc_laser_desc`, `nav_mega_svc_scan_title`, `nav_mega_svc_scan_desc`, `nav_mega_svc_photo_title`, `nav_mega_svc_photo_desc`, `nav_mega_about_heading`, `nav_mega_about_who`, `nav_mega_about_mission`, `nav_mega_about_process`, `nav_mega_about_blog`, `nav_mega_about_clients_label`, `nav_mega_about_testimonial`, `nav_cart_label`, `nav_account_label`, `nav_open_menu`, `nav_close_menu`, `nav_lang_label`
+    - Use Spanish values from the design document translation table
+    - _Requirements: 8.3, 8.4_
+  - [x] 2.2 Add all 36 keys to `assets/js/i18n/lang.en.js` with English values
+    - _Requirements: 8.3, 8.4_
+  - [x] 2.3 Add all 36 keys to `assets/js/i18n/lang.de.js` with German translations
+    - _Requirements: 8.3, 8.4_
+  - [x] 2.4 Add all 36 keys to `assets/js/i18n/lang.pt.js` with Portuguese translations
+    - _Requirements: 8.3, 8.4_
+  - [x] 2.5 Add all 36 keys to `assets/js/i18n/lang.ja.js` with Japanese translations
+    - _Requirements: 8.3, 8.4_
+  - [x] 2.6 Add all 36 keys to `assets/js/i18n/lang.zh.js` with Chinese translations
+    - _Requirements: 8.3, 8.4_
+
+- [x] 3. Build the desktop nav bar HTML structure in index.html
+  - Replace the existing `<nav class="navbar ...">` block with the new `<nav class="site-nav">` structure
+  - Include `.site-nav__inner` with three regions: `.site-nav__logo` (circular logo + "Filamorfosis" brand text), `.site-nav__menu` (empty `<ul>` placeholder for the 5 nav items), `.site-nav__actions` (lang switcher, cart icon with badge, account icon)
+  - Add `<div class="site-nav__backdrop"></div>` as the last child of `<nav class="site-nav">`
+  - Add `<div class="mobile-nav">` and `<div class="mobile-nav__overlay">` immediately after the `<nav>` — include `.mobile-nav__header`, empty `.mobile-nav__menu`, and `.mobile-nav__footer` (lang switcher)
+  - All text nodes must use `data-translate` attributes; no hardcoded strings
+  - Use semantic HTML: `<nav>`, `<ul>`, `<li>`, `<button>`, `<a>` elements as specified in the design
+  - Add `aria-label`, `aria-expanded="false"`, `aria-haspopup="true"` on all trigger buttons
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 7.4, 7.5, 11.1_
+
+- [x] 4. Add the five nav items and mega menu panel shells to index.html
+  - Add five `<li>` elements inside `.site-nav__menu`:
+    - `Tienda` — `<li class="site-nav__item site-nav__item--has-mega">` with a `<button class="site-nav__trigger">` and an empty `<div class="mega-menu" id="mega-tienda">`
+    - `Servicios` — same pattern with `id="mega-servicios"`
+    - `Conócenos` — same pattern with `id="mega-conocenos"`
+    - `Preguntas Frecuentes` — `<li class="site-nav__item">` with a plain `<a>` link (no mega menu)
+    - `Contacto` — `<li class="site-nav__item">` with a plain `<a>` link
+  - Mirror all five items inside `.mobile-nav__menu` using `.mobile-nav__item` and `.mobile-nav__item--has-sub` for the first three
+  - _Requirements: 1.2, 6.3_
+
+- [x] 5. Implement desktop nav bar CSS in navigation.css
+  - [x] 5.1 Write base `.site-nav` styles
+    - Fixed positioning (`position: fixed; top: 0; left: 0; width: 100%; z-index: var(--z-navbar)`)
+    - Dark background (`background: #0a0e1a`), Poppins font, white text
+    - Flexbox layout for `.site-nav__inner` with logo left, menu center, actions right
+    - Height, padding, and spacing matching Superside's proportions
+    - _Requirements: 1.1, 1.6, 1.7, 10.4_
+  - [x] 5.2 Write `.site-nav--scrolled` scroll state styles
+    - Triggered when JS adds `.site-nav--scrolled` class (at `scrollY > 50`)
+    - Apply `backdrop-filter: blur(12px)`, slightly reduced height, subtle border-bottom
+    - Use CSS `transition` on height and backdrop-filter for smooth change
+    - _Requirements: 1.6, 9.6_
+  - [x] 5.3 Write `.site-nav__logo` brand styles
+    - Circular logo image with `border-radius: 50%`
+    - "Filamorfosis" brand text with purple/pink gradient using `background-clip: text`
+    - Poppins font, bold weight
+    - _Requirements: 1.3, 1.7, 10.4_
+  - [x] 5.4 Write `.site-nav__menu` and `.site-nav__trigger` styles
+    - Horizontal flex list, no list-style
+    - Trigger buttons: no default button styles, white text, Poppins font, minimum `1rem` font size
+    - Hover state: purple/pink gradient color change, no underline
+    - Active/open state (`.is-open > .site-nav__trigger`): gradient accent color
+    - _Requirements: 5.3, 5.6, 10.3_
+  - [x] 5.5 Write `.site-nav__actions` styles
+    - Flex row with gap for lang switcher, cart icon, account icon
+    - Cart badge: absolute-positioned pill with neon accent background
+    - Icon buttons: accessible focus ring using `outline` (no `outline: none`)
+    - _Requirements: 1.4, 7.6_
+
+- [x] 6. Build Tienda mega menu HTML (3-column dynamic layout)
+  - Inside `#mega-tienda > .mega-menu__inner`, add three `.mega-menu__col` divs:
+    - Col 1: heading (`data-translate="nav_mega_store_heading"`), `.nav-categories-list` container (populated by JS), loading skeleton div (`.mega-menu__loading`), error div (`.mega-menu__error`) with retry button (`data-translate="nav_mega_store_retry"`), timeout div (`.mega-menu__timeout`)
+    - Col 2: `.nav-subcategories-panel` container (populated by JS)
+    - Col 3: static promo card with title (`data-translate="nav_mega_store_promo_title"`), description (`data-translate="nav_mega_store_promo_desc"`), CTA link (`data-translate="nav_mega_store_cta"`)
+  - All static text uses `data-translate`; dynamic category names are injected by `CategoryService`
+  - _Requirements: 2.1, 2.3, 2.4, 2.5, 9.2_
+
+- [x] 7. Build Servicios mega menu HTML + CSS (2-column grid, 5 service cards)
+  - Inside `#mega-servicios > .mega-menu__inner`, add a heading and a `.mega-menu__services-grid` div
+  - Add five `.service-card` elements, each containing: FontAwesome icon `<i>`, `<h3 data-translate="nav_mega_svc_*_title">`, `<p data-translate="nav_mega_svc_*_desc">`
+  - Services in order: Impresión 3D (`fa-cube`), Impresión UV (`fa-print`), Corte Láser (`fa-bolt`), Escaneo 3D (`fa-camera`), Impresión Fotográfica (`fa-image`)
+  - In `navigation.css`, write `.mega-menu__services-grid` as a 2-column CSS grid with gap
+  - Write `.service-card` styles: dark card background, border-radius, padding, icon with gradient color, hover state (scale + border glow) using CSS `transition`
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.6_
+
+- [x] 8. Build Conócenos mega menu HTML + CSS (2-column layout)
+  - Inside `#mega-conocenos > .mega-menu__inner`, add two `.mega-menu__col` divs:
+    - Col 1: heading (`data-translate="nav_mega_about_heading"`), `<ul>` with four `<li><a>` links: Quiénes Somos, Misión y Valores, Nuestro Proceso, Blog — all using `data-translate`
+    - Col 2: social proof card with client count label (`data-translate="nav_mega_about_clients_label"`), testimonial quote (`data-translate="nav_mega_about_testimonial"`)
+  - In `navigation.css`, write `.mega-menu__col` flex/grid styles for the 2-column layout
+  - Write social proof card styles: gradient border, dark background, italic testimonial text
+  - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.7_
+
+- [x] 9. Implement mega menu panel CSS (animations, backdrop, hover effects)
+  - [x] 9.1 Write base `.mega-menu` hidden state and open state styles
+    - Hidden: `opacity: 0; pointer-events: none; transform: translateY(-8px); visibility: hidden`
+    - Open (`.site-nav__item.is-open .mega-menu`): `opacity: 1; pointer-events: auto; transform: translateY(0); visibility: visible`
+    - Use `transition: opacity 250ms ease, transform 250ms ease` (≤300ms per Requirement 5.8)
+    - Position: `absolute; top: 100%; left: 0; width: 100%`
+    - Background: `#0a0e1a`, border-bottom with gradient accent, `box-shadow`
+    - _Requirements: 5.1, 5.7, 5.8, 10.3_
+  - [x] 9.2 Write `.site-nav__backdrop` styles
+    - Full-viewport fixed overlay: `position: fixed; inset: 0; z-index` below nav panel
+    - Hidden by default; visible when `.site-nav__backdrop--visible` class is present
+    - Semi-transparent dark background with `transition: opacity 250ms ease`
+    - _Requirements: 5.2_
+  - [ ]* 9.3 Write unit tests for mega menu CSS class toggling
+    - Assert `.mega-menu` `transition-duration` computed style is ≤ 300ms
+    - Assert `.site-nav__backdrop--visible` class shows the backdrop
+    - _Requirements: 5.1, 5.2, 5.8_
+
+- [x] 10. Implement MegaMenuController in navigation.js
+  - [x] 10.1 Implement `MegaMenuController.open(triggerEl)`
+    - Add `.is-open` to the parent `<li>`, set `aria-expanded="true"` on the trigger button
+    - Add `.site-nav__backdrop--visible` to the backdrop element
+    - Call `CategoryService.load()` if the trigger is for the Tienda menu and categories are not yet loaded
+    - _Requirements: 2.1, 5.1, 5.2, 7.2_
+  - [x] 10.2 Implement `MegaMenuController.close(triggerEl)` and `closeAll()`
+    - Remove `.is-open`, set `aria-expanded="false"`
+    - Remove `.site-nav__backdrop--visible` if no other menus are open
+    - _Requirements: 5.7, 7.3_
+  - [x] 10.3 Implement hover intent logic
+    - On `mouseenter` of `.site-nav__item--has-mega`: start a 100ms timer; on `mouseleave` before timer fires, cancel it; on timer completion, call `open()`
+    - On `mouseleave` of `.site-nav`: start a 150ms timer then call `closeAll()`
+    - _Requirements: 5.3, 10.3_
+  - [x] 10.4 Implement keyboard event handling in `MegaMenuController.init()`
+    - `Enter`/`Space` on a `.site-nav__trigger`: call `open(triggerEl)`
+    - `Escape` anywhere: call `closeAll()`, return focus to the active trigger
+    - `Tab` past the last focusable element in an open mega menu: call `close()` for that menu
+    - _Requirements: 7.1, 7.2, 7.3_
+  - [ ]* 10.5 Write unit tests for MegaMenuController
+    - Simulate hover, assert `.is-open` toggled and `aria-expanded` updated
+    - Simulate `Escape` keydown, assert menu closes and focus returns to trigger
+    - Simulate rapid hover across multiple triggers, assert only one menu open at a time
+    - _Requirements: 5.1, 7.2, 7.3_
+
+- [x] 11. Implement CategoryService in navigation.js
+  - [x] 11.1 Implement `CategoryService.load()` with fetch, cache, and deduplication
+    - On first call: initiate `fetch('/api/v1/categories')` wrapped in `Promise.race` with a 3-second timeout rejection; store the promise in `_fetchPromise`
+    - On resolution: populate `_cache`, call `renderIntoMenu(categories)`, remove loading skeleton
+    - On concurrent calls while fetch is in-flight: return the existing `_fetchPromise`
+    - On subsequent calls after cache is populated: return `_cache` directly without a network request
+    - _Requirements: 2.2, 9.3, 9.4_
+  - [x] 11.2 Implement loading, error, and timeout states
+    - Before fetch resolves: show `.mega-menu__loading` skeleton, hide `.mega-menu__error` and `.mega-menu__timeout`
+    - On network error or non-2xx HTTP: hide skeleton, show `.mega-menu__error` with retry button
+    - On timeout (>3s): hide skeleton, show `.mega-menu__timeout` with retry button
+    - Retry button click: reset `_cache = null` and `_fetchPromise = null`, call `load()` again
+    - _Requirements: 2.7, 9.2, 9.7_
+  - [x] 11.3 Implement `CategoryService.renderIntoMenu(categories)`
+    - Build DOM nodes for `.nav-categories-list`: one `.nav-category-item` per category with icon and name
+    - Each item links to `buildCategoryUrl(slug)` → `/store.html?category={slug}`
+    - Render subcategories into `.nav-subcategories-panel` grouped under their parent
+    - Handle empty array: render a "No hay categorías disponibles" message
+    - _Requirements: 2.3, 2.4, 2.5, 2.6_
+  - [ ]* 11.4 Write property test for category rendering completeness (Property 1)
+    - **Property 1: Category rendering is complete and faithful**
+    - **Validates: Requirements 2.3, 2.4, 2.5**
+    - File: `assets/js/tests/property-tests/navigation.property.test.js`
+    - Generator: `fc.array(fc.record({ name: fc.string(), icon: fc.string(), slug: fc.string(), subCategories: fc.array(fc.record({ name: fc.string(), icon: fc.string(), slug: fc.string() })) }))`
+    - Assert every `category.name`, `category.icon`, and every `sub.name` appears in the rendered HTML output
+    - Run minimum 100 iterations
+  - [ ]* 11.5 Write property test for Category API fetch-at-most-once (Property 5)
+    - **Property 5: Category API is fetched at most once**
+    - **Validates: Requirements 9.3**
+    - Generator: `fc.integer({ min: 1, max: 20 })` — number of additional `load()` calls after initial
+    - Mock `fetch`; call `CategoryService.load()` once to populate cache; call `load()` N more times; assert `fetch` was called exactly once total
+    - Run minimum 100 iterations
+
+- [x] 12. Implement MobileMenuController in navigation.js
+  - [x] 12.1 Implement `MobileMenuController.open()` and `close()`
+    - `open()`: add `.is-open` to `.mobile-nav`, add `.no-scroll` to `<body>`, set `aria-expanded="true"` on hamburger button
+    - `close()`: remove `.is-open` from `.mobile-nav`, remove `.no-scroll` from `<body>`, set `aria-expanded="false"` on hamburger button
+    - `toggle()`: check current state and call `open()` or `close()` accordingly
+    - _Requirements: 6.2, 6.6, 6.7_
+  - [x] 12.2 Implement accordion submenu logic
+    - Each `.mobile-nav__trigger` click: toggle `.is-expanded` on its parent `.mobile-nav__item--has-sub`
+    - Before expanding, collapse any other currently expanded item (only one open at a time)
+    - _Requirements: 6.4_
+  - [x] 12.3 Implement close-on-outside-tap and resize handling
+    - `.mobile-nav__overlay` click: call `MobileMenuController.close()`
+    - `window` resize event: if `window.innerWidth >= 768`, call `MobileMenuController.close()`
+    - _Requirements: 6.6_
+  - [x] 12.4 Write mobile nav CSS in navigation.css
+    - `.mobile-nav`: off-canvas panel, `position: fixed; top: 0; left: 0; height: 100%; width: 280px; transform: translateX(-100%); transition: transform 300ms ease; z-index` above backdrop
+    - `.mobile-nav.is-open`: `transform: translateX(0)`
+    - `.mobile-nav__overlay`: full-viewport fixed overlay, hidden by default, visible when `.mobile-nav.is-open` is present (CSS sibling/adjacent selector or class on body)
+    - `.mobile-nav__item--has-sub .mobile-nav__sub`: `max-height: 0; overflow: hidden; transition: max-height 300ms ease`
+    - `.mobile-nav__item--has-sub.is-expanded .mobile-nav__sub`: `max-height: 500px`
+    - Apply Filamorfosis dark theme, purple/pink gradient accents, Poppins font, minimum `1rem` font size
+    - _Requirements: 6.2, 6.3, 6.8, 10.6_
+  - [ ]* 12.5 Write property test for body scroll lock invariant (Property 6)
+    - **Property 6: Body scroll is locked when and only when mobile menu is open**
+    - **Validates: Requirements 6.7**
+    - Generator: `fc.array(fc.constantFrom('open', 'close'), { minLength: 1, maxLength: 30 })`
+    - For each operation sequence, simulate open/close calls; after each step assert `document.body.classList.contains('no-scroll') === _state.mobileOpen`
+    - Run minimum 100 iterations
+
+- [x] 13. Implement LangSwitcherNav and scroll behavior in navigation.js
+  - [x] 13.1 Implement `LangSwitcherNav.init()`
+    - Attach click handlers to language buttons inside `.site-nav__actions` and `.mobile-nav__footer`
+    - Each click calls `window.switchLanguage(lang)` — reuse the existing function from `main.js`
+    - Update the active language indicator (highlight current lang button)
+    - _Requirements: 8.2, 11.2_
+  - [x] 13.2 Implement scroll behavior
+    - Add a `scroll` event listener (passive) on `window`
+    - Toggle `.site-nav--scrolled` on `.site-nav` when `window.scrollY > 50`
+    - Remove the duplicate scroll handler from `main.js` (the `// Navbar scroll blur` IIFE at the bottom)
+    - _Requirements: 1.6, 11.5_
+
+- [x] 14. Implement accessibility: ARIA live regions and focus management
+  - Add an `aria-live="polite"` region inside `.site-nav` for announcing menu state changes to screen readers
+  - In `MegaMenuController.open()`: update the live region text to announce the menu name (e.g., "Menú Tienda abierto")
+  - In `MegaMenuController.close()`: clear the live region text
+  - Ensure all `.site-nav__trigger` and `.mobile-nav__trigger` buttons have visible focus indicators via CSS `outline` (never `outline: none`)
+  - Verify `Tab` order is logical: logo → menu items → actions (left to right)
+  - _Requirements: 7.4, 7.6, 7.7_
+
+- [x] 15. Checkpoint — verify core nav functionality
+  - Ensure all tests pass, ask the user if questions arise.
+  - Verify desktop nav renders correctly at ≥768px with all five menu items visible
+  - Verify mobile hamburger appears at <768px and desktop menu is hidden
+  - Verify mega menus open/close with correct CSS class toggling and animations ≤300ms
+  - Verify `CategoryService` shows loading skeleton, then renders categories, then caches on re-open
+
+- [x] 16. Write property-based tests for language switching and accessibility invariants
+  - [x] 16.1 Write property test for language switching (Property 2)
+    - **Property 2: Language switching updates all navigation text**
+    - **Validates: Requirements 3.6, 4.7, 8.2**
+    - File: `assets/js/tests/property-tests/navigation.property.test.js`
+    - Generator: `fc.constantFrom('es', 'en', 'de', 'pt', 'ja', 'zh')`
+    - For each language, call `window.switchLanguage(lang)`; query all `[data-translate]` inside `.site-nav` and `.mobile-nav`; assert each element's `textContent.trim() === window.FilamorfosisI18n[lang][element.dataset.translate]`
+    - Run minimum 100 iterations
+  - [x] 16.2 Write property test for accessible names invariant (Property 3)
+    - **Property 3: All interactive nav elements have accessible names**
+    - **Validates: Requirements 7.4**
+    - Structural invariant — no random generator needed; run once against the rendered DOM
+    - Query all `button, a` inside `.site-nav, .mobile-nav`; for each assert `aria-label || aria-labelledby || element.textContent.trim()` is non-empty
+  - [x] 16.3 Write property test for data-translate coverage (Property 4)
+    - **Property 4: All static nav text elements carry data-translate attributes**
+    - **Validates: Requirements 8.1**
+    - Structural invariant — run once against the rendered DOM
+    - Query all elements inside `.site-nav, .mobile-nav` with non-empty `textContent` that are not dynamically injected (absence of `.nav-category-item` class); assert each has `data-translate` or `data-t` attribute
+
+- [x] 17. Remove old navbar code from index.html and main.js
+  - Remove the old `<nav class="navbar ...">` block and any associated `<div class="navbar__*">` elements from `index.html`
+  - Remove the `Mobile Menu Toggle` jQuery block from `main.js` (`.navbar__toggle` click handler and `.navbar__menu a` click handler)
+  - Remove the `Mobile language option click (inside hamburger menu)` handler that references `.navbar__toggle` and `.navbar__menu`
+  - Remove the `Navbar scroll effect` jQuery scroll handler (`$('.navbar').toggleClass('navbar--scrolled', ...)`)
+  - Remove the `// Navbar scroll blur` IIFE at the bottom of `main.js` (the standalone `document.querySelector('.navbar')` block)
+  - Remove any CSS rules in `main.css` that target `.navbar`, `.navbar__toggle`, `.navbar__menu`, `.navbar--scrolled` — these are now dead code
+  - _Requirements: 11.1, 11.5_
+
+- [x] 18. Final checkpoint — integration verification
+  - Ensure all tests pass, ask the user if questions arise.
+  - Run all property-based tests in `assets/js/tests/property-tests/navigation.property.test.js` and confirm all six properties pass
+  - Verify no `console.log`, `console.warn`, or `console.error` calls remain in `navigation.js`
+  - Verify no inline `style="..."` attributes exist in the new nav HTML
+  - Verify all six language files contain all 36 new `nav_*` keys
+  - Verify no orphaned CSS rules targeting removed `.navbar` selectors remain in `main.css`
+  - Verify the page renders without layout shift on load (critical CSS and fonts preloaded)
+
+## Notes
+
+- Tasks marked with `*` are optional and can be skipped for a faster MVP
+- Each task references specific requirements for traceability
+- Property tests use **fast-check** (already the PBT library for this project's JS tests)
+- All CSS class toggling is done via `classList.add/remove/toggle` — no inline styles, no `$.css()`
+- The existing `window.switchLanguage` function in `main.js` already iterates all `[data-translate]` elements globally, so new nav keys are picked up automatically without modifying `main.js`
+- The `CategoryService` uses `GET /api/v1/categories` (public endpoint — no auth token required)
+- Font sizes must never fall below `1rem` anywhere in `navigation.css` or JS-injected HTML
