@@ -126,7 +126,80 @@
   outline-offset: 2px;
 }
 
-/* ── .site-nav__trigger — mega menu trigger buttons ───────────────────────── */
+/* ── .site-nav__trigger--chevron-only — standalone chevron for split triggers ── */
+.site-nav__trigger--chevron-only {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm) var(--space-xs);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  line-height: 1;
+}
+
+.site-nav__trigger--chevron-only:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.site-nav__trigger--chevron-only:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* Rotate chevron when parent item is open */
+.site-nav__item.is-open > .site-nav__trigger--chevron-only .site-nav__trigger-chevron {
+  transform: rotate(180deg);
+}
+
+/* ── .site-nav__link--trigger-label — the text link part of a split trigger ── */
+.site-nav__link--trigger-label {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-md);
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  white-space: nowrap;
+}
+
+.site-nav__link--trigger-label:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.site-nav__link--trigger-label:hover span,
+.site-nav__link--trigger-label:hover {
+  background: var(--color-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.site-nav__link--trigger-label:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* Active state when on /tienda/* */
+.site-nav__item.is-active > .site-nav__link--trigger-label {
+  background: var(--color-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+
 .site-nav__trigger {
   display: inline-flex;
   align-items: center;
@@ -440,10 +513,10 @@
   gap: var(--space-lg);
 }
 
-/* ── .mega-menu__services-grid — 2-column card grid ──────────────────────── */
+/* ── .mega-menu__services-grid — responsive card grid ────────────────────── */
 .mega-menu__services-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: var(--space-md);
 }
 
@@ -476,6 +549,125 @@
   outline: 2px solid var(--color-accent-purple);
   outline-offset: 2px;
 }
+
+/* ── .service-card--image — full-bleed image card with zoom effect ────────── */
+/*
+ * Structure:
+ *   <a class="service-card service-card--image">
+ *     <span class="service-card__bg">          ← background image, zooms on hover
+ *     <span class="service-card__overlay">     ← dark gradient for readability
+ *     <span class="service-card__content">     ← title + arrow, sits on top
+ *       <span class="service-card__title">
+ *       <span class="service-card__arrow">
+ */
+.service-card--image {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  background: #0d1224;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  min-height: 140px;
+  /* Reset icon-card styles */
+  gap: 0;
+}
+
+.service-card--image:hover {
+  transform: none; /* zoom is on the bg layer, not the card */
+  border-color: rgba(168, 85, 247, 0.6);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  background: #0d1224;
+}
+
+/* Background image layer — zooms independently */
+.service-card__bg {
+  position: absolute;
+  inset: 0;
+  background-image: var(--svc-bg-url, none);
+  background-size: cover;
+  background-position: center;
+  background-color: rgba(139, 92, 246, 0.15); /* fallback when no image */
+  transition: transform 400ms ease;
+  will-change: transform;
+}
+
+.service-card--image:hover .service-card__bg {
+  transform: scale(1.08);
+}
+
+/* Dark gradient overlay — ensures text is always readable */
+.service-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(10, 14, 26, 0.88) 0%,
+    rgba(10, 14, 26, 0.45) 55%,
+    rgba(10, 14, 26, 0.15) 100%
+  );
+  transition: background 300ms ease;
+}
+
+.service-card--image:hover .service-card__overlay {
+  background: linear-gradient(
+    to top,
+    rgba(10, 14, 26, 0.92) 0%,
+    rgba(80, 30, 120, 0.35) 55%,
+    rgba(10, 14, 26, 0.1) 100%
+  );
+}
+
+/* Content layer — sits above bg and overlay */
+.service-card__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  min-height: 140px;
+  padding: var(--space-md) var(--space-lg);
+  box-sizing: border-box;
+}
+
+/* Title text */
+.service-card--image .service-card__title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: #fff;
+  margin: 0;
+  line-height: 1.3;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  transition: color 200ms ease;
+}
+
+.service-card--image:hover .service-card__title {
+  background: var(--color-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Arrow icon — slides in on hover */
+.service-card__arrow {
+  font-size: var(--font-size-base);
+  color: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 200ms ease, transform 200ms ease, color 200ms ease;
+  flex-shrink: 0;
+}
+
+.service-card--image:hover .service-card__arrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: #a855f7;
+}
+
+
 
 /* Icon — purple/pink gradient */
 .service-card__icon {
@@ -614,7 +806,25 @@
   display: block;
 }
 
+/* Services loading skeleton — same trigger */
+.mega-menu--loading .mega-menu__loading--services {
+  display: block;
+}
+
+/* Hide the grid while loading */
+.mega-menu--loading #mega-services-grid {
+  display: none;
+}
+
 .mega-menu--error .mega-menu__error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  align-items: flex-start;
+}
+
+/* Services error state */
+.mega-menu--error .mega-menu__error--services {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
@@ -1028,6 +1238,72 @@
 .mobile-nav__item {
   display: flex;
   flex-direction: column;
+}
+
+/* ── .mobile-nav__item-row — split link + chevron row ────────────────────── */
+.mobile-nav__item-row {
+  display: flex;
+  align-items: center;
+}
+
+.mobile-nav__link--section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space-xl);
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.mobile-nav__link--section:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mobile-nav__link--section:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+.mobile-nav__trigger--chevron-only {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.mobile-nav__trigger--chevron-only:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mobile-nav__trigger--chevron-only:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+.mobile-nav__trigger--chevron-only .mobile-nav__trigger-chevron {
+  font-size: var(--font-size-base);
+  opacity: 0.6;
+  transition: transform 300ms ease;
+}
+
+.mobile-nav__item--has-sub.is-expanded > .mobile-nav__item-row > .mobile-nav__trigger--chevron-only .mobile-nav__trigger-chevron {
+  transform: rotate(180deg);
+  opacity: 1;
 }
 
 /* ── .mobile-nav__link — plain link items (FAQ, Contacto) ────────────────── */

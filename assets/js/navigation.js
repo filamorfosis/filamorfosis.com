@@ -79,6 +79,10 @@
             if (megaPanel && megaPanel.id === 'mega-tienda' && !_state.categoriesLoaded) {
                 CategoryService.load();
             }
+            // Lazy-load processes for the Servicios mega menu
+            if (megaPanel && megaPanel.id === 'mega-servicios' && ProcessService._cache === null) {
+                ProcessService.load();
+            }
         },
 
         /**
@@ -120,7 +124,7 @@
         closeAll: function () {
             var openItems = document.querySelectorAll('.site-nav__item--has-mega.is-open');
             openItems.forEach(function (item) {
-                var trigger = item.querySelector('.site-nav__trigger');
+                var trigger = item.querySelector('.site-nav__trigger, .site-nav__trigger--chevron-only');
                 if (trigger) {
                     MegaMenuController.close(trigger);
                 }
@@ -142,7 +146,8 @@
 
             /* ── Hover intent ─────────────────────────────────────────── */
             megaItems.forEach(function (item) {
-                var trigger = item.querySelector('.site-nav__trigger');
+                // Support both full trigger buttons and chevron-only split buttons
+                var trigger = item.querySelector('.site-nav__trigger, .site-nav__trigger--chevron-only');
                 if (!trigger) { return; }
 
                 // mouseenter: start 100ms open timer
@@ -207,7 +212,7 @@
 
             /* ── Keyboard: Enter / Space on trigger ───────────────────── */
             megaItems.forEach(function (item) {
-                var trigger = item.querySelector('.site-nav__trigger');
+                var trigger = item.querySelector('.site-nav__trigger, .site-nav__trigger--chevron-only');
                 if (!trigger) { return; }
 
                 trigger.addEventListener('keydown', function (e) {
@@ -236,7 +241,7 @@
 
             /* ── Keyboard: Tab past last focusable item closes menu ────── */
             megaItems.forEach(function (item) {
-                var trigger = item.querySelector('.site-nav__trigger');
+                var trigger = item.querySelector('.site-nav__trigger, .site-nav__trigger--chevron-only');
                 var megaPanel = item.querySelector('.mega-menu');
                 if (!trigger || !megaPanel) { return; }
 
@@ -351,7 +356,9 @@
             );
             expandedItems.forEach(function (item) {
                 item.classList.remove('is-expanded');
-                var trigger = item.querySelector('.mobile-nav__trigger');
+                var trigger = item.querySelector(
+                    '.mobile-nav__trigger, .mobile-nav__trigger--chevron-only'
+                );
                 if (trigger) {
                     trigger.setAttribute('aria-expanded', 'false');
                 }
@@ -384,8 +391,10 @@
             }
 
             /* ── Accordion submenu triggers ───────────────────────────── */
+            // Supports both full triggers and chevron-only buttons inside .mobile-nav__item-row
             var subTriggers = document.querySelectorAll(
-                '.mobile-nav__item--has-sub > .mobile-nav__trigger'
+                '.mobile-nav__item--has-sub > .mobile-nav__trigger, ' +
+                '.mobile-nav__item--has-sub > .mobile-nav__item-row > .mobile-nav__trigger--chevron-only'
             );
             subTriggers.forEach(function (trigger) {
                 trigger.addEventListener('click', function () {
@@ -599,6 +608,7 @@
                 emptyItem.className = 'nav-category-item nav-category-item--empty';
                 emptyItem.textContent = 'No hay categorías disponibles';
                 categoriesList.appendChild(emptyItem);
+                CategoryService._renderMobileCategories([]);
                 return;
             }
 
@@ -652,6 +662,33 @@
                 li.appendChild(a);
                 categoriesList.appendChild(li);
             });
+
+            // ── Also populate mobile nav sub-list ─────────────────────────
+            CategoryService._renderMobileCategories(categories);
+        },
+
+        /**
+         * Populates the mobile nav Tienda sub-list with category links.
+         * @param {Array} categories
+         */
+        _renderMobileCategories: function (categories) {
+            // The Tienda mobile item uses .mobile-nav__item-row structure
+            var mobileSubList = document.querySelector(
+                '.mobile-nav__item--has-sub .mobile-nav__item-row ~ .mobile-nav__sub'
+            );
+            if (!mobileSubList) { return; }
+
+            mobileSubList.innerHTML = '';
+
+            categories.forEach(function (category) {
+                var li = document.createElement('li');
+                var a = document.createElement('a');
+                a.href = CategoryService.buildCategoryUrl(category.slug);
+                a.className = 'mobile-nav__sub-link';
+                a.textContent = category.name;
+                li.appendChild(a);
+                mobileSubList.appendChild(li);
+            });
         },
 
         /**
@@ -660,7 +697,216 @@
          * @returns {string}
          */
         buildCategoryUrl: function (slug) {
-            return '/tienda?category=' + encodeURIComponent(slug);
+            return '/tienda/' + encodeURIComponent(slug);
+        }
+    };
+
+    /* ─────────────────────────────────────────────────────────────────────
+       ProcessService
+       Fetches processes (services) from the API, caches the result, and
+       renders image cards into the Servicios mega menu and mobile sub-list.
+    ───────────────────────────────────────────────────────────────────── */
+    var ProcessService = {
+        _cache: null,
+        _fetchPromise: null,
+
+        /**
+         * Loads processes from GET /api/v1/processes.
+         * Caches after first successful fetch. Deduplicates in-flight calls.
+         * Shows loading skeleton while fetching; delegates errors to _handleError.
+         * @returns {Promise<Array>}
+         */
+        load: function () {
+            var self = ProcessService;
+            var megaPanel = document.getElementById('mega-servicios');
+
+            if (self._cache !== null) {
+                self.renderIntoMenu(self._cache);
+                return Promise.resolve(self._cache);
+            }
+
+            if (self._fetchPromise !== null) {
+                return self._fetchPromise;
+            }
+
+            self._setLoadingState(megaPanel);
+
+            var timeoutPromise = new Promise(function (_, reject) {
+                setTimeout(function () { reject(new Error('TIMEOUT')); }, 3000);
+            });
+
+            var fetchPromise = (typeof window.getProcesses === 'function'
+                ? window.getProcesses()
+                : fetch('/api/v1/processes').then(function (r) {
+                    if (!r.ok) { throw new Error('HTTP_ERROR:' + r.status); }
+                    return r.json();
+                })
+            );
+
+            self._fetchPromise = Promise.race([fetchPromise, timeoutPromise])
+                .then(function (processes) {
+                    var list = (processes && processes.items)
+                        ? processes.items
+                        : (Array.isArray(processes) ? processes : []);
+                    self._cache = list;
+                    self._fetchPromise = null;
+                    self._clearLoadingState(megaPanel);
+                    self.renderIntoMenu(self._cache);
+                    return self._cache;
+                })
+                .catch(function (err) {
+                    self._fetchPromise = null;
+                    self._clearLoadingState(megaPanel);
+                    self._handleError(megaPanel, err && err.message === 'TIMEOUT');
+                    return [];
+                });
+
+            return self._fetchPromise;
+        },
+
+        _setLoadingState: function (panel) {
+            if (!panel) { return; }
+            panel.classList.add('mega-menu--loading');
+            panel.classList.remove('mega-menu--error');
+        },
+
+        _clearLoadingState: function (panel) {
+            if (!panel) { return; }
+            panel.classList.remove('mega-menu--loading');
+        },
+
+        _handleError: function (panel, isTimeout) {
+            if (!panel) { return; }
+            panel.classList.add('mega-menu--error');
+            panel.classList.remove('mega-menu--loading');
+            var retryBtn = panel.querySelector('.mega-menu__retry-btn--services');
+            if (retryBtn) {
+                var fresh = retryBtn.cloneNode(true);
+                retryBtn.parentNode.replaceChild(fresh, retryBtn);
+                fresh.addEventListener('click', function () {
+                    ProcessService._cache = null;
+                    ProcessService._fetchPromise = null;
+                    panel.classList.remove('mega-menu--error');
+                    ProcessService.load();
+                });
+            }
+        },
+
+        /**
+         * Resolves a raw image URL or S3 key to a displayable URL.
+         * @param {string|null} url
+         * @returns {string}
+         */
+        _resolveImage: function (url) {
+            if (!url) { return ''; }
+            if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0 || url.indexOf('data:') === 0) {
+                return url;
+            }
+            var cdn = window.FILAMORFOSIS_CDN_BASE;
+            return cdn ? (cdn + '/' + url) : '';
+        },
+
+        /**
+         * Builds and inserts service cards into #mega-services-grid.
+         * Each card shows the process image as background with a zoom-on-hover
+         * effect, the process name, and links to /servicios/:slug.
+         * Also populates the mobile sub-list.
+         * @param {Array} processes
+         */
+        renderIntoMenu: function (processes) {
+            var megaPanel = document.getElementById('mega-servicios');
+            if (!megaPanel) { return; }
+
+            var grid = megaPanel.querySelector('#mega-services-grid');
+            if (!grid) { return; }
+
+            grid.innerHTML = '';
+
+            if (!processes || processes.length === 0) {
+                var empty = document.createElement('p');
+                empty.className = 'nav-category-item--empty';
+                empty.textContent = 'No hay servicios disponibles';
+                grid.appendChild(empty);
+                ProcessService._renderMobileServices([]);
+                return;
+            }
+
+            processes.forEach(function (process) {
+                var imgUrl = ProcessService._resolveImage(process.imageUrl);
+
+                var a = document.createElement('a');
+                a.href = '/servicios/' + encodeURIComponent(process.slug);
+                a.className = 'service-card service-card--image';
+                if (imgUrl) {
+                    a.setAttribute('data-bg', imgUrl);
+                }
+
+                // Image layer (zooms on hover via CSS)
+                var imgLayer = document.createElement('span');
+                imgLayer.className = 'service-card__bg';
+                if (imgUrl) {
+                    // CSS custom property is the correct way to pass a dynamic
+                    // URL into a CSS background-image rule
+                    imgLayer.style.setProperty('--svc-bg-url', 'url(' + imgUrl + ')');
+                }
+
+                // Overlay for readability
+                var overlay = document.createElement('span');
+                overlay.className = 'service-card__overlay';
+
+                // Content
+                var content = document.createElement('span');
+                content.className = 'service-card__content';
+
+                var title = document.createElement('span');
+                title.className = 'service-card__title';
+                title.textContent = process.nameEs || process.slug;
+
+                var arrow = document.createElement('span');
+                arrow.className = 'service-card__arrow';
+                arrow.setAttribute('aria-hidden', 'true');
+                arrow.innerHTML = '<i class="fas fa-arrow-right"></i>';
+
+                content.appendChild(title);
+                content.appendChild(arrow);
+
+                a.appendChild(imgLayer);
+                a.appendChild(overlay);
+                a.appendChild(content);
+                grid.appendChild(a);
+            });
+
+            ProcessService._renderMobileServices(processes);
+        },
+
+        /**
+         * Populates the mobile nav Servicios sub-list.
+         * @param {Array} processes
+         */
+        _renderMobileServices: function (processes) {
+            var mobileSubList = document.getElementById('mobile-services-sub');
+            if (!mobileSubList) { return; }
+
+            mobileSubList.innerHTML = '';
+
+            processes.forEach(function (process) {
+                var li = document.createElement('li');
+                var a = document.createElement('a');
+                a.href = '/servicios/' + encodeURIComponent(process.slug);
+                a.className = 'mobile-nav__sub-link';
+                a.textContent = process.nameEs || process.slug;
+                li.appendChild(a);
+                mobileSubList.appendChild(li);
+            });
+        },
+
+        /**
+         * Returns the servicios URL for a given process slug.
+         * @param {string} slug
+         * @returns {string}
+         */
+        buildServiceUrl: function (slug) {
+            return '/servicios/' + encodeURIComponent(slug);
         }
     };
 
@@ -753,6 +999,7 @@
         MegaMenuController: MegaMenuController,
         MobileMenuController: MobileMenuController,
         CategoryService: CategoryService,
+        ProcessService: ProcessService,
         LangSwitcherNav: LangSwitcherNav,
 
         /**

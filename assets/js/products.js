@@ -89,6 +89,12 @@ let pageSize        = 20;
 let _searchDebounce = null;
 let _loadedProducts = [];     // accumulated across "load more" pages
 let processSlugToId = {};    // maps API process slug → API GUID
+let _categorySlug   = null;  // active category slug from /tienda/:slug
+
+// Set by router before renderAll() is called
+window.setCategorySlug = function(slug) {
+    _categorySlug = slug || null;
+};
 
 /* ═══════════════════════════════════════════════
    SKELETON LOADING
@@ -115,6 +121,7 @@ async function fetchProducts(opts) {
     opts = opts || {};
     const params = { pageSize: pageSize };
     if (opts.search) params.search = opts.search;
+    if (_categorySlug) params.category = _categorySlug;
     params.page = opts.page || 1;
     return window.getProducts(params);
 }

@@ -44,12 +44,12 @@
 
                 <!-- Tienda (mega menu) -->
                 <li class="site-nav__item site-nav__item--has-mega" data-route="/tienda">
-                    <button class="site-nav__trigger"
+                    <a class="site-nav__link site-nav__link--trigger-label" href="/tienda" data-translate="nav_tienda">Tienda</a>
+                    <button class="site-nav__trigger site-nav__trigger--chevron-only"
                             aria-expanded="false"
                             aria-haspopup="true"
-                            aria-label="Tienda"
-                            data-translate-aria-label="nav_tienda">
-                        <span class="site-nav__trigger-label" data-translate="nav_tienda">Tienda</span>
+                            aria-label="Abrir menú Tienda"
+                            data-translate-aria-label="nav_tienda_menu">
                         <i class="fas fa-chevron-down site-nav__trigger-chevron" aria-hidden="true"></i>
                     </button>
                     <div class="mega-menu" id="mega-tienda" role="region" aria-label="Tienda">
@@ -96,43 +96,29 @@
 
                 <!-- Servicios (mega menu) -->
                 <li class="site-nav__item site-nav__item--has-mega" data-route="/servicios">
-                    <button class="site-nav__trigger"
+                    <a class="site-nav__link site-nav__link--trigger-label" href="/servicios" data-translate="nav_servicios">Servicios</a>
+                    <button class="site-nav__trigger site-nav__trigger--chevron-only"
                             aria-expanded="false"
                             aria-haspopup="true"
-                            aria-label="Servicios"
-                            data-translate-aria-label="nav_servicios">
-                        <span class="site-nav__trigger-label" data-translate="nav_servicios">Servicios</span>
+                            aria-label="Abrir menú Servicios"
+                            data-translate-aria-label="nav_servicios_menu">
                         <i class="fas fa-chevron-down site-nav__trigger-chevron" aria-hidden="true"></i>
                     </button>
                     <div class="mega-menu" id="mega-servicios" role="region" aria-label="Servicios">
                         <div class="mega-menu__inner mega-menu__inner--services">
                             <h3 class="mega-menu__heading" data-translate="nav_mega_services_heading"></h3>
-                            <div class="mega-menu__services-grid">
-                                <a class="service-card" href="/servicios?tab=impresion-3d">
-                                    <i class="fas fa-cube service-card__icon" aria-hidden="true"></i>
-                                    <h3 class="service-card__title" data-translate="nav_mega_svc_3d_title"></h3>
-                                    <p class="service-card__desc" data-translate="nav_mega_svc_3d_desc"></p>
-                                </a>
-                                <a class="service-card" href="/servicios?tab=impresion-uv">
-                                    <i class="fas fa-print service-card__icon" aria-hidden="true"></i>
-                                    <h3 class="service-card__title" data-translate="nav_mega_svc_uv_title"></h3>
-                                    <p class="service-card__desc" data-translate="nav_mega_svc_uv_desc"></p>
-                                </a>
-                                <a class="service-card" href="/servicios?tab=corte-laser">
-                                    <i class="fas fa-bolt service-card__icon" aria-hidden="true"></i>
-                                    <h3 class="service-card__title" data-translate="nav_mega_svc_laser_title"></h3>
-                                    <p class="service-card__desc" data-translate="nav_mega_svc_laser_desc"></p>
-                                </a>
-                                <a class="service-card" href="/servicios?tab=escaneo-3d">
-                                    <i class="fas fa-camera service-card__icon" aria-hidden="true"></i>
-                                    <h3 class="service-card__title" data-translate="nav_mega_svc_scan_title"></h3>
-                                    <p class="service-card__desc" data-translate="nav_mega_svc_scan_desc"></p>
-                                </a>
-                                <a class="service-card" href="/servicios?tab=impresion-fotografica">
-                                    <i class="fas fa-image service-card__icon" aria-hidden="true"></i>
-                                    <h3 class="service-card__title" data-translate="nav_mega_svc_photo_title"></h3>
-                                    <p class="service-card__desc" data-translate="nav_mega_svc_photo_desc"></p>
-                                </a>
+                            <div class="mega-menu__services-grid" id="mega-services-grid">
+                                <!-- Populated dynamically by ProcessService -->
+                            </div>
+                            <div class="mega-menu__loading mega-menu__loading--services" aria-live="polite">
+                                <div class="mega-menu__skeleton"></div>
+                                <div class="mega-menu__skeleton"></div>
+                                <div class="mega-menu__skeleton"></div>
+                                <div class="mega-menu__skeleton"></div>
+                            </div>
+                            <div class="mega-menu__error mega-menu__error--services" role="alert">
+                                <span data-translate="nav_mega_store_error"></span>
+                                <button class="mega-menu__retry-btn mega-menu__retry-btn--services" type="button" data-translate="nav_mega_store_retry"></button>
                             </div>
                         </div>
                     </div>
@@ -250,23 +236,23 @@
 
         <ul class="mobile-nav__menu" role="list">
             <li class="mobile-nav__item mobile-nav__item--has-sub">
-                <button class="mobile-nav__trigger" aria-expanded="false" aria-haspopup="true" data-translate-aria-label="nav_tienda">
-                    <span class="mobile-nav__trigger-label" data-translate="nav_tienda">Tienda</span>
-                    <i class="fas fa-chevron-down mobile-nav__trigger-chevron" aria-hidden="true"></i>
-                </button>
+                <div class="mobile-nav__item-row">
+                    <a class="mobile-nav__link mobile-nav__link--section" href="/tienda" data-translate="nav_tienda">Tienda</a>
+                    <button class="mobile-nav__trigger mobile-nav__trigger--chevron-only" aria-expanded="false" aria-haspopup="true" aria-label="Abrir categorías Tienda">
+                        <i class="fas fa-chevron-down mobile-nav__trigger-chevron" aria-hidden="true"></i>
+                    </button>
+                </div>
                 <ul class="mobile-nav__sub" role="list"></ul>
             </li>
             <li class="mobile-nav__item mobile-nav__item--has-sub">
-                <button class="mobile-nav__trigger" aria-expanded="false" aria-haspopup="true" data-translate-aria-label="nav_servicios">
-                    <span class="mobile-nav__trigger-label" data-translate="nav_servicios">Servicios</span>
-                    <i class="fas fa-chevron-down mobile-nav__trigger-chevron" aria-hidden="true"></i>
-                </button>
-                <ul class="mobile-nav__sub" role="list">
-                    <li><a class="mobile-nav__sub-link" href="/servicios?tab=impresion-3d" data-translate="nav_mega_svc_3d_title">Impresión 3D</a></li>
-                    <li><a class="mobile-nav__sub-link" href="/servicios?tab=impresion-uv" data-translate="nav_mega_svc_uv_title">Impresión UV</a></li>
-                    <li><a class="mobile-nav__sub-link" href="/servicios?tab=corte-laser" data-translate="nav_mega_svc_laser_title">Corte Láser</a></li>
-                    <li><a class="mobile-nav__sub-link" href="/servicios?tab=escaneo-3d" data-translate="nav_mega_svc_scan_title">Escaneo 3D</a></li>
-                    <li><a class="mobile-nav__sub-link" href="/servicios?tab=impresion-fotografica" data-translate="nav_mega_svc_photo_title">Impresión Fotográfica</a></li>
+                <div class="mobile-nav__item-row">
+                    <a class="mobile-nav__link mobile-nav__link--section" href="/servicios" data-translate="nav_servicios">Servicios</a>
+                    <button class="mobile-nav__trigger mobile-nav__trigger--chevron-only" aria-expanded="false" aria-haspopup="true" aria-label="Abrir categorías Servicios">
+                        <i class="fas fa-chevron-down mobile-nav__trigger-chevron" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <ul class="mobile-nav__sub" role="list" id="mobile-services-sub">
+                    <!-- Populated dynamically by ProcessService -->
                 </ul>
             </li>
             <li class="mobile-nav__item mobile-nav__item--has-sub">

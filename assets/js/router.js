@@ -53,11 +53,6 @@
                 _initWhatsApp();
                 _initShowcase();
                 _reApplyLang();
-                // Honour ?tab= query param
-                var tab = new URLSearchParams(window.location.search).get('tab');
-                if (tab && typeof window.activateShowcaseTab === 'function') {
-                    window.activateShowcaseTab(tab);
-                }
             }
         },
         {
@@ -101,16 +96,20 @@
     function _initCatalog() {
         // Reset catalog state so it re-fetches for the new DOM
         window._catalogInited = false;
+
+        // Extract category slug from path (/tienda/slug) or legacy ?category= param
+        var pathParts = window.location.pathname.split('/');
+        var slugFromPath = (pathParts[1] === 'tienda' && pathParts[2]) ? pathParts[2] : null;
+        var slugFromQuery = new URLSearchParams(window.location.search).get('category');
+        var categorySlug = slugFromPath || slugFromQuery || null;
+
+        // Pass slug to catalog engine before rendering
+        if (typeof window.setCategorySlug === 'function') {
+            window.setCategorySlug(categorySlug);
+        }
+
         if (typeof window.renderAll === 'function') {
             window.renderAll();
-        }
-        // Honour ?category= query param
-        var cat = new URLSearchParams(window.location.search).get('category');
-        if (cat && typeof window.setActiveCategory === 'function') {
-            // Give renderAll a moment to stamp the DOM before filtering
-            setTimeout(function () {
-                window.setActiveCategory(cat);
-            }, 150);
         }
     }
 
@@ -118,6 +117,16 @@
         // main.js exposes window.initShowcase after our patch
         if (typeof window.initShowcase === 'function') {
             window.initShowcase();
+        }
+        // Extract process slug from path (/servicios/slug) or legacy ?tab= param
+        var pathParts = window.location.pathname.split('/');
+        var slugFromPath = (pathParts[1] === 'servicios' && pathParts[2]) ? pathParts[2] : null;
+        var tabFromQuery = new URLSearchParams(window.location.search).get('tab');
+        var activeSlug = slugFromPath || tabFromQuery || null;
+        if (activeSlug && typeof window.activateShowcaseTab === 'function') {
+            setTimeout(function () {
+                window.activateShowcaseTab(activeSlug);
+            }, 80);
         }
     }
 
@@ -136,15 +145,29 @@
 
     /**
      * Finds the route object for a given pathname.
+     * Supports exact matches and the /tienda/:slug pattern.
      * Falls back to the '/' route if no match is found.
      * @param {string} pathname
      * @returns {Object}
      */
     function _matchRoute(pathname) {
         var p = pathname.replace(/\/$/, '') || '/';
+
+        // Exact match first
         for (var i = 0; i < routes.length; i++) {
             if (routes[i].path === p) { return routes[i]; }
         }
+
+        // /tienda/:slug — treat as tienda route with a category slug
+        if (/^\/tienda\/[^/]+$/.test(p)) {
+            return routes[1]; // tienda route (index 1)
+        }
+
+        // /servicios/:slug — treat as servicios route with a process slug
+        if (/^\/servicios\/[^/]+$/.test(p)) {
+            return routes[2]; // servicios route (index 2)
+        }
+
         return routes[0]; // default to home
     }
 
@@ -211,13 +234,19 @@
     /* ── Active nav link ────────────────────────────────────────────────── */
 
     function _updateActiveNavLinks(path) {
+        // Normalise: /tienda/anything counts as /tienda for active state
+        // and /servicios/anything counts as /servicios
+        var activePath = /^\/tienda(\/|$)/.test(path) ? '/tienda'
+                       : /^\/servicios(\/|$)/.test(path) ? '/servicios'
+                       : path;
+
         // Plain links with data-route
         var allLinks = document.querySelectorAll(
             '.site-nav__link[data-route], .mobile-nav__link[data-route]'
         );
         allLinks.forEach(function (link) {
             var linkPath = link.getAttribute('data-route');
-            if (linkPath === path) {
+            if (linkPath === activePath) {
                 link.classList.add('is-active');
                 link.setAttribute('aria-current', 'page');
             } else {
@@ -230,7 +259,7 @@
         var megaItems = document.querySelectorAll('.site-nav__item[data-route]');
         megaItems.forEach(function (li) {
             var liPath = li.getAttribute('data-route');
-            if (liPath === path) {
+            if (liPath === activePath) {
                 li.classList.add('is-active');
             } else {
                 li.classList.remove('is-active');
