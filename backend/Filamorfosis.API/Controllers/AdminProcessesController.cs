@@ -15,18 +15,16 @@ namespace Filamorfosis.API.Controllers;
 [RequireMfa]
 public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculatorService pricing) : ControllerBase
 {
-    // GET /api/v1/admin/processes
+    // GET /api/v1/admin/processes — returns ALL processes (active + inactive)
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
         var processes = await db.Processes
             .Include(c => c.Attributes)
-            .Where(c => c.IsActive)
             .ToListAsync();
 
         var processIds = processes.Select(c => c.Id).ToList();
 
-        // Load cost parameters for all processes by ID
         var costParams = await db.ProcessesCosts
             .Include(p => p.Process)
             .Where(p => processIds.Contains(p.ProcessId))
@@ -53,6 +51,7 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
             Slug = c.Slug,
             NameEs = c.NameEs,
             ImageUrl = c.ImageUrl,
+            IsActive = c.IsActive,
             ProductCount = db.Products.Count(p => p.ProcessId == c.Id && p.IsActive),
             Attributes = c.Attributes.Select(a => new ProcessAttributeDto
             {
@@ -101,6 +100,7 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
         if (req.NameEs is not null) process.NameEs = req.NameEs;
         if (req.Slug is not null) process.Slug = req.Slug;
         if (req.ImageUrl is not null) process.ImageUrl = req.ImageUrl;
+        if (req.IsActive.HasValue) process.IsActive = req.IsActive.Value;
 
         await db.SaveChangesAsync();
 
@@ -110,6 +110,7 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
             Slug = process.Slug,
             NameEs = process.NameEs,
             ImageUrl = process.ImageUrl,
+            IsActive = process.IsActive,
             ProductCount = await db.Products.CountAsync(p => p.ProcessId == process.Id && p.IsActive),
             Attributes = process.Attributes.Select(a => new ProcessAttributeDto
             {
@@ -120,7 +121,7 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
         });
     }
 
-    // DELETE /api/v1/admin/processes/{id}
+    // DELETE /api/v1/admin/processes/{id} — hard deletes the process
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -141,10 +142,10 @@ public class AdminProcessesController(FilamorfosisDbContext db, IPricingCalculat
             });
         }
 
-        process.IsActive = false;
+        db.Processes.Remove(process);
         await db.SaveChangesAsync();
 
-        return Ok(new { id = process.Id, isActive = false });
+        return Ok(new { id = process.Id, deleted = true });
     }
 
     // POST /api/v1/admin/processes/{id}/attributes

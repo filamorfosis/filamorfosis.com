@@ -27,7 +27,7 @@
 
 /* ── .site-nav shell ───────────────────────────────────────────────────────── */
 .site-nav {
-  --nav-height: 72px; /* updated to 60px by .site-nav--scrolled */
+  --nav-height: 60px; /* updated to 60px by .site-nav--scrolled */
   position: fixed;
   top: var(--promo-banner-height, 0px); /* sit below the promo banner */
   left: 0;
@@ -48,7 +48,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 72px;
+  height: 60px;
   max-width: 1440px;
   margin: 0 auto;
   padding: 0 var(--space-xl);
@@ -447,12 +447,12 @@
  * parent .site-nav__item via MegaMenuController — no inline styles ever.
  */
 .mega-menu {
-  /* Positioning — full-width bar anchored below the nav bar.
-   * Uses position:fixed so it breaks out of the <li> stacking context
-   * and always spans the full viewport width regardless of where the
-   * trigger <li> sits in the flex row. */
+  /* Positioning — full-width bar anchored to the nav's actual bottom edge.
+   * --mega-top is set in JS via getBoundingClientRect() so it tracks the
+   * nav height precisely, even during CSS height transitions. Falls back to
+   * the CSS-variable calculation for the initial render before JS runs. */
   position: fixed;
-  top: calc(var(--promo-banner-height, 0px) + var(--nav-height, 72px));
+  /* top: var(--mega-top, calc(var(--promo-banner-height, 0px) + var(--nav-height, 60px))); */
   left: 0;
   width: 100%;
 
@@ -520,7 +520,189 @@
   gap: var(--space-md);
 }
 
-/* ── .service-card — individual service card ─────────────────────────────── */
+/* ── .service-sidebar — REPLACED by .service-sticky-nav on services page ─── */
+/*
+ * The old .service-sidebar with emoji icon buttons is superseded by the
+ * dynamic sticky nav bar below. These rules are kept for any legacy reference
+ * but the element is no longer rendered in the template.
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SERVICE STICKY NAV — dynamic process cards docked below the site-nav
+   ═══════════════════════════════════════════════════════════════════════════
+
+ * Rendered only on the /servicios/* pages. Populated by
+ * ProcessService.renderIntoStickyNav() after the API fetch resolves.
+ *
+ * Stacks directly below the site-nav (top = nav height + promo banner).
+ * Each card is a compact image card with zoom-on-hover, matching the
+ * megamenu service cards but shorter.
+ */
+
+.service-sticky-nav {
+  position: sticky;
+  top: calc(var(--promo-banner-height, 0px) + var(--nav-height, 72px));
+  z-index: calc(var(--z-navbar) - 3); /* below mega menu, above page content */
+  width: 100%;
+  background: rgba(10, 14, 26, 0.97);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  /* Gradient accent line on top edge */
+  box-shadow:
+    0 1px 0 0 rgba(168, 85, 247, 0.25),
+    0 4px 24px rgba(0, 0, 0, 0.4);
+}
+.service-sticky-nav__inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: var(--space-sm) var(--space-xl);
+  overflow-x: auto;
+  /* Hide scrollbar but keep scrollability */
+  scrollbar-width: none;
+}
+
+.service-sticky-nav__inner::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Card row ─────────────────────────────────────────────────────────────── */
+.service-sticky-nav__cards {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: stretch;
+  min-width: max-content; /* prevents wrapping; row scrolls horizontally */
+}
+
+/* ── Individual sticky nav card ───────────────────────────────────────────── */
+/*
+ * Compact version of .service-card--image.
+ * Fixed height, wider aspect ratio, label always visible at bottom.
+ */
+.svc-nav-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  width: 160px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.svc-nav-card:hover {
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
+}
+
+.svc-nav-card:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+  outline-offset: 2px;
+}
+
+/* Active state */
+.svc-nav-card--active {
+  border-color: rgba(168, 85, 247, 0.8);
+  box-shadow:
+    0 0 0 2px rgba(168, 85, 247, 0.3),
+    0 0 16px rgba(168, 85, 247, 0.25);
+}
+
+/* Background image layer */
+.svc-nav-card__bg {
+  position: absolute;
+  inset: 0;
+  background-image: var(--svc-bg-url, none);
+  background-size: cover;
+  background-position: center;
+  background-color: rgba(139, 92, 246, 0.2);
+  transition: transform 350ms ease;
+  will-change: transform;
+}
+
+.svc-nav-card:hover .svc-nav-card__bg,
+.svc-nav-card--active .svc-nav-card__bg {
+  transform: scale(1.1);
+}
+
+/* Gradient overlay */
+.svc-nav-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(10, 14, 26, 0.85) 0%,
+    rgba(10, 14, 26, 0.3) 60%,
+    transparent 100%
+  );
+  transition: background 250ms ease;
+}
+
+.svc-nav-card--active .svc-nav-card__overlay {
+  background: linear-gradient(
+    to top,
+    rgba(80, 20, 120, 0.75) 0%,
+    rgba(10, 14, 26, 0.2) 60%,
+    transparent 100%
+  );
+}
+
+/* Label */
+.svc-nav-card__label {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  transition: color 200ms ease;
+}
+
+.svc-nav-card--active .svc-nav-card__label {
+  background: var(--color-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Active indicator bar at bottom */
+.svc-nav-card--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-gradient-brand);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .service-sticky-nav__inner {
+    padding: var(--space-xs) var(--space-base);
+  }
+
+  .svc-nav-card {
+    width: 120px;
+    height: 60px;
+  }
+}
+
+
 .service-card {
   display: flex;
   flex-direction: column;

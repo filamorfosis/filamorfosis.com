@@ -118,16 +118,54 @@
         if (typeof window.initShowcase === 'function') {
             window.initShowcase();
         }
+
+        // Populate the sticky service nav bar from cached processes (or fetch)
+        if (window.FilamorfosisNav && window.FilamorfosisNav.ProcessService) {
+            var ps = window.FilamorfosisNav.ProcessService;
+            if (ps._cache !== null) {
+                // Already cached — render immediately
+                ps.renderIntoStickyNav(ps._cache);
+            } else {
+                // Fetch and render (also populates megamenu cache for later)
+                ps.load();
+            }
+        }
+
         // Extract process slug from path (/servicios/slug) or legacy ?tab= param
         var pathParts = window.location.pathname.split('/');
         var slugFromPath = (pathParts[1] === 'servicios' && pathParts[2]) ? pathParts[2] : null;
         var tabFromQuery = new URLSearchParams(window.location.search).get('tab');
         var activeSlug = slugFromPath || tabFromQuery || null;
-        if (activeSlug && typeof window.activateShowcaseTab === 'function') {
-            setTimeout(function () {
-                window.activateShowcaseTab(activeSlug);
-            }, 80);
+
+        if (activeSlug) {
+            // Try to resolve slug → tab ID via data-process-slug on panels
+            var tabId = _resolveSlugToTab(activeSlug) || activeSlug;
+            if (typeof window.activateShowcaseTab === 'function') {
+                setTimeout(function () {
+                    window.activateShowcaseTab(tabId);
+                    // Also update sticky card active state
+                    if (window.FilamorfosisNav && window.FilamorfosisNav.ProcessService) {
+                        window.FilamorfosisNav.ProcessService._activateStickyCard(activeSlug, tabId);
+                    }
+                }, 80);
+            }
         }
+    }
+
+    /**
+     * Maps a process slug to a showcase panel tab ID using data-process-slug
+     * attributes on the panels in the current DOM.
+     * @param {string} slug
+     * @returns {string|null}
+     */
+    function _resolveSlugToTab(slug) {
+        var panels = document.querySelectorAll('.showcase-panel[data-process-slug]');
+        for (var i = 0; i < panels.length; i++) {
+            if (panels[i].getAttribute('data-process-slug') === slug) {
+                return panels[i].id.replace('showcase-', '');
+            }
+        }
+        return null;
     }
 
     /**

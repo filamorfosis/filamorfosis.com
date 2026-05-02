@@ -581,9 +581,6 @@
             t.classList.remove('active');
             t.setAttribute('aria-selected', 'false');
         });
-        document.querySelectorAll('.service-sidebar__item').forEach(function(t) {
-            t.classList.remove('active');
-        });
         document.querySelectorAll('.showcase-panel').forEach(function(p) {
             p.classList.remove('active');
         });
@@ -594,43 +591,15 @@
         var panel = document.getElementById('showcase-' + target);
         if (panel) panel.classList.add('active');
 
-        var stickyLabel = document.getElementById('showcaseStickyLabel');
-        var stickyBtn   = document.getElementById('showcaseStickyBtn');
-        var activeTab   = document.querySelector('.showcase-tab[data-tab="' + target + '"]');
-        if (stickyLabel && activeTab) {
-            var labelEl = activeTab.querySelector('.showcase-tab-label');
-            stickyLabel.textContent = labelEl ? labelEl.textContent : '';
-        }
-        if (stickyBtn) {
-            stickyBtn.setAttribute('onclick', "event.preventDefault();_navToCat('" + target + "');");
-        }
-
-        var catBtn = document.querySelector('.service-sidebar__catalog');
-        if (catBtn) catBtn.setAttribute('onclick', "_navToCat('" + target + "')");
-
-        var sidebarIcon = document.getElementById('sidebarActiveIcon');
-        var sidebarName = document.getElementById('sidebarActiveName');
-        var sidebarCta  = document.getElementById('sidebarActiveCta');
-        var sidebarBtn  = document.querySelector('.service-sidebar__item[data-tab="' + target + '"]');
-        if (sidebarIcon && sidebarBtn) sidebarIcon.textContent = sidebarBtn.textContent.trim();
-        if (sidebarName && sidebarBtn) {
-            var labelKey = sidebarBtn.getAttribute('data-label-key');
-            var lang = window.currentLang || 'es';
-            var tl = window.translations && window.translations[lang];
-            var label = (tl && labelKey && tl[labelKey]) ? tl[labelKey] : (sidebarBtn.getAttribute('title') || '');
-            sidebarName.textContent = label;
-        }
-        if (sidebarCta) {
-            if (target === 'scan') {
-                var contactText = (window.translations && window.translations[window.currentLang || 'es'] && window.translations[window.currentLang || 'es']['wa_btn']) || 'Contáctanos →';
-                sidebarCta.textContent = contactText;
-                sidebarCta.setAttribute('onclick', "var m=document.getElementById('waModal');if(m){m.style.display='flex';var msg=document.getElementById('waMessage');if(msg)msg.value='Hola, me interesa el servicio de Escaneo 3D';}");
-            } else {
-                var viewText = (window.translations && window.translations[window.currentLang || 'es'] && window.translations[window.currentLang || 'es']['service.viewProducts']) || 'Ver productos →';
-                sidebarCta.textContent = viewText;
-                sidebarCta.setAttribute('onclick', "event.preventDefault();_navToCat('" + target + "');");
-            }
-        }
+        // Sync sticky nav card active state
+        var activePanel = document.getElementById('showcase-' + target);
+        var activeSlug = activePanel ? activePanel.getAttribute('data-process-slug') : null;
+        document.querySelectorAll('.svc-nav-card').forEach(function(card) {
+            var isActive = activeSlug
+                ? card.getAttribute('data-slug') === activeSlug
+                : card.getAttribute('data-tab') === target;
+            card.classList.toggle('svc-nav-card--active', isActive);
+        });
     }
 
     // Expose for router.js to call after servicios template is stamped

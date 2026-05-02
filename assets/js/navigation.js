@@ -55,6 +55,14 @@
             // Close any other open menu first
             MegaMenuController.closeAll();
 
+            // Snap --mega-top to the nav's current actual bottom before opening
+            // so the panel never appears offset during a height transition.
+            var siteNav = document.querySelector('.site-nav');
+            if (siteNav) {
+                var navBottom = siteNav.getBoundingClientRect().bottom;
+                document.documentElement.style.setProperty('--mega-top', navBottom + 'px');
+            }
+
             item.classList.add('is-open');
             triggerEl.setAttribute('aria-expanded', 'true');
             _state.activeMenu = triggerEl;
@@ -280,6 +288,23 @@
                     MegaMenuController.closeAll();
                 });
             }
+
+            /* ── Any link click inside a mega panel closes all menus ─────
+             * Uses event delegation on the nav so it catches both static
+             * links and links injected dynamically (e.g. category cards).  */
+            nav.addEventListener('click', function (e) {
+                var link = e.target.closest('.mega-menu a[href]');
+                if (link) {
+                    MegaMenuController.closeAll();
+                }
+            });
+
+            /* ── Link click inside any mega panel closes all menus ────── */
+            nav.querySelectorAll('.mega-menu a[href]').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    MegaMenuController.closeAll();
+                });
+            });
         }
     };
 
@@ -810,7 +835,7 @@
          * Builds and inserts service cards into #mega-services-grid.
          * Each card shows the process image as background with a zoom-on-hover
          * effect, the process name, and links to /servicios/:slug.
-         * Also populates the mobile sub-list.
+         * Also populates the mobile sub-list and the sticky nav bar if present.
          * @param {Array} processes
          */
         renderIntoMenu: function (processes) {
@@ -828,55 +853,132 @@
                 empty.textContent = 'No hay servicios disponibles';
                 grid.appendChild(empty);
                 ProcessService._renderMobileServices([]);
+                ProcessService.renderIntoStickyNav([]);
                 return;
             }
 
             processes.forEach(function (process) {
-                var imgUrl = ProcessService._resolveImage(process.imageUrl);
-
-                var a = document.createElement('a');
-                a.href = '/servicios/' + encodeURIComponent(process.slug);
-                a.className = 'service-card service-card--image';
-                if (imgUrl) {
-                    a.setAttribute('data-bg', imgUrl);
-                }
-
-                // Image layer (zooms on hover via CSS)
-                var imgLayer = document.createElement('span');
-                imgLayer.className = 'service-card__bg';
-                if (imgUrl) {
-                    // CSS custom property is the correct way to pass a dynamic
-                    // URL into a CSS background-image rule
-                    imgLayer.style.setProperty('--svc-bg-url', 'url(' + imgUrl + ')');
-                }
-
-                // Overlay for readability
-                var overlay = document.createElement('span');
-                overlay.className = 'service-card__overlay';
-
-                // Content
-                var content = document.createElement('span');
-                content.className = 'service-card__content';
-
-                var title = document.createElement('span');
-                title.className = 'service-card__title';
-                title.textContent = process.nameEs || process.slug;
-
-                var arrow = document.createElement('span');
-                arrow.className = 'service-card__arrow';
-                arrow.setAttribute('aria-hidden', 'true');
-                arrow.innerHTML = '<i class="fas fa-arrow-right"></i>';
-
-                content.appendChild(title);
-                content.appendChild(arrow);
-
-                a.appendChild(imgLayer);
-                a.appendChild(overlay);
-                a.appendChild(content);
-                grid.appendChild(a);
+                grid.appendChild(ProcessService._buildCard(process, 'service-card service-card--image'));
             });
 
             ProcessService._renderMobileServices(processes);
+            ProcessService.renderIntoStickyNav(processes);
+        },
+
+        /**
+         * Builds a single service image card element.
+         * @param {Object} process
+         * @param {string} className
+         * @returns {HTMLElement}
+         */
+        _buildCard: function (process, className) {
+            var imgUrl = ProcessService._resolveImage(process.imageUrl);
+
+            var a = document.createElement('a');
+            a.href = '/servicios/' + encodeURIComponent(process.slug);
+            a.className = className;
+
+            // Image layer (zooms on hover via CSS)
+            var imgLayer = document.createElement('span');
+            imgLayer.className = 'service-card__bg';
+            if (imgUrl) {
+                imgLayer.style.setProperty('--svc-bg-url', 'url(' + imgUrl + ')');
+            }
+
+            // Overlay for readability
+            var overlay = document.createElement('span');
+            overlay.className = 'service-card__overlay';
+
+            // Content
+            var content = document.createElement('span');
+            content.className = 'service-card__content';
+
+            var title = document.createElement('span');
+            title.className = 'service-card__title';
+            title.textContent = process.nameEs || process.slug;
+
+            var arrow = document.createElement('span');
+            arrow.className = 'service-card__arrow';
+            arrow.setAttribute('aria-hidden', 'true');
+            arrow.innerHTML = '<i class="fas fa-arrow-right"></i>';
+
+            content.appendChild(title);
+            content.appendChild(arrow);
+
+            a.appendChild(imgLayer);
+            a.appendChild(overlay);
+            a.appendChild(content);
+
+            return a;
+        },
+
+        /**
+         * Renders compact image cards into the sticky service nav bar
+         * (#serviceStickyCards) on the services page.
+         * Cards use data-tab to hook into _activateShowcaseTab.
+         * @param {Array} processes
+         */
+        renderIntoStickyNav: function (processes) {
+            var container = document.getElementById('serviceStickyCards');
+            if (!container) { return; }
+
+            container.innerHTML = '';
+
+            if (!processes || processes.length === 0) { return; }
+
+            // Determine the currently active slug from the URL
+            var pathParts = window.location.pathname.split('/');
+            var activeSlug = (pathParts[1] === 'servicios' && pathParts[2]) ? pathParts[2] : null;
+
+            processes.forEach(function (process) {
+                var imgUrl   = ProcessService._resolveImage(process.imageUrl);
+                var isActive = activeSlug ? (process.slug === activeSlug) : false;
+
+                var a = document.createElement('a');
+                a.href = '/servicios/' + encodeURIComponent(process.slug);
+                a.className = 'svc-nav-card' + (isActive ? ' svc-nav-card--active' : '');
+                a.setAttribute('data-tab', process.slug);
+                a.setAttribute('data-slug', process.slug);
+
+                var bg = document.createElement('span');
+                bg.className = 'svc-nav-card__bg';
+                if (imgUrl) {
+                    bg.style.setProperty('--svc-bg-url', 'url(' + imgUrl + ')');
+                }
+
+                var overlay = document.createElement('span');
+                overlay.className = 'svc-nav-card__overlay';
+
+                var label = document.createElement('span');
+                label.className = 'svc-nav-card__label';
+                label.textContent = process.nameEs || process.slug;
+
+                a.appendChild(bg);
+                a.appendChild(overlay);
+                a.appendChild(label);
+
+                // Click: activate panel + update URL without full navigation
+                a.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.history.pushState({}, '', '/servicios/' + encodeURIComponent(process.slug));
+                    ProcessService._activateStickyCard(process.slug);
+                    if (typeof window.activateShowcaseTab === 'function') {
+                        window.activateShowcaseTab(process.slug);
+                    }
+                });
+
+                container.appendChild(a);
+            });
+        },
+
+        /**
+         * Updates the active state on sticky nav cards.
+         * @param {string} activeSlug
+         */
+        _activateStickyCard: function (activeSlug) {
+            document.querySelectorAll('.svc-nav-card').forEach(function (card) {
+                card.classList.toggle('svc-nav-card--active', card.getAttribute('data-slug') === activeSlug);
+            });
         },
 
         /**
@@ -977,19 +1079,40 @@
 
     /* ─────────────────────────────────────────────────────────────────────
        Scroll behavior
-       Toggles .site-nav--scrolled on the nav bar when window.scrollY > 50.
-       Uses a passive listener for 60fps performance (Requirement 1.6, 9.6).
+       - Toggles .site-nav--scrolled when window.scrollY > 50.
+       - Closes any open mega menu on scroll (prevents gap between nav and
+         panel during the nav height transition).
+       - Keeps mega menu top in sync with the nav's actual rendered bottom
+         by updating --mega-top on every scroll frame.
+       Uses a passive listener for 60fps performance.
     ───────────────────────────────────────────────────────────────────── */
     function _initScrollBehavior() {
         var siteNav = document.querySelector('.site-nav');
         if (!siteNav) { return; }
 
-        window.addEventListener('scroll', function () {
-            siteNav.classList.toggle('site-nav--scrolled', window.scrollY > 50);
-        }, { passive: true });
+        function _updateNavState() {
+            var wasScrolled = siteNav.classList.contains('site-nav--scrolled');
+            var isScrolled  = window.scrollY > 50;
 
-        // Apply immediately in case the page is already scrolled on load
-        siteNav.classList.toggle('site-nav--scrolled', window.scrollY > 50);
+            siteNav.classList.toggle('site-nav--scrolled', isScrolled);
+
+            // Close any open mega menu when the user starts scrolling.
+            // This prevents the gap that appears while the nav height
+            // transitions from 72px → 60px (CSS vars don't interpolate).
+            if (!wasScrolled && isScrolled) {
+                MegaMenuController.closeAll();
+            }
+
+            // Keep the mega menu top anchored to the nav's actual bottom edge.
+            // Using getBoundingClientRect() is immune to CSS transition lag.
+            var navBottom = siteNav.getBoundingClientRect().bottom;
+            document.documentElement.style.setProperty('--mega-top', navBottom + 'px');
+        }
+
+        window.addEventListener('scroll', _updateNavState, { passive: true });
+
+        // Apply immediately on load
+        _updateNavState();
     }
 
     /* ─────────────────────────────────────────────────────────────────────

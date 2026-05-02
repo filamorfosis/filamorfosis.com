@@ -1118,3 +1118,39 @@ span.req {
   font-weight: 600;
   margin-left: 4px;
 }
+
+/* ── Admin toggle switch ─────────────────────────────────────────────────── */
+.admin-toggle__track {
+  display: inline-flex;
+  align-items: center;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  position: relative;
+  transition: background 200ms ease, border-color 200ms ease;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.admin-toggle__thumb {
+  position: absolute;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #64748b;
+  transition: transform 200ms ease, background 200ms ease;
+}
+
+/* Checked state — driven by JS adding .is-on to the track */
+.admin-toggle__track.is-on {
+  background: rgba(139,92,246,0.35);
+  border-color: rgba(139,92,246,0.6);
+}
+
+.admin-toggle__track.is-on .admin-toggle__thumb {
+  transform: translateX(20px);
+  background: #a78bfa;
+}

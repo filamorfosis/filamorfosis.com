@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="es">
 <head>
+    <base href="/">
     <title>Filamorfosis® | Impresión 3D, UV y Láser en México</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -755,28 +756,18 @@
     </section>
 
     <section id="services" class="showcase-section">
-        <div class="service-sidebar" id="serviceSidebar">
-            <div class="service-sidebar__header">
-                <span class="service-sidebar__title" data-translate="services_title">Servicios a tu Medida</span>
+
+        <!-- Sticky service nav bar — populated dynamically by ProcessService -->
+        <div class="service-sticky-nav" id="serviceStickyNav" role="navigation" aria-label="Servicios">
+            <div class="service-sticky-nav__inner">
+                <div class="service-sticky-nav__cards" id="serviceStickyCards">
+                    <!-- Cards injected by ProcessService.renderIntoStickyNav() -->
+                </div>
             </div>
-            <div class="service-sidebar__icons">
-                <button class="service-sidebar__item active" data-tab="engrave" data-label-key="gallery_filter_engrave" title="Grabado Láser">✒</button>
-                <button class="service-sidebar__item" data-tab="uv" data-label-key="gallery_filter_uv" title="Impresión UV">🎨</button>
-                <button class="service-sidebar__item" data-tab="3d" data-label-key="gallery_filter_3d" title="Impresión 3D">🌀</button>
-                <button class="service-sidebar__item" data-tab="laser" data-label-key="gallery_filter_laser" title="Corte Láser">✂</button>
-                <button class="service-sidebar__item" data-tab="scan" data-label-key="gallery_filter_scan" title="Escaneo 3D">🗿</button>
-                <button class="service-sidebar__item" data-tab="photo" data-label-key="gallery_filter_photo" title="Fotografía">🖨️</button>
-            </div>
-            <div class="service-sidebar__active-label" id="sidebarActiveLabel">
-                <span class="service-sidebar__active-icon" id="sidebarActiveIcon">🔆</span>
-                <span class="service-sidebar__active-name" id="sidebarActiveName">Grabado Láser</span>
-                <a href="/tienda" class="service-sidebar__active-cta" id="sidebarActiveCta" data-t="service.viewProducts">Ver productos →</a>
-            </div>
-            <span class="service-sidebar__subtitle" data-translate="services_subtitle">Productos listos para personalizar — o diseñamos juntos algo único para ti.</span>
         </div>
 
-        <!-- Laser Engraving -->
-        <div class="showcase-panel active" id="showcase-engrave" role="tabpanel">
+        <!-- UV Laser Engraving -->
+        <div class="showcase-panel active" id="showcase-uv-laser" data-process-slug="uv-laser" role="tabpanel">
             <div class="showcase-service-info">
                 <div class="showcase-service-text">
                     <h3 data-translate="service_engrave_title">Grabado Láser</h3>
@@ -805,7 +796,7 @@
         </div>
 
         <!-- UV Printing -->
-        <div class="showcase-panel" id="showcase-uv" role="tabpanel">
+        <div class="showcase-panel" id="showcase-uv-printing" data-process-slug="uv-printing" role="tabpanel">
             <div class="showcase-service-info">
                 <div class="showcase-service-text">
                     <h3 data-translate="service_uv_title">Impresión UV</h3>
@@ -839,7 +830,7 @@
         </div>
 
         <!-- 3D Printing -->
-        <div class="showcase-panel" id="showcase-3d" role="tabpanel">
+        <div class="showcase-panel" id="showcase-3d-printing" data-process-slug="3d-printing" role="tabpanel">
             <div class="showcase-service-info">
                 <div class="showcase-service-text">
                     <h3 data-translate="service_3d_title">Impresión 3D</h3>
@@ -871,7 +862,7 @@
         </div>
 
         <!-- Laser Cutting -->
-        <div class="showcase-panel" id="showcase-laser" role="tabpanel">
+        <div class="showcase-panel" id="showcase-laser-cutting" data-process-slug="laser-cutting" role="tabpanel">
             <div class="showcase-service-info">
                 <div class="showcase-service-text">
                     <h3 data-translate="service_laser_title">Corte Láser</h3>
@@ -902,7 +893,7 @@
         </div>
 
         <!-- 3D Scanning -->
-        <div class="showcase-panel" id="showcase-scan" role="tabpanel">
+        <div class="showcase-panel" id="showcase-3d-scanning" data-process-slug="3d-scanning" role="tabpanel">
             <div class="showcase-service-info">
                 <div class="showcase-service-text">
                     <h3 data-translate="service_scan_title">Escaneo 3D</h3>
@@ -931,7 +922,7 @@
         </div>
 
         <!-- Photo Printing -->
-        <div class="showcase-panel" id="showcase-photo" role="tabpanel">
+        <div class="showcase-panel" id="showcase-photo-printing" data-process-slug="photo-printing" role="tabpanel">
             <div class="showcase-service-info">
                 <div class="showcase-service-text">
                     <h3 data-translate="service_photo_title">Impresión Fotográfica</h3>

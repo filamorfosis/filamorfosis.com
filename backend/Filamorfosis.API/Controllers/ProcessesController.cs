@@ -13,12 +13,14 @@ public class ProcessesController(FilamorfosisDbContext db) : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var processes = await db.Processes
+            .Where(c => c.IsActive)
             .Select(c => new ProcessDto
             {
                 Id = c.Id,
                 Slug = c.Slug,
                 NameEs = c.NameEs,
                 ImageUrl = c.ImageUrl,
+                IsActive = c.IsActive,
                 ProductCount = c.Products.Count(p => p.IsActive)
             })
             .ToListAsync();

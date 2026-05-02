@@ -345,6 +345,7 @@
               <tr>
                 <th>Slug</th>
                 <th>Nombre</th>
+                <th>Estado</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -724,6 +725,17 @@
             <label for="proc-modal-imageUrl">Image URL <span style="color:#475569;font-weight:400;text-transform:none">(opcional)</span></label>
             <input type="text" id="proc-modal-imageUrl" placeholder="https://cdn.filamorfosis.com/...">
           </div>
+        </div>
+
+        <!-- Active toggle — only shown when editing an existing process -->
+        <div id="proc-modal-active-row" style="display:none;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);margin-top:4px">
+          <label class="admin-toggle" style="margin:0;cursor:pointer;display:flex;align-items:center;gap:10px">
+            <span class="admin-toggle__track" id="proc-modal-toggle-track">
+              <span class="admin-toggle__thumb"></span>
+            </span>
+            <span id="proc-modal-active-label" style="font-size:1rem;font-weight:600;color:#e2e8f0">Activo</span>
+          </label>
+          <span id="proc-modal-active-hint" style="font-size:1rem;color:#64748b">El servicio aparece en la tienda y en el menú de servicios.</span>
         </div>
 
         <!-- Cost Parameters Section -->

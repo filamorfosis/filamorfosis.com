@@ -70,14 +70,21 @@
     if (!tbody) return;
 
     if (!_processes.length) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#64748b;padding:24px">Sin procesos</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;padding:24px">Sin procesos</td></tr>';
       return;
     }
 
     tbody.innerHTML = _processes.map(proc => {
-      return '<tr id="proc-row-' + esc(proc.id) + '">' +
+      const activeBadge = proc.isActive
+        ? '<span class="badge badge-green" style="font-size:1rem">Activo</span>'
+        : '<span class="badge badge-red" style="font-size:1rem">Inactivo</span>';
+
+      const rowStyle = proc.isActive ? '' : 'opacity:0.55';
+
+      return '<tr id="proc-row-' + esc(proc.id) + '" style="' + rowStyle + '">' +
         '<td style="font-family:monospace;color:#94a3b8">' + esc(proc.slug) + '</td>' +
         '<td style="font-weight:600">' + esc(proc.nameEs) + '</td>' +
+        '<td>' + activeBadge + '</td>' +
         '<td style="white-space:nowrap">' +
           '<button class="btn-admin btn-admin-secondary btn-admin-sm"' +
                   ' onclick="AdminProcesses.openEditProcessModal(\'' + esc(proc.id) + '\')"' +
@@ -116,11 +123,13 @@
     _clearProcessForm();
     const title = document.getElementById('process-modal-title');
     if (title) title.textContent = 'Nuevo Proceso';
-    
-    // Hide cost parameters section for new processes
+
+    // Hide active toggle and cost parameters section for new processes
+    const activeRow = document.getElementById('proc-modal-active-row');
+    if (activeRow) activeRow.style.display = 'none';
     const section = document.getElementById('proc-modal-cost-section');
     if (section) section.style.display = 'none';
-    
+
     const modal = _getProcessModal();
     if (modal) modal.style.display = 'flex';
   }
@@ -137,6 +146,11 @@
     _setField('proc-modal-nameEs', proc.nameEs);
     _setField('proc-modal-slug', proc.slug);
     _setField('proc-modal-imageUrl', proc.imageUrl || '');
+
+    // Show and set the active toggle
+    const activeRow = document.getElementById('proc-modal-active-row');
+    if (activeRow) activeRow.style.display = 'flex';
+    _setToggle(proc.isActive !== false);
 
     // Load cost parameters for this process
     await _loadProcessCostParameters(id);
@@ -161,6 +175,28 @@
     return el ? el.value.trim() : '';
   }
 
+  // Tracks the current isActive state for the process being edited
+  let _editingIsActive = true;
+
+  function _setToggle(active) {
+    _editingIsActive = active;
+    const track = document.getElementById('proc-modal-toggle-track');
+    const label = document.getElementById('proc-modal-active-label');
+    const hint  = document.getElementById('proc-modal-active-hint');
+    if (track) track.classList.toggle('is-on', active);
+    if (label) {
+      label.textContent = active ? 'Activo' : 'Inactivo';
+      label.style.color = active ? '#e2e8f0' : '#f87171';
+    }
+    if (hint) hint.textContent = active
+      ? 'El servicio aparece en la tienda y en el menú de servicios.'
+      : 'El servicio está oculto en la tienda y en el menú de servicios.';
+  }
+
+  function _getToggle() {
+    return _editingIsActive;
+  }
+
   // -- saveProcessModal ------------------------------------------------------
 
   async function saveProcessModal(e) {
@@ -182,6 +218,9 @@
     }
 
     const data = { nameEs, slug, imageUrl: imageUrl || null };
+    if (_editingProcessId) {
+      data.isActive = _getToggle();
+    }
 
     const btn = document.getElementById('process-modal-save-btn');
     spin(btn, true);
@@ -413,7 +452,13 @@
    * Sets up event listeners and prepares the module for use.
    */
   function init() {
-    console.log('AdminProcesses module initialized');
+    // Wire the active toggle track click — flips the module-level state variable
+    const track = document.getElementById('proc-modal-toggle-track');
+    if (track) {
+      track.addEventListener('click', function () {
+        _setToggle(!_editingIsActive);
+      });
+    }
   }
 
   // -- Public API ------------------------------------------------------------
