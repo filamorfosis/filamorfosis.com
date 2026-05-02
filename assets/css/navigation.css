@@ -1227,9 +1227,12 @@ body.no-scroll {
  * .site-nav__backdrop--visible — no inline styles ever.
  */
 .site-nav__backdrop {
-  /* Full-viewport fixed overlay */
+  /* Fixed overlay — starts below the nav bar so it never covers nav triggers */
   position: fixed;
-  inset: 0;
+  top: calc(var(--promo-banner-height, 0px) + var(--nav-height, 72px));
+  left: 0;
+  right: 0;
+  bottom: 0;
 
   /* Stack below the nav bar and mega menu panels */
   z-index: calc(var(--z-navbar) - 2);
