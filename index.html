@@ -43,6 +43,11 @@
             <!-- Desktop menu -->
             <ul class="site-nav__menu" role="list">
 
+                <!-- Inicio -->
+                <li class="site-nav__item">
+                    <a class="site-nav__link" href="/" data-route="/" data-translate="nav_inicio">Inicio</a>
+                </li>
+
                 <!-- Tienda (mega menu) -->
                 <li class="site-nav__item site-nav__item--has-mega" data-route="/tienda">
                     <a class="site-nav__link site-nav__link--trigger-label" href="/tienda" data-translate="nav_tienda">Tienda</a>
@@ -169,41 +174,77 @@
 
             </ul>
 
-            <!-- Actions: lang switcher + cart + account + hamburger -->
+            <!-- Actions: lang dropdown + cart + user dropdown + hamburger -->
             <div class="site-nav__actions">
-                <div class="lang-switcher" aria-label="Idioma" data-translate-aria-label="nav_lang_label">
-                    <button class="lang-switcher__btn" data-lang="es" aria-label="Español">
-                        <span class="lang-switcher__flag">🇪🇸</span>
-                        <span class="lang-switcher__code">ES</span>
+
+                <!-- Language dropdown -->
+                <div class="nav-lang-dropdown" id="navLangDropdown" aria-label="Idioma">
+                    <button class="nav-lang-dropdown__trigger" id="navLangTrigger" aria-expanded="false" aria-haspopup="listbox">
+                        <span class="nav-lang-dropdown__current" id="navLangCurrent">ES</span>
+                        <i class="fas fa-chevron-down nav-lang-dropdown__chevron" aria-hidden="true"></i>
                     </button>
-                    <button class="lang-switcher__btn" data-lang="en" aria-label="English">
-                        <span class="lang-switcher__flag">🇬🇧</span>
-                        <span class="lang-switcher__code">EN</span>
-                    </button>
-                    <button class="lang-switcher__btn" data-lang="de" aria-label="Deutsch">
-                        <span class="lang-switcher__flag">🇩🇪</span>
-                        <span class="lang-switcher__code">DE</span>
-                    </button>
-                    <button class="lang-switcher__btn" data-lang="pt" aria-label="Português">
-                        <span class="lang-switcher__flag">🇧🇷</span>
-                        <span class="lang-switcher__code">PT</span>
-                    </button>
-                    <button class="lang-switcher__btn" data-lang="ja" aria-label="日本語">
-                        <span class="lang-switcher__flag">🇯🇵</span>
-                        <span class="lang-switcher__code">JA</span>
-                    </button>
-                    <button class="lang-switcher__btn" data-lang="zh" aria-label="中文">
-                        <span class="lang-switcher__flag">🇨🇳</span>
-                        <span class="lang-switcher__code">ZH</span>
-                    </button>
+                    <ul class="nav-lang-dropdown__menu" id="navLangMenu" role="listbox" aria-label="Seleccionar idioma">
+                        <li><button class="nav-lang-dropdown__option" data-lang="es" role="option">Español</button></li>
+                        <li><button class="nav-lang-dropdown__option" data-lang="en" role="option">English</button></li>
+                        <li><button class="nav-lang-dropdown__option" data-lang="de" role="option">Deutsch</button></li>
+                        <li><button class="nav-lang-dropdown__option" data-lang="pt" role="option">Português</button></li>
+                        <li><button class="nav-lang-dropdown__option" data-lang="ja" role="option">日本語</button></li>
+                        <li><button class="nav-lang-dropdown__option" data-lang="zh" role="option">中文</button></li>
+                    </ul>
                 </div>
+
+                <!-- Cart -->
                 <a class="site-nav__cart" href="javascript:void(0)" onclick="FilamorfosisCart && FilamorfosisCart.openDrawer()" aria-label="Carrito" data-translate-aria-label="nav_cart_label">
                     <i class="fas fa-shopping-cart" aria-hidden="true"></i>
                     <span class="cart-badge" id="cart-count">0</span>
                 </a>
-                <a class="site-nav__account" href="account.html" data-no-spa aria-label="Mi cuenta" data-translate-aria-label="nav_account_label">
-                    <i class="fas fa-user" aria-hidden="true"></i>
-                </a>
+
+                <!-- User dropdown — single trigger, content changes based on auth state -->
+                <div class="nav-user-dropdown" id="navUserDropdown">
+                    <button class="nav-user-dropdown__trigger" id="navUserTrigger" aria-expanded="false" aria-haspopup="true">
+                        <span class="nav-user-dropdown__avatar" aria-hidden="true">
+                            <i class="fas fa-user-circle"></i>
+                        </span>
+                        <span class="nav-user-dropdown__name" id="navbar-user-name" data-translate="nav_login">Iniciar Sesión</span>
+                        <i class="fas fa-chevron-down nav-user-dropdown__chevron" aria-hidden="true"></i>
+                    </button>
+                    <div class="nav-user-dropdown__menu" id="navUserMenu">
+                        <!-- Logged-in header (hidden when logged out) -->
+                        <div class="nav-user-dropdown__header" id="navUserHeader" style="display:none">
+                            <span class="nav-user-dropdown__greeting" data-translate="nav_user_greeting">Hola,</span>
+                            <span class="nav-user-dropdown__header-name" id="navUserMenuName"></span>
+                        </div>
+                        <!-- Logged-in links (hidden when logged out) -->
+                        <ul class="nav-user-dropdown__list" id="navUserLinks" style="display:none">
+                            <li>
+                                <a class="nav-user-dropdown__item" href="account.html" data-no-spa>
+                                    <i class="fas fa-user" aria-hidden="true"></i>
+                                    <span data-translate="nav_my_profile">Mi Perfil</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="nav-user-dropdown__item" href="account.html#addresses" data-no-spa>
+                                    <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                                    <span data-translate="nav_my_addresses">Mis Direcciones</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="nav-user-dropdown__item" href="account.html#orders" data-no-spa>
+                                    <i class="fas fa-box" aria-hidden="true"></i>
+                                    <span data-translate="nav_my_orders">Mis Pedidos</span>
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- Footer: logout when logged in, register when logged out -->
+                        <div class="nav-user-dropdown__footer">
+                            <button class="nav-user-dropdown__logout" id="navUserLogout" data-action="logout" style="display:none">
+                                <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                                <span data-translate="nav_logout">Cerrar sesión</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <button class="mobile-nav__hamburger"
                         aria-expanded="false"
                         aria-haspopup="true"
@@ -737,22 +778,16 @@
 
     <!-- Hero Section -->
     <section id="home" class="hero-section">
-        <video class="hero-video-bg hero-video-bg--a" id="heroBgA" autoplay muted playsinline>
+        <video class="hero-video-bg hero-video-bg--a" id="heroBgA" autoplay muted playsinline loop>
             <source src="Resources/hero/FilamorfosisBanner_Low.mp4" type="video/mp4">
         </video>
         <div class="hero-overlay"></div>
         <div class="container">
             <div class="hero-content">
-                <h1 class="hero-title animate-fade-in" data-translate="hero_title">Tus Ideas. Tu Realidad.</h1>
-                <p class="hero-subtitle animate-fade-in-delay" data-translate="hero_subtitle">Transformamos tu imaginación en objetos tangibles, <strong>capa</strong> por <strong>capa.</strong></p>
-                <hr class="hero-divider">
-                <div class="hero-cta animate-fade-in-delay-2">
-                    <a href="/tienda" class="btn btn-primary" data-translate="hero_cta_primary">Explorar Productos</a>
-                    <a href="#services" class="btn btn-secondary" data-translate="hero_cta_secondary">Ver Servicios</a>
-                </div>
+                <h1 class="hero-title animate-fade-in">Convierte tu idea en un negocio exitoso.</h1>
+                <p class="hero-subtitle animate-fade-in-delay">Diseñamos, fabricamos y comercializamos productos únicos.<br><strong>Tu visión. Nuestra manufactura. Tu éxito.</strong></p>
             </div>
         </div>
-        <div class="scroll-indicator"><div class="mouse"></div></div>
     </section>
 
     <section id="services" class="showcase-section">
@@ -949,6 +984,76 @@
         </div>
 
     </section>
+
+    <div class="container btl-container">
+
+                <div class="btl-header">
+                    <span class="btl-eyebrow" data-translate="btl_eyebrow">De la idea a la realidad</span>
+                    <h2 class="btl-title" data-translate="btl_title">Tu boceto se convierte en algo real</h2>
+                    <p class="btl-subtitle" data-translate="btl_subtitle">No necesitas ser diseñador. Si puedes dibujarlo, imaginarlo o describirlo — nosotros lo hacemos realidad.</p>
+                </div>
+
+                <div class="btl-comparison">
+                    <div class="btl-card btl-before">
+                        <div class="btl-card-img-wrap">
+                            <img src="Resources/BringToLife/Before.jpeg" alt="Boceto del cliente">
+                            <div class="btl-card-label" data-translate="btl_before_label">Tu idea</div>
+                        </div>
+                        <div class="btl-card-body">
+                            <div class="btl-card-icon">✏️</div>
+                            <h3 data-translate="btl_before_title">Empieza con un boceto</h3>
+                            <p data-translate="btl_before_desc">Un dibujo en papel, una foto de referencia, una descripción — cualquier punto de partida funciona.</p>
+                        </div>
+                    </div>
+
+                    <div class="btl-arrow">
+                        <div class="btl-arrow-line"></div>
+                        <div class="btl-arrow-steps">
+                            <span data-translate="btl_step1">Diseño 3D</span>
+                            <span data-translate="btl_step2">Impresión</span>
+                            <span data-translate="btl_step3">Acabado</span>
+                        </div>
+                        <div class="btl-arrow-head">→</div>
+                    </div>
+
+                    <div class="btl-card btl-after">
+                        <div class="btl-card-img-wrap">
+                            <img src="Resources/BringToLife/After.jpeg" alt="Resultado final impreso en 3D">
+                            <div class="btl-card-label btl-card-label-after" data-translate="btl_after_label">Tu objeto real</div>
+                        </div>
+                        <div class="btl-card-body">
+                            <div class="btl-card-icon">🏆</div>
+                            <h3 data-translate="btl_after_title">Se vuelve realidad</h3>
+                            <p data-translate="btl_after_desc">Un objeto físico, preciso y duradero — listo para usar, regalar o vender.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btl-features">
+                    <div class="btl-feature">
+                        <span class="btl-feature-icon">🎨</span>
+                        <p data-translate="btl_feat1">No necesitas saber diseño 3D</p>
+                    </div>
+                    <div class="btl-feature">
+                        <span class="btl-feature-icon">💬</span>
+                        <p data-translate="btl_feat2">Te asesoramos en cada paso</p>
+                    </div>
+                    <div class="btl-feature">
+                        <span class="btl-feature-icon">⚡</span>
+                        <p data-translate="btl_feat3">Entregas rápidas</p>
+                    </div>
+                    <div class="btl-feature">
+                        <span class="btl-feature-icon">📦</span>
+                        <p data-translate="btl_feat4">Desde 1 pieza hasta producción</p>
+                    </div>
+                </div>
+
+                <div class="btl-cta">
+                    <a href="#contact" class="btn btn-primary" data-translate="btl_cta">Cuéntanos tu idea →</a>
+                </div>
+
+            </div>
+    </div><!-- /.btl-container -->
 
     <!-- Clients Section -->
     <section id="clients" class="clients-section">

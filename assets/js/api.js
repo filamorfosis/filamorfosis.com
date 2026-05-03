@@ -21,6 +21,9 @@ async function tryRefresh() {
   return _refreshing;
 }
 
+// Public endpoints — no auth required, skip 401 refresh
+const PUBLIC_PATHS = ['/categories', '/processes', '/products'];
+
 async function apiFetch(path, options = {}) {
   const headers = {
     'Content-Type': 'application/json',
@@ -34,10 +37,16 @@ async function apiFetch(path, options = {}) {
     headers
   });
 
-  if (res.status === 401 && path !== '/auth/refresh' && path !== '/auth/login') {
+  // Refresh endpoint returning 401 just means no active session — not an error worth retrying
+  if (res.status === 401 && path === '/auth/refresh') {
+    throw { status: 401, detail: 'no_session' };
+  }
+
+  const isPublic = PUBLIC_PATHS.some(p => path === p || path.startsWith(p + '?') || path.startsWith(p + '/'));
+
+  if (res.status === 401 && !isPublic && path !== '/auth/login') {
     try {
       await tryRefresh();
-      // Retry once after refresh
       const retry = await fetch(`${API_BASE}${path}`, {
         credentials: 'include',
         ...options,
@@ -66,6 +75,7 @@ async function _parseError(res) {
 // ── Named helpers ─────────────────────────────────────────────────────────────
 
 window.getProcesses = () => apiFetch('/processes');
+window.getCategories = () => apiFetch('/categories');
 window.getProducts = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
   return apiFetch(`/products${qs ? '?' + qs : ''}`);

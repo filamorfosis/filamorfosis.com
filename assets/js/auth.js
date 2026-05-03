@@ -237,7 +237,8 @@
   }
 
   function _restoreSession() {
-    // Try a silent refresh on page load to restore session from cookie
+    // Try a silent refresh on page load to restore session from cookie.
+    // A 401 here is expected when the user is not logged in — suppress the error.
     authRefresh()
       .then(() => getMe().then(user => {
         _currentUser = user;
@@ -245,19 +246,50 @@
         _updateNavbar();
         document.dispatchEvent(new CustomEvent('auth:restored', { detail: user }));
       }))
-      .catch(() => { /* not logged in */ });
+      .catch(() => { /* not logged in — expected, no action needed */ });
   }
 
   function _updateNavbar() {
     const loggedIn = !!_currentUser;
+
+    // Trigger button name: user's first name when logged in, "Iniciar sesión" when not
+    const nameEl = document.getElementById('navbar-user-name');
+    if (nameEl) {
+      if (loggedIn && _currentUser.firstName) {
+        nameEl.textContent = _currentUser.firstName;
+        nameEl.removeAttribute('data-translate');
+      } else {
+        nameEl.setAttribute('data-translate', 'nav_login');
+        // Apply current translation
+        const lang = window.currentLang || localStorage.getItem('preferredLanguage') || 'es';
+        const tl = window.FilamorfosisI18n && window.FilamorfosisI18n[lang];
+        nameEl.textContent = (tl && tl['nav_login']) || 'Iniciar Sesión';
+      }
+    }
+
+    // Logged-in sections
+    const header  = document.getElementById('navUserHeader');
+    const links   = document.getElementById('navUserLinks');
+    const logout  = document.getElementById('navUserLogout');
+
+    if (header)   header.style.display   = loggedIn ? '' : 'none';
+    if (links)    links.style.display    = loggedIn ? '' : 'none';
+    if (logout)   logout.style.display   = loggedIn ? '' : 'none';
+
+    // Sync name in menu header
+    const menuName = document.getElementById('navUserMenuName');
+    if (menuName && _currentUser) {
+      menuName.textContent = _currentUser.firstName +
+        (_currentUser.lastName ? ' ' + _currentUser.lastName : '');
+    }
+
+    // Legacy data-auth elements (kept for any other uses)
     document.querySelectorAll('[data-auth="logged-in"]').forEach(el => {
       el.style.display = loggedIn ? '' : 'none';
     });
     document.querySelectorAll('[data-auth="logged-out"]').forEach(el => {
       el.style.display = loggedIn ? 'none' : '';
     });
-    const nameEl = document.getElementById('navbar-user-name');
-    if (nameEl && _currentUser) nameEl.textContent = _currentUser.firstName;
   }
 
   async function logout() {

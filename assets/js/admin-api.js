@@ -410,61 +410,61 @@
 
   // ── Product Categories ────────────────────────────────────────────────────
 
-  /** GET /api/v1/categories — returns all categories with their subcategories */
+  /** GET /api/v1/admin/categories — returns all categories with their subcategories */
   function adminGetCategories() {
-    return apiFetch('/categories');
+    return apiFetch('/admin/categories');
   }
 
-  /** GET /api/v1/categories/{id} — returns a single category by ID */
+  /** GET /api/v1/admin/categories/{id} — returns a single category by ID */
   function adminGetCategory(id) {
-    return apiFetch(`/categories/${id}`);
+    return apiFetch(`/admin/categories/${id}`);
   }
 
-  /** POST /api/v1/categories — create a new category */
+  /** POST /api/v1/admin/categories — create a new category */
   function adminCreateCategory(data) {
-    return apiFetch('/categories', {
+    return apiFetch('/admin/categories', {
       method: 'POST',
       body: JSON.stringify(data)
     });
   }
 
-  /** PUT /api/v1/categories/{id} — update an existing category */
+  /** PUT /api/v1/admin/categories/{id} — update an existing category */
   function adminUpdateCategory(id, data) {
-    return apiFetch(`/categories/${id}`, {
+    return apiFetch(`/admin/categories/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
     });
   }
 
-  /** DELETE /api/v1/categories/{id} — delete a category (cascade deletes subcategories) */
+  /** DELETE /api/v1/admin/categories/{id} — delete a category (cascade deletes subcategories) */
   function adminDeleteCategory(id) {
-    return apiFetch(`/categories/${id}`, { method: 'DELETE' });
+    return apiFetch(`/admin/categories/${id}`, { method: 'DELETE' });
   }
 
-  /** POST /api/v1/categories/{id}/subcategories — create a new subcategory under a category */
+  /** POST /api/v1/admin/categories/{id}/subcategories — create a new subcategory under a category */
   function adminCreateSubCategory(categoryId, data) {
-    return apiFetch(`/categories/${categoryId}/subcategories`, {
+    return apiFetch(`/admin/categories/${categoryId}/subcategories`, {
       method: 'POST',
       body: JSON.stringify(data)
     });
   }
 
-  /** GET /api/v1/categories/subcategories/{id} — get a single subcategory by ID */
+  /** GET /api/v1/admin/categories/subcategories/{id} — get a single subcategory by ID */
   function adminGetSubCategory(id) {
-    return apiFetch(`/categories/subcategories/${id}`);
+    return apiFetch(`/admin/categories/subcategories/${id}`);
   }
 
-  /** PUT /api/v1/categories/subcategories/{id} — update an existing subcategory */
+  /** PUT /api/v1/admin/categories/subcategories/{id} — update an existing subcategory */
   function adminUpdateSubCategory(id, data) {
-    return apiFetch(`/categories/subcategories/${id}`, {
+    return apiFetch(`/admin/categories/subcategories/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
     });
   }
 
-  /** DELETE /api/v1/categories/subcategories/{id} — delete a subcategory */
+  /** DELETE /api/v1/admin/categories/subcategories/{id} — delete a subcategory */
   function adminDeleteSubCategory(id) {
-    return apiFetch(`/categories/subcategories/${id}`, { method: 'DELETE' });
+    return apiFetch(`/admin/categories/subcategories/${id}`, { method: 'DELETE' });
   }
 
   /**

@@ -34,7 +34,8 @@ function resolveImageUrl(url) {
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
     const cdn = window.FILAMORFOSIS_CDN_BASE;
     if (cdn) return `${cdn}/${url}`;
-    return _IMG_PLACEHOLDER;
+    // Local dev / no CDN — serve as root-relative path
+    return '/' + url;
 }
 
 // closeModal exposed globally for router

@@ -27,6 +27,7 @@
             init: function () {
                 _initWhatsApp();
                 _initPromoBanner();
+                _initClients();
                 _reApplyLang();
             }
         },
@@ -52,6 +53,7 @@
             init: function () {
                 _initWhatsApp();
                 _initShowcase();
+                _initClients();
                 _reApplyLang();
             }
         },
@@ -84,6 +86,12 @@
         // whatsapp-fab.js exposes window.initWhatsAppFAB (capital A)
         if (typeof window.initWhatsAppFAB === 'function') {
             window.initWhatsAppFAB();
+        }
+    }
+
+    function _initClients() {
+        if (typeof window.initClientsMarquee === 'function') {
+            window.initClientsMarquee();
         }
     }
 

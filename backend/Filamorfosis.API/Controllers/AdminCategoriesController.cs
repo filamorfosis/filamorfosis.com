@@ -14,7 +14,7 @@ namespace Filamorfosis.API.Controllers;
 /// Manages two-level category structure: Categories → SubCategories
 /// </summary>
 [ApiController]
-[Route("api/v1/categories")]
+[Route("api/v1/admin/categories")]
 [Authorize(Roles = "Master,ProductManagement")]
 [RequireMfa]
 public class AdminCategoriesController(

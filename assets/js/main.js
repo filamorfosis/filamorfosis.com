@@ -618,6 +618,26 @@
 
     // ── Service sidebar — always visible, no scroll logic needed ─────────────
 
+    // ── Clients marquee renderer ──────────────────────────────────────────────
+    // Populates #clientsGrid from the CLIENTS array defined in clients.js.
+    // Duplicates the items for a seamless infinite scroll effect.
+    window.initClientsMarquee = function () {
+        var grid = document.getElementById('clientsGrid');
+        if (!grid || typeof CLIENTS === 'undefined' || !CLIENTS.length) { return; }
+
+        function buildCard(client) {
+            return '<div class="client-card">' +
+                '<a class="client-logo-link" href="' + (client.socials && client.socials[0] ? client.socials[0].url : '#') + '" target="_blank" rel="noopener" aria-label="' + client.name + '">' +
+                '<img class="client-logo" src="' + client.logo + '" alt="' + client.name + '" loading="lazy">' +
+                '</a>' +
+                '</div>';
+        }
+
+        // Two copies for seamless loop
+        var html = CLIENTS.map(buildCard).join('') + CLIENTS.map(buildCard).join('');
+        grid.innerHTML = html;
+    };
+
 })(jQuery);
 
 // Lazy load videos using IntersectionObserver — only load when visible

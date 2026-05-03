@@ -55,6 +55,12 @@
             // Close any other open menu first
             MegaMenuController.closeAll();
 
+            // Close the lang and user dropdowns if open
+            var langWrapper = document.getElementById('navLangDropdown');
+            if (langWrapper) { langWrapper.classList.remove('is-open'); }
+            var userWrapper = document.getElementById('navUserDropdown');
+            if (userWrapper) { userWrapper.classList.remove('is-open'); }
+
             // Snap --mega-top to the nav's current actual bottom before opening
             // so the panel never appears offset during a height transition.
             var siteNav = document.querySelector('.site-nav');
@@ -183,6 +189,30 @@
                 });
             });
 
+            // mouseenter on plain nav items (no mega menu): close any open mega menu
+            var plainItems = nav.querySelectorAll('.site-nav__item:not(.site-nav__item--has-mega)');
+            plainItems.forEach(function (item) {
+                item.addEventListener('mouseenter', function () {
+                    if (MegaMenuController._closeTimer !== null) {
+                        clearTimeout(MegaMenuController._closeTimer);
+                        MegaMenuController._closeTimer = null;
+                    }
+                    MegaMenuController.closeAll();
+                });
+            });
+
+            // mouseenter on the actions bar (lang, cart, user): also close mega menus
+            var actionsBar = nav.querySelector('.site-nav__actions');
+            if (actionsBar) {
+                actionsBar.addEventListener('mouseenter', function () {
+                    if (MegaMenuController._closeTimer !== null) {
+                        clearTimeout(MegaMenuController._closeTimer);
+                        MegaMenuController._closeTimer = null;
+                    }
+                    MegaMenuController.closeAll();
+                });
+            }
+
             // mouseleave on the whole nav: close all after 150ms
             nav.addEventListener('mouseleave', function () {
                 MegaMenuController._closeTimer = setTimeout(function () {
@@ -293,7 +323,7 @@
              * Uses event delegation on the nav so it catches both static
              * links and links injected dynamically (e.g. category cards).  */
             nav.addEventListener('click', function (e) {
-                var link = e.target.closest('.mega-menu a[href]');
+                var link = e.target.closest('.mega-menu a[href], .site-nav__link--trigger-label');
                 if (link) {
                     MegaMenuController.closeAll();
                 }
@@ -506,8 +536,8 @@
                 }, 3000);
             });
 
-            var fetchPromise = (typeof window.apiFetch === 'function'
-                    ? window.apiFetch('/categories')
+            var fetchPromise = (typeof window.getCategories === 'function'
+                    ? window.getCategories()
                     : fetch('/api/v1/categories').then(function (r) {
                         if (!r.ok) { throw new Error('HTTP_ERROR:' + r.status); }
                         return r.json();
@@ -828,7 +858,9 @@
                 return url;
             }
             var cdn = window.FILAMORFOSIS_CDN_BASE;
-            return cdn ? (cdn + '/' + url) : '';
+            if (cdn) { return cdn + '/' + url; }
+            // Local dev / no CDN — serve as root-relative path
+            return '/' + url;
         },
 
         /**
@@ -1028,52 +1060,182 @@
          * main.js has already applied (window.currentLang or localStorage).
          */
         init: function () {
-            // Collect all lang buttons in both desktop and mobile nav
-            var allBtns = document.querySelectorAll(
-                '.site-nav__actions .lang-switcher__btn, .mobile-nav__footer .lang-switcher__btn'
-            );
-
-            allBtns.forEach(function (btn) {
+            // Wire mobile footer lang buttons (desktop uses LangDropdownController)
+            var mobileBtns = document.querySelectorAll('.mobile-nav__footer .lang-switcher__btn');
+            mobileBtns.forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     var lang = btn.getAttribute('data-lang');
                     if (!lang) { return; }
-
-                    // Delegate to the existing switchLanguage function in main.js
                     if (typeof window.switchLanguage === 'function') {
                         window.switchLanguage(lang);
                     }
-
-                    // Update active indicator across all nav lang switcher instances
                     LangSwitcherNav._setActive(lang);
                 });
             });
+        },
 
-            // Sync initial active state with whatever language main.js loaded
+        /**
+         * Marks the dropdown option matching `lang` as active and updates
+         * the trigger label to show the current language code.
+         * @param {string} lang
+         */
+        _setActive: function (lang) {
+            // Update dropdown options
+            document.querySelectorAll('.nav-lang-dropdown__option').forEach(function (btn) {
+                btn.classList.toggle('is-active', btn.getAttribute('data-lang') === lang);
+            });
+            // Update trigger label
+            var current = document.getElementById('navLangCurrent');
+            if (current) { current.textContent = lang.toUpperCase(); }
+            // Keep mobile footer buttons in sync
+            document.querySelectorAll('.mobile-nav__footer .lang-switcher__btn').forEach(function (btn) {
+                btn.classList.toggle('is-active', btn.getAttribute('data-lang') === lang);
+            });
+            _state.lang = lang;
+        }
+    };
+
+    /* ─────────────────────────────────────────────────────────────────────
+       LangDropdownController
+       Manages the language dropdown open/close and option selection.
+    ───────────────────────────────────────────────────────────────────── */
+    var LangDropdownController = {
+        init: function () {
+            var wrapper = document.getElementById('navLangDropdown');
+            var trigger = document.getElementById('navLangTrigger');
+            var menu    = document.getElementById('navLangMenu');
+            if (!wrapper || !trigger || !menu) { return; }
+
+            // Toggle on trigger click
+            trigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var isOpen = wrapper.classList.contains('is-open');
+                // Close user dropdown if open
+                UserDropdownController.close();
+                wrapper.classList.toggle('is-open', !isOpen);
+                trigger.setAttribute('aria-expanded', String(!isOpen));
+            });
+
+            // Option click — switch language and close
+            menu.addEventListener('click', function (e) {
+                var btn = e.target.closest('.nav-lang-dropdown__option');
+                if (!btn) { return; }
+                var lang = btn.getAttribute('data-lang');
+                if (lang && typeof window.switchLanguage === 'function') {
+                    window.switchLanguage(lang);
+                }
+                LangSwitcherNav._setActive(lang);
+                LangDropdownController.close();
+            });
+
+            // Close on outside click
+            document.addEventListener('click', function (e) {
+                if (!wrapper.contains(e.target)) {
+                    LangDropdownController.close();
+                }
+            });
+
+            // Close on Escape
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') { LangDropdownController.close(); }
+            });
+
+            // Set initial active state
             var initialLang = (typeof window.currentLang === 'string' && window.currentLang)
                 ? window.currentLang
                 : (localStorage.getItem('preferredLanguage') || 'es');
             LangSwitcherNav._setActive(initialLang);
         },
 
-        /**
-         * Marks the button matching `lang` as active (adds .is-active) and
-         * removes .is-active from all other nav lang buttons.
-         * @param {string} lang — e.g. 'es', 'en', 'de', 'pt', 'ja', 'zh'
-         */
-        _setActive: function (lang) {
-            var allBtns = document.querySelectorAll(
-                '.site-nav__actions .lang-switcher__btn, .mobile-nav__footer .lang-switcher__btn'
-            );
-            allBtns.forEach(function (btn) {
-                if (btn.getAttribute('data-lang') === lang) {
-                    btn.classList.add('is-active');
-                    btn.setAttribute('aria-current', 'true');
-                } else {
-                    btn.classList.remove('is-active');
-                    btn.removeAttribute('aria-current');
+        close: function () {
+            var wrapper = document.getElementById('navLangDropdown');
+            var trigger = document.getElementById('navLangTrigger');
+            if (wrapper) { wrapper.classList.remove('is-open'); }
+            if (trigger) { trigger.setAttribute('aria-expanded', 'false'); }
+        }
+    };
+
+    /* ─────────────────────────────────────────────────────────────────────
+       UserDropdownController
+       Manages the user account dropdown open/close.
+    ───────────────────────────────────────────────────────────────────── */
+    var UserDropdownController = {
+        init: function () {
+            var wrapper = document.getElementById('navUserDropdown');
+            var trigger = document.getElementById('navUserTrigger');
+            if (!wrapper || !trigger) { return; }
+
+            trigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+
+                // If not logged in, open the auth modal directly — no dropdown
+                if (typeof window.FilamorfosisAuth !== 'undefined' &&
+                    !window.FilamorfosisAuth.getCurrentUser()) {
+                    window.FilamorfosisAuth.showModal('login');
+                    return;
+                }
+
+                var isOpen = wrapper.classList.contains('is-open');
+                // Close lang dropdown if open
+                LangDropdownController.close();
+                wrapper.classList.toggle('is-open', !isOpen);
+                trigger.setAttribute('aria-expanded', String(!isOpen));
+            });
+
+            // Close on outside click
+            document.addEventListener('click', function (e) {
+                if (!wrapper.contains(e.target)) {
+                    UserDropdownController.close();
                 }
             });
-            _state.lang = lang;
+
+            // Close on Escape
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') { UserDropdownController.close(); }
+            });
+
+            // Sync user name into menu header when auth updates
+            document.addEventListener('auth:login', function (e) {
+                UserDropdownController._syncName(e.detail);
+            });
+            document.addEventListener('auth:restored', function (e) {
+                UserDropdownController._syncName(e.detail);
+            });
+            document.addEventListener('auth:logout', function () {
+                UserDropdownController.close();
+            });
+
+            // Close dropdown when any link inside it is clicked
+            wrapper.addEventListener('click', function (e) {
+                var target = e.target.closest('a[href], button[data-action]');
+                if (!target) { return; }
+
+                // Register link — open auth modal on register tab
+                if (target.id === 'navUserRegister' || target.closest('#navUserRegister')) {
+                    e.preventDefault();
+                    UserDropdownController.close();
+                    if (typeof window.FilamorfosisAuth !== 'undefined') {
+                        window.FilamorfosisAuth.showModal('register');
+                    }
+                    return;
+                }
+
+                UserDropdownController.close();
+            });
+        },
+
+        close: function () {
+            var wrapper = document.getElementById('navUserDropdown');
+            var trigger = document.getElementById('navUserTrigger');
+            if (wrapper) { wrapper.classList.remove('is-open'); }
+            if (trigger) { trigger.setAttribute('aria-expanded', 'false'); }
+        },
+
+        _syncName: function (user) {
+            var menuName = document.getElementById('navUserMenuName');
+            if (menuName && user && user.firstName) {
+                menuName.textContent = user.firstName + (user.lastName ? ' ' + user.lastName : '');
+            }
         }
     };
 
@@ -1096,22 +1258,15 @@
 
             siteNav.classList.toggle('site-nav--scrolled', isScrolled);
 
-            // Close any open mega menu when the user starts scrolling.
-            // This prevents the gap that appears while the nav height
-            // transitions from 72px → 60px (CSS vars don't interpolate).
             if (!wasScrolled && isScrolled) {
                 MegaMenuController.closeAll();
             }
 
-            // Keep the mega menu top anchored to the nav's actual bottom edge.
-            // Using getBoundingClientRect() is immune to CSS transition lag.
             var navBottom = siteNav.getBoundingClientRect().bottom;
             document.documentElement.style.setProperty('--mega-top', navBottom + 'px');
         }
 
         window.addEventListener('scroll', _updateNavState, { passive: true });
-
-        // Apply immediately on load
         _updateNavState();
     }
 
@@ -1124,15 +1279,15 @@
         CategoryService: CategoryService,
         ProcessService: ProcessService,
         LangSwitcherNav: LangSwitcherNav,
+        LangDropdownController: LangDropdownController,
+        UserDropdownController: UserDropdownController,
 
-        /**
-         * Bootstraps the entire navigation module.
-         * Called once after the DOM is ready.
-         */
         init: function () {
             MegaMenuController.init();
             MobileMenuController.init();
             LangSwitcherNav.init();
+            LangDropdownController.init();
+            UserDropdownController.init();
             _initScrollBehavior();
         }
     };
@@ -1145,7 +1300,6 @@
             window.FilamorfosisNav.init();
         });
     } else {
-        // DOM already ready (script loaded with defer after parse)
         window.FilamorfosisNav.init();
     }
 
