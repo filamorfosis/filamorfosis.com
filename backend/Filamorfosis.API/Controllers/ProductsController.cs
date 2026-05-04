@@ -211,44 +211,73 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
                 detail = $"Product {id} not found."
             });
 
-        return Ok(new ProductDetailDto
-        {
-            Id = product.Id,
-            Slug = product.Slug,
-            TitleEs = product.TitleEs,
-            DescriptionEs = product.DescriptionEs,
-            Tags = product.Tags,
-            ImageUrls = AggregateVariantImages(product.Variants),
-            Badge = product.Badge,
-            IsActive = product.IsActive,
-            ProcessId = product.ProcessId,
-            Variants = product.Variants.Select(v => new ProductVariantDto
-            {
-                Id = v.Id,
-                Sku = v.Sku,
-                LabelEs = v.LabelEs,
-                Price = v.Price,
-                EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(product.Discounts)),
-                IsAvailable = v.IsAvailable,
-                AcceptsDesignFile = v.AcceptsDesignFile,
-                InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),
-                Discounts = v.Discounts.Select(d => new DiscountDto
-                {
-                    Id = d.Id,
-                    DiscountType = d.DiscountType,
-                    Value = d.Value,
-                    StartsAt = d.StartsAt,
-                    EndsAt = d.EndsAt
-                }).ToList(),
-                Attributes = v.AttributeValues.Select(a => new VariantAttributeValueDto
-                {
-                    AttributeDefinitionId = a.AttributeDefinitionId,
-                    Name = a.AttributeDefinition.Name,
-                    Value = a.Value
-                }).ToList()
-            }).ToList()
-        });
+        return Ok(MapProductDetail(product));
     }
+
+    [HttpGet("by-slug/{slug}")]
+    public async Task<IActionResult> GetBySlug(string slug)
+    {
+        var product = await db.Products
+            .Include(p => p.Discounts)
+            .Include(p => p.Variants)
+                .ThenInclude(v => v.AttributeValues)
+                    .ThenInclude(av => av.AttributeDefinition)
+            .Include(p => p.Variants)
+                .ThenInclude(v => v.MaterialUsages)
+                    .ThenInclude(u => u.Material)
+            .Include(p => p.Variants)
+                .ThenInclude(v => v.Discounts)
+            .FirstOrDefaultAsync(p => p.Slug == slug && p.IsActive);
+
+        if (product is null)
+            return NotFound(new
+            {
+                type = "https://filamorfosis.com/errors/not-found",
+                title = "Not Found",
+                status = 404,
+                detail = $"Product with slug '{slug}' not found."
+            });
+
+        return Ok(MapProductDetail(product));
+    }
+
+    private ProductDetailDto MapProductDetail(Product product) => new ProductDetailDto
+    {
+        Id = product.Id,
+        Slug = product.Slug,
+        TitleEs = product.TitleEs,
+        DescriptionEs = product.DescriptionEs,
+        Tags = product.Tags,
+        ImageUrls = AggregateVariantImages(product.Variants),
+        Badge = product.Badge,
+        IsActive = product.IsActive,
+        ProcessId = product.ProcessId,
+        Variants = product.Variants.Select(v => new ProductVariantDto
+        {
+            Id = v.Id,
+            Sku = v.Sku,
+            LabelEs = v.LabelEs,
+            Price = v.Price,
+            EffectivePrice = DiscountCalculator.ComputeEffectivePrice(v.Price, v.Discounts.Concat(product.Discounts)),
+            IsAvailable = v.IsAvailable,
+            AcceptsDesignFile = v.AcceptsDesignFile,
+            InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),
+            Discounts = v.Discounts.Select(d => new DiscountDto
+            {
+                Id = d.Id,
+                DiscountType = d.DiscountType,
+                Value = d.Value,
+                StartsAt = d.StartsAt,
+                EndsAt = d.EndsAt
+            }).ToList(),
+            Attributes = v.AttributeValues.Select(a => new VariantAttributeValueDto
+            {
+                AttributeDefinitionId = a.AttributeDefinitionId,
+                Name = a.AttributeDefinition.Name,
+                Value = a.Value
+            }).ToList()
+        }).ToList()
+    };
 
     /// <summary>
     /// Aggregates all ImageUrls from a product's variants into a single deduplicated array,

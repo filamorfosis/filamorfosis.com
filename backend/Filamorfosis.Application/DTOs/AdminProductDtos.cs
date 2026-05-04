@@ -13,6 +13,7 @@ public class CreateProductRequest
 public class UpdateProductRequest
 {
     public string? TitleEs { get; set; }
+    public string? Slug { get; set; }
     public string? DescriptionEs { get; set; }
     public Guid? ProcessId { get; set; }
     public string[]? Tags { get; set; }

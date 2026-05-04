@@ -146,6 +146,20 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             });
 
         if (req.TitleEs is not null) p.TitleEs = req.TitleEs;
+        if (req.Slug is not null)
+        {
+            var normalizedSlug = req.Slug.Trim().ToLower();
+            // Ensure slug is unique (excluding this product)
+            var slugExists = await db.Products.AnyAsync(x => x.Slug == normalizedSlug && x.Id != id);
+            if (slugExists)
+                return UnprocessableEntity(new ProblemDetails
+                {
+                    Status = StatusCodes.Status422UnprocessableEntity,
+                    Title = "Slug already in use",
+                    Detail = $"The slug '{normalizedSlug}' is already used by another product."
+                });
+            p.Slug = normalizedSlug;
+        }
         if (req.DescriptionEs is not null) p.DescriptionEs = req.DescriptionEs;
         if (req.ProcessId.HasValue) p.ProcessId = req.ProcessId.Value;
         if (req.Tags is not null) p.Tags = req.Tags;

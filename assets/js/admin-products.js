@@ -554,6 +554,22 @@
           <input type="text" id="pedit-titleEs" value="${esc(product ? product.titleEs || product.title || '' : '')}" required placeholder="Nombre en español">
         </div>
         <div class="form-field">
+          <label>SLUG <span class="req">*</span> <span style="color:#64748b;font-weight:400;font-size:1rem">(URL amigable)</span></label>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="text" id="pedit-slug"
+                   value="${esc(product ? product.slug || '' : '')}"
+                   required
+                   placeholder="mi-producto-ejemplo"
+                   pattern="[a-z0-9\\-]+"
+                   title="Solo letras minúsculas, números y guiones"
+                   style="flex:1">
+            ${!product ? `<button type="button" id="pedit-slug-auto" class="btn-admin btn-admin-secondary btn-admin-sm" title="Generar desde título">
+              <i class="fas fa-magic"></i> Auto
+            </button>` : ''}
+          </div>
+          <span style="color:#64748b;font-size:1rem">Ejemplo: <code style="color:#a78bfa">/producto/taza-personalizada-uv</code></span>
+        </div>
+        <div class="form-field">
           <label>PROCESAMIENTO ${product ? '' : '<span class="req">*</span>'}</label>
           ${product
             ? `<div style="padding:8px 12px;border-radius:6px;background:rgba(255,255,255,0.04);
@@ -619,6 +635,36 @@
     // Wire the form submit
     const form = document.getElementById('prod-edit-form');
     if (form) form.addEventListener('submit', saveProductModal);
+
+    // Auto-slug: generate from title on button click or on title input (new products only)
+    const titleInput = document.getElementById('pedit-titleEs');
+    const slugInput  = document.getElementById('pedit-slug');
+    const autoBtn    = document.getElementById('pedit-slug-auto');
+
+    function _titleToSlug(title) {
+      return title.trim().toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+    }
+
+    if (autoBtn && slugInput && titleInput) {
+      autoBtn.addEventListener('click', () => {
+        slugInput.value = _titleToSlug(titleInput.value);
+      });
+    }
+    // For new products: auto-fill slug as user types title (only if slug is still empty or was auto-filled)
+    if (!product && titleInput && slugInput) {
+      let _slugManuallyEdited = false;
+      slugInput.addEventListener('input', () => { _slugManuallyEdited = true; });
+      titleInput.addEventListener('input', () => {
+        if (!_slugManuallyEdited) {
+          slugInput.value = _titleToSlug(titleInput.value);
+        }
+      });
+    }
 
     // Render product-level discounts
     if (product) _renderProductDiscounts(product);
@@ -1065,6 +1111,7 @@
     if (errEl) errEl.textContent = '';
 
     const titleEs = (document.getElementById('pedit-titleEs') || {}).value?.trim();
+    const slugRaw = (document.getElementById('pedit-slug') || {}).value?.trim();
     const categoryId = (document.getElementById('pedit-categoryId') || {}).value;
     const descriptionEs = (document.getElementById('pedit-descriptionEs') || {}).value?.trim();
     const tagsRaw = (document.getElementById('pedit-tags') || {}).value?.trim();
@@ -1073,6 +1120,15 @@
 
     if (!titleEs) {
       if (errEl) errEl.textContent = 'El título es requerido.';
+      return;
+    }
+    if (!slugRaw) {
+      if (errEl) errEl.textContent = 'El slug es requerido.';
+      return;
+    }
+    const slug = slugRaw.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    if (!slug) {
+      if (errEl) errEl.textContent = 'El slug solo puede contener letras minúsculas, números y guiones.';
       return;
     }
     if (!categoryId) {
@@ -1088,6 +1144,7 @@
 
     const data = {
       titleEs,
+      slug,
       processId: categoryId,
       descriptionEs,
       tags,

@@ -81,6 +81,7 @@ window.getProducts = (params = {}) => {
   return apiFetch(`/products${qs ? '?' + qs : ''}`);
 };
 window.getProduct = (id) => apiFetch(`/products/${id}`);
+window.getProductBySlug = (slug) => apiFetch(`/products/by-slug/${encodeURIComponent(slug)}`);
 
 window.getCart = () => apiFetch('/cart');
 window.addToCart = (item) => apiFetch('/cart/items', { method: 'POST', body: JSON.stringify(item) });

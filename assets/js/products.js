@@ -504,7 +504,7 @@ function renderGrid() {
         var ctaDisabled = !isAvailable ? ' disabled' : '';
         var ctaClass = 'cat-card-cta' + (!isAvailable ? ' cat-card-cta--disabled' : '');
 
-        return '<article class="cat-card" data-id="' + p.id + '" role="listitem">' +
+        return '<article class="cat-card" data-id="' + p.id + '" data-slug="' + (p.slug || p.id) + '" role="listitem">' +
             '<div class="cat-card-img">' +
                 carouselHtml +
                 imageBadgesHtml +
@@ -535,7 +535,7 @@ function renderGrid() {
             if (cta && cta.disabled) return;
             // Open product modal
             if (typeof openModal === 'function') {
-                openModal(card.dataset.id);
+                openModal(card.dataset.slug || card.dataset.id);
             }
         });
 
@@ -774,7 +774,7 @@ function _buildFeaturedCard(p) {
         priceHtml = '<span class="featured-card__price-single">' + displayPrice + '</span>';
     }
 
-    return '<div class="swiper-slide featured-card" data-id="' + p.id + '">' +
+    return '<div class="swiper-slide featured-card" data-id="' + p.id + '" data-slug="' + (p.slug || p.id) + '">' +
         '<div class="featured-card__img-wrap">' +
             '<img src="' + imgSrc + '" alt="' + title + '" loading="lazy" class="featured-card__img">' +
             (badgeLabel ? '<span class="featured-card__badge">' + badgeLabel + '</span>' : '') +
@@ -829,7 +829,7 @@ async function renderFeaturedSection(badge, containerId) {
         swiperEl.querySelectorAll('.featured-card').forEach(function(card) {
             card.addEventListener('click', function() {
                 if (typeof openModal === 'function') {
-                    openModal(card.dataset.id);
+                    openModal(card.dataset.slug || card.dataset.id);
                 }
             });
         });
@@ -919,11 +919,11 @@ async function renderAll() {
 
     await loadProducts(true);
 
-    // Deep-link: open product modal if URL contains #product=ID
+    // Deep-link: open product modal if URL contains #product=<slug-or-id>
     var hash = window.location.hash || '';
-    var productMatch = hash.match(/[#&]?product=([a-f0-9-]{36})/i);
+    var productMatch = hash.match(/[#&]?product=([^&]+)/i);
     if (productMatch) {
-        openModal(productMatch[1]);
+        openModal(decodeURIComponent(productMatch[1]));
     }
 }
 
@@ -968,13 +968,13 @@ document.addEventListener('DOMContentLoaded', function() {
    PRODUCT DETAIL PAGE
    renderProductDetailPage(id) — called by router
    ═══════════════════════════════════════════════ */
-window.renderProductDetailPage = async function(id) {
+window.renderProductDetailPage = async function(slug) {
     var root = document.getElementById('pdp-root');
     if (!root) return;
     root.innerHTML = '<div class="pdp2-loading"><i class="fas fa-spinner fa-spin"></i></div>';
     window.scrollTo(0, 0);
     var p;
-    try { p = await window.getProduct(id); }
+    try { p = await window.getProductBySlug(slug); }
     catch (e) {
         root.innerHTML = '<div class="pdp2-error"><i class="fas fa-exclamation-triangle"></i><p>Error al cargar el producto.</p><button class="pdp2-back-btn" onclick="window.FilamorfosisRouter&&window.FilamorfosisRouter.navigate(\'/tienda\')"><i class="fas fa-arrow-left"></i> Volver</button></div>';
         return;

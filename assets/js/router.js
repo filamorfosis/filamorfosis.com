@@ -138,9 +138,9 @@
 
     function _initProductDetail() {
         var pathParts = window.location.pathname.split('/');
-        var productId = (pathParts[1] === 'producto' && pathParts[2]) ? pathParts[2] : null;
-        if (productId && typeof window.renderProductDetailPage === 'function') {
-            window.renderProductDetailPage(productId);
+        var productSlug = (pathParts[1] === 'producto' && pathParts[2]) ? decodeURIComponent(pathParts[2]) : null;
+        if (productSlug && typeof window.renderProductDetailPage === 'function') {
+            window.renderProductDetailPage(productSlug);
         }
     }
 
