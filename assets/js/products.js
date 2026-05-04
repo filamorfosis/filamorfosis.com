@@ -1,4 +1,4 @@
-/* ══════════════════════════════════════════════
+﻿/* ══════════════════════════════════════════════
    CATALOG ENGINE — API-backed
    Fetches products from GET /api/v1/products
    t() bridges to catalog.js / main.js translations
@@ -42,15 +42,8 @@ function resolveImageUrl(url) {
     return `${origin}/uploads/${url.replace(/^\//, '')}`;
 }
 
-// closeModal exposed globally for router
-function closeModal() {
-    const overlay = document.getElementById('catModal');
-    if (overlay) {
-        overlay.classList.remove('open');
-        overlay.removeEventListener('keydown', _modalFocusTrap);
-    }
-    document.body.style.overflow = '';
-}
+// closeModal — no-op, modal removed
+function closeModal() {}
 
 // animateCounter exposed globally
 function animateCounter(el, target, duration) {
@@ -609,320 +602,15 @@ function renderGrid() {
 
 
 /* ═══════════════════════════════════════════════
-   MODAL — open (async fetch) + render
+   PRODUCT NAVIGATION
    ═══════════════════════════════════════════════ */
-async function openModal(id) {
-    var overlay = document.getElementById('catModal');
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    var inner = document.getElementById('catModalInner');
-    inner.innerHTML = '<div style="text-align:center;padding:40px"><i class="fas fa-spinner fa-spin fa-2x" style="color:#a78bfa"></i></div>';
-    try {
-        var p = await window.getProduct(id);
-        renderModal(p);
-    } catch (e) {
-        inner.innerHTML = '<div style="text-align:center;padding:40px;color:#f87171">Error al cargar el producto</div>';
-    }
-}
-
-function renderModal(p) {
-    var inner = document.getElementById('catModalInner');
-
-    // ── Gallery ───────────────────────────────────────────────────────────────
-    var imgs = p.imageUrls && p.imageUrls.length ? p.imageUrls : null;
-    var galleryHtml = '';
-    if (imgs) {
-        var mainSrc = resolveImageUrl(imgs[0]);
-        galleryHtml = `<div class="cat-modal-gallery" style="margin-bottom:16px">
-            <img src="${mainSrc}" alt="${pT(p,'title')}" id="modalMainImg" style="width:100%;border-radius:12px;max-height:280px;object-fit:cover" loading="lazy">
-            ${imgs.length > 1 ? `<div class="cat-modal-gallery-thumbs" style="display:flex;gap:8px;margin-top:8px;overflow-x:auto">
-                ${imgs.map(function(src, i) {
-                    return `<div class="cat-modal-gallery-thumb ${i===0?'active':''}" data-idx="${i}" style="cursor:pointer;border-radius:8px;overflow:hidden;flex-shrink:0;width:60px;height:60px;border:2px solid ${i===0?'#a78bfa':'transparent'}">
-                        <img src="${resolveImageUrl(src)}" alt="${pT(p,'title')} ${i+1}" loading="lazy" style="width:100%;height:100%;object-fit:cover">
-                    </div>`;
-                }).join('')}
-            </div>` : ''}
-        </div>`;
-    }
-
-    // ── Variants ──────────────────────────────────────────────────────────────
-    var variants = p.variants || [];
-    var variantsHtml = `
-        <div class="modal-variants-section">
-            <div class="modal-table-header">
-                <span class="modal-table-title">Opciones disponibles</span>
-                <span class="modal-table-hint" id="tableHint">Selecciona una o más opciones</span>
-            </div>
-            <div class="modal-variants-list" id="modalVariantsList">
-                ${variants.map(function(v) {
-                    var available = v.isAvailable && v.inStock !== false;
-
-                    // Compute effective price client-side from discounts (same logic as admin table)
-                    var now = new Date();
-                    var effectivePrice = v.price ?? 0;
-                    var appliedDiscounts = []; // Track applied discounts for display
-                    (v.discounts || []).forEach(function(d) {
-                        var starts = d.startsAt ? new Date(d.startsAt) : null;
-                        var ends   = d.endsAt   ? new Date(d.endsAt)   : null;
-                        var active = (!starts || starts <= now) && (!ends || ends >= now);
-                        if (!active) return;
-                        if (d.discountType === 'Percentage') {
-                            effectivePrice = effectivePrice * (1 - d.value / 100);
-                            appliedDiscounts.push({ type: 'Percentage', value: d.value });
-                        } else {
-                            effectivePrice = Math.max(0, effectivePrice - d.value);
-                            appliedDiscounts.push({ type: 'Fixed', value: d.value });
-                        }
-                    });
-                    // Also use server-sent effectivePrice if it's valid and lower
-                    if (v.effectivePrice != null && v.effectivePrice > 0 && v.effectivePrice < effectivePrice) {
-                        effectivePrice = v.effectivePrice;
-                    }
-
-                    var hasDiscount = available && effectivePrice < (v.price ?? 0);
-                    
-                    // Build discount badge text based on discount type
-                    var discountBadge = '';
-                    if (hasDiscount) {
-                        // Calculate total discount amount
-                        var totalDiscountAmount = (v.price ?? 0) - effectivePrice;
-                        
-                        if (appliedDiscounts.length === 1) {
-                            // Single discount - show based on type
-                            var discount = appliedDiscounts[0];
-                            if (discount.type === 'Percentage') {
-                                discountBadge = '-' + Math.round(discount.value) + '%';
-                            } else {
-                                discountBadge = '-$' + Math.round(discount.value);
-                            }
-                        } else if (appliedDiscounts.length > 1) {
-                            // Multiple discounts - show total dollar amount
-                            discountBadge = '-$' + Math.round(totalDiscountAmount);
-                        } else {
-                            // Fallback: calculate percentage if no discount info available
-                            var discountPct = Math.round((1 - effectivePrice / v.price) * 100);
-                            discountBadge = '-' + discountPct + '%';
-                        }
-                    }
-                    
-                    var priceLabel = available ? ('$' + Math.round(hasDiscount ? effectivePrice : v.price) + ' MXN') : '';
-                    return `<div class="modal-variant-item${!available ? ' unavailable' : ''}" data-variant-id="${v.id}">
-                        <label class="modal-variant-check-wrap${!available ? ' modal-variant-check-wrap--disabled' : ''}">
-                            <input type="checkbox" class="modal-variant-cb variant-cb" value="${v.id}"
-                                   ${!available ? 'disabled' : ''}>
-                            <span class="modal-variant-label">${v.labelEs || v.labelEn || ''}</span>
-                        </label>
-                        <span class="modal-variant-price">
-                            ${hasDiscount ? `
-                                <span style="text-decoration:line-through;color:#64748b;font-size:1rem;margin-right:2px">$${Math.round(v.price)}</span>
-                                <span class="variant-discount-badge">${discountBadge}</span>
-                                <span style="color:#fb923c;font-weight:700">$${Math.round(effectivePrice)} MXN</span>
-                            ` : priceLabel}
-                        </span>
-                        ${v.inStock === false ? '<span class="badge badge-red modal-variant-status-badge">Agotado</span>' : (!v.isAvailable ? '<span class="badge badge-red modal-variant-status-badge">No disponible</span>' : '')}
-                        <div class="variant-qty-wrap">
-                            <button type="button" class="qty-btn qty-dec modal-qty-btn">−</button>
-                            <input type="number" class="variant-qty" value="1" min="1" max="99"
-                                   style="width:44px;text-align:center;background:#1e293b;border:1px solid #334155;color:#f1f5f9;border-radius:6px;padding:3px 4px;font-size:1rem">
-                            <button type="button" class="qty-btn qty-inc modal-qty-btn">+</button>
-                        </div>
-                    </div>`;
-                }).join('')}
-                ${variants.length === 0 ? '<p class="modal-variants-empty">Sin variantes disponibles</p>' : ''}
-            </div>
-        </div>`;
-
-    // ── Assemble ──────────────────────────────────────────────────────────────
-    inner.innerHTML = `
-        <div class="cat-modal-header">
-            <h2 class="cat-modal-title" id="catModalTitle">${pT(p,'title')}</h2>
-            <div class="cat-modal-desc">${pT(p,'desc')}</div>
-        </div>
-        ${galleryHtml}
-        ${variantsHtml}
-        <div class="modal-cta-row">
-            <button class="modal-cta-add" id="modalAddToCartBtn" disabled>
-                <i class="fas fa-cart-plus"></i>
-                <span id="cartBtnLabel">Selecciona una opción</span>
-            </button>
-            <button class="modal-cta-share" id="modalShareBtn">
-                <i class="fas fa-share-alt"></i>
-                <span>Compartir</span>
-            </button>
-        </div>
-        <details class="modal-help-details">
-            <summary><i class="fas fa-question-circle"></i> ¿Necesitas ayuda?</summary>
-            <div class="modal-help-details__body">
-                <a class="modal-help-link" href="javascript:void(0)" onclick="whatsapp('${(pT(p,'title')||'').replace(/'/g,"\\'")}')">
-                    <i class="fab fa-whatsapp modal-wa-icon"></i> Consultar por WhatsApp
-                </a>
-            </div>
-        </details>`;
-
-    // ── Accessibility ─────────────────────────────────────────────────────────
-    var overlay = document.getElementById('catModal');
-    overlay.setAttribute('role', 'dialog');
-    overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-labelledby', 'catModalTitle');
-
-    // ── Thumbnail gallery click ───────────────────────────────────────────────
-    inner.querySelectorAll('.cat-modal-gallery-thumb').forEach(function(thumb) {
-        thumb.addEventListener('click', function() {
-            var idx = parseInt(thumb.dataset.idx);
-            var mainImg = document.getElementById('modalMainImg');
-            if (mainImg && p.imageUrls && p.imageUrls[idx]) {
-                mainImg.src = resolveImageUrl(p.imageUrls[idx]);
-            }
-            inner.querySelectorAll('.cat-modal-gallery-thumb').forEach(function(t) {
-                t.classList.remove('active');
-            });
-            thumb.classList.add('active');
-        });
-    });
-
-    // ── Variant checkboxes → show qty, enable cart button ────────────────────
-    var cartBtn  = document.getElementById('modalAddToCartBtn');
-    var labelEl  = document.getElementById('cartBtnLabel');
-    var hintEl   = document.getElementById('tableHint');
-
-    function _updateCartBtn() {
-        var anyChecked = inner.querySelectorAll('.variant-cb:checked').length > 0;
-        cartBtn.disabled = !anyChecked;
-        if (labelEl) labelEl.textContent = anyChecked ? (t('add_to_cart') || 'Agregar al carrito') : 'Selecciona una opción';
-        if (hintEl)  hintEl.classList.toggle('modal-table-hint--hidden', anyChecked);
-    }
-
-    inner.querySelectorAll('.variant-cb').forEach(function(cb) {
-        cb.addEventListener('change', function() {
-            var row = cb.closest('.modal-variant-item');
-            var qtyWrap = row && row.querySelector('.variant-qty-wrap');
-            if (qtyWrap) {
-                qtyWrap.classList.toggle('variant-qty-wrap--visible', cb.checked);
-                if (cb.checked) {
-                    var qtyInput = qtyWrap.querySelector('.variant-qty');
-                    if (qtyInput) qtyInput.value = 1;
-                }
-            }
-            // Highlight checked row
-            if (row) row.classList.toggle('selected', cb.checked);
-            _updateCartBtn();
-        });
-    });
-
-    // Qty +/- buttons
-    inner.querySelectorAll('.qty-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var row = btn.closest('.modal-variant-item');
-            var input = row && row.querySelector('.variant-qty');
-            if (!input) return;
-            var val = parseInt(input.value) || 1;
-            if (btn.classList.contains('qty-dec')) val = Math.max(1, val - 1);
-            else val = Math.min(99, val + 1);
-            input.value = val;
-        });
-    });
-
-    // ── Cart button ───────────────────────────────────────────────────────────
-    if (cartBtn) {
-        cartBtn.addEventListener('click', function() {
-            var checked = inner.querySelectorAll('.variant-cb:checked');
-            if (!checked.length) {
-                if (hintEl) hintEl.classList.remove('modal-table-hint--hidden');
-                return;
-            }
-            checked.forEach(function(cb) {
-                var row = cb.closest('.modal-variant-item');
-                var qty = row ? (parseInt(row.querySelector('.variant-qty')?.value) || 1) : 1;
-                if (window.FilamorfosisCart) {
-                    window.FilamorfosisCart.addItem(cb.value, qty);
-                }
-            });
-        });
-    }
-
-    // ── Share button ──────────────────────────────────────────────────────────
-    var shareBtn = document.getElementById('modalShareBtn');
-    if (shareBtn) {
-        shareBtn.addEventListener('click', function() {
-            var url = window.location.href.split('#')[0] + '#product=' + p.id;
-            function _showShareTooltip() {
-                var existing = document.getElementById('share-tooltip');
-                if (existing) existing.remove();
-                var tip = document.createElement('div');
-                tip.id = 'share-tooltip';
-                tip.textContent = '¡Enlace copiado!';
-                tip.style.cssText = [
-                    'position:fixed',
-                    'background:#1e293b',
-                    'border:1px solid #8b5cf6',
-                    'color:#c4b5fd',
-                    'font-size:1rem',
-                    'font-weight:600',
-                    'padding:6px 14px',
-                    'border-radius:8px',
-                    'z-index:99999',
-                    'pointer-events:none',
-                    'box-shadow:0 4px 20px rgba(139,92,246,0.3)',
-                    'white-space:nowrap',
-                    'transition:opacity 0.3s'
-                ].join(';');
-                document.body.appendChild(tip);
-                // Position above the share button
-                var rect = shareBtn.getBoundingClientRect();
-                tip.style.left = (rect.left + rect.width / 2 - tip.offsetWidth / 2) + 'px';
-                tip.style.top  = (rect.top - tip.offsetHeight - 8) + 'px';
-                setTimeout(function() {
-                    tip.style.opacity = '0';
-                    setTimeout(function() { tip.remove(); }, 300);
-                }, 2000);
-            }
-            var copy = navigator.clipboard
-                ? navigator.clipboard.writeText(url)
-                : Promise.resolve(document.execCommand('copy', false, url));
-            copy.then(_showShareTooltip).catch(function() {
-                try {
-                    var ta = document.createElement('textarea');
-                    ta.value = url; ta.style.cssText = 'position:fixed;opacity:0';
-                    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-                    _showShareTooltip();
-                } catch (_) {}
-            });
-        });
-    }
-
-    // ── Focus trap ────────────────────────────────────────────────────────────
-    overlay.addEventListener('keydown', _modalFocusTrap);
-
-    // ── Focus first element ───────────────────────────────────────────────────
-    setTimeout(function() {
-        var firstFocusable = overlay.querySelector(
-            'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        if (firstFocusable) firstFocusable.focus();
-    }, 50);
-}
-
-
-/* ═══════════════════════════════════════════════
-   FOCUS TRAP
-   ═══════════════════════════════════════════════ */
-function _modalFocusTrap(e) {
-    if (e.key !== 'Tab') return;
-    var overlay = document.getElementById('catModal');
-    var focusable = Array.from(overlay.querySelectorAll(
-        'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])'
-    )).filter(function(el) { return el.offsetParent !== null; });
-    if (!focusable.length) return;
-    var first = focusable[0];
-    var last  = focusable[focusable.length - 1];
-    if (e.shiftKey) {
-        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+function openModal(id) {
+    if (window.FilamorfosisRouter) {
+        window.FilamorfosisRouter.navigate('/producto/' + id);
     } else {
-        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+        window.location.href = '/producto/' + id;
     }
 }
-
 /* ═══════════════════════════════════════════════
    UTILITY
    ═══════════════════════════════════════════════ */
@@ -1277,354 +965,222 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 /* ═══════════════════════════════════════════════
-   PRODUCT DETAIL PAGE — Task 10
-   renderProductDetail(id) — renders into #spa-view
+   PRODUCT DETAIL PAGE
+   renderProductDetailPage(id) — called by router
    ═══════════════════════════════════════════════ */
-
-async function renderProductDetail(id) {
-    var spaView = document.getElementById('spa-view');
-    if (!spaView) return;
-
-    // Show loading spinner
-    spaView.innerHTML = '<div class="pdp-loading"><i class="fas fa-spinner fa-spin pdp-loading__icon"></i></div>';
+window.renderProductDetailPage = async function(id) {
+    var root = document.getElementById('pdp-root');
+    if (!root) return;
+    root.innerHTML = '<div class="pdp2-loading"><i class="fas fa-spinner fa-spin"></i></div>';
     window.scrollTo(0, 0);
-
-    var product;
-    try {
-        product = await window.getProduct(id);
-    } catch (e) {
-        _renderProductDetailError(spaView);
+    var p;
+    try { p = await window.getProduct(id); }
+    catch (e) {
+        root.innerHTML = '<div class="pdp2-error"><i class="fas fa-exclamation-triangle"></i><p>Error al cargar el producto.</p><button class="pdp2-back-btn" onclick="window.FilamorfosisRouter&&window.FilamorfosisRouter.navigate(\'/tienda\')"><i class="fas fa-arrow-left"></i> Volver</button></div>';
         return;
     }
-
-    if (!product) {
-        _renderProductDetailError(spaView);
-        return;
-    }
-
-    _renderProductDetailPage(spaView, product);
-}
-
-function _renderProductDetailError(container) {
-    container.innerHTML =
-        '<div class="pdp-error-card">' +
-            '<i class="fas fa-exclamation-triangle pdp-error-card__icon"></i>' +
-            '<p class="pdp-error-card__msg">' + t('error_load_products') + '</p>' +
-            '<button class="pdp-back-link" onclick="window._spaNavigate(\'#home\')">' +
-                '<i class="fas fa-arrow-left"></i> ' + t('back_to_catalog') +
-            '</button>' +
-        '</div>';
-}
-
-function _renderProductDetailPage(container, p) {
+    document.title = (p.titleEs || 'Producto') + ' | Filamorfosis\u00ae';
     var variants = p.variants || [];
     var imgs = (p.imageUrls && p.imageUrls.length) ? p.imageUrls : [];
 
-    // ── Resolve category name from cache ──────────────────────────────────────
-    var catName = '';
-    if (p.categoryId && SPAState.categoryCache && SPAState.categoryCache.length) {
-        var cat = SPAState.categoryCache.find(function(c) { return c.id === p.categoryId; });
-        if (cat) catName = _catName(cat);
+    function _ep(v) {
+        var now = new Date(), ep = v.price || 0;
+        (v.discounts || []).forEach(function(d) {
+            var s = d.startsAt ? new Date(d.startsAt) : null;
+            var e = d.endsAt ? new Date(d.endsAt) : null;
+            if ((!s || s <= now) && (!e || e >= now))
+                ep = d.discountType === 'Percentage' ? ep * (1 - d.value / 100) : Math.max(0, ep - d.value);
+        });
+        if (v.effectivePrice > 0 && v.effectivePrice < ep) ep = v.effectivePrice;
+        return ep;
     }
 
-    // ── Gallery HTML ──────────────────────────────────────────────────────────
     var galleryHtml;
     if (imgs.length) {
-        var mainImg = resolveImageUrl(imgs[0]);
-        var thumbsHtml = imgs.length > 1
-            ? '<div class="pdp-gallery__thumbs">' +
-                imgs.map(function(src, i) {
-                    return '<button class="pdp-gallery__thumb' + (i === 0 ? ' pdp-gallery__thumb--active' : '') + '" ' +
-                        'data-idx="' + i + '" data-src="' + resolveImageUrl(src) + '" ' +
-                        'aria-label="' + t('breadcrumb_home') + ' ' + (i + 1) + '">' +
-                        '<img src="' + resolveImageUrl(src) + '" alt="' + pT(p, 'title') + ' ' + (i + 1) + '" loading="lazy">' +
-                    '</button>';
-                }).join('') +
-              '</div>'
-            : '';
-        galleryHtml =
-            '<div class="pdp-gallery">' +
-                '<div class="pdp-gallery__main-wrap">' +
-                    '<img src="' + mainImg + '" alt="' + pT(p, 'title') + '" id="pdpMainImg" class="pdp-gallery__main-img" loading="lazy">' +
-                '</div>' +
-                thumbsHtml +
-            '</div>';
+        var thumbsHtml = imgs.map(function(src, i) {
+            return '<button class="pdp2-thumb' + (i===0?' pdp2-thumb--active':'') + '" data-idx="'+i+'" data-src="'+resolveImageUrl(src)+'">' +
+                '<img src="'+resolveImageUrl(src)+'" alt="'+(p.titleEs||'')+' '+(i+1)+'" loading="lazy"></button>';
+        }).join('');
+        galleryHtml = '<div class="pdp2-gallery">' +
+            '<div class="pdp2-gallery__main">' +
+                '<img src="'+resolveImageUrl(imgs[0])+'" alt="'+(p.titleEs||'')+'" id="pdp2MainImg" class="pdp2-gallery__main-img" loading="lazy">' +
+                (imgs.length > 1
+                    ? '<button class="pdp2-gallery__arrow pdp2-gallery__arrow--prev" id="pdp2Prev"><i class="fas fa-chevron-left"></i></button>' +
+                      '<button class="pdp2-gallery__arrow pdp2-gallery__arrow--next" id="pdp2Next"><i class="fas fa-chevron-right"></i></button>'
+                    : '') +
+            '</div>' +
+            (imgs.length > 1 ? '<div class="pdp2-gallery__thumbs">'+thumbsHtml+'</div>' : '') +
+        '</div>';
     } else {
-        galleryHtml =
-            '<div class="pdp-gallery">' +
-                '<div class="pdp-gallery__main-wrap pdp-gallery__main-wrap--placeholder">' +
-                    '<span class="pdp-gallery__placeholder-icon">📦</span>' +
-                    '<span class="pdp-gallery__placeholder-text">' + t('no_image') + '</span>' +
-                '</div>' +
-            '</div>';
+        galleryHtml = '<div class="pdp2-gallery"><div class="pdp2-gallery__main pdp2-gallery__main--placeholder">' +
+            '<span class="pdp2-placeholder-icon">\uD83D\uDCE6</span><span class="pdp2-placeholder-text">Sin imagen</span></div></div>';
     }
 
-    // ── Breadcrumb HTML ───────────────────────────────────────────────────────
-    var breadcrumbHtml =
-        '<nav class="pdp-breadcrumb" aria-label="breadcrumb">' +
-            '<ol class="pdp-breadcrumb__list">' +
-                '<li class="pdp-breadcrumb__item">' +
-                    '<button class="pdp-breadcrumb__link" onclick="window._spaNavigate(\'#home\')">' +
-                        t('breadcrumb_home') +
-                    '</button>' +
-                '</li>' +
-                (catName
-                    ? '<li class="pdp-breadcrumb__item">' +
-                        '<span class="pdp-breadcrumb__sep" aria-hidden="true">/</span>' +
-                        '<span class="pdp-breadcrumb__text">' + catName + '</span>' +
-                      '</li>'
-                    : '') +
-                '<li class="pdp-breadcrumb__item">' +
-                    '<span class="pdp-breadcrumb__sep" aria-hidden="true">/</span>' +
-                    '<span class="pdp-breadcrumb__text pdp-breadcrumb__text--current" aria-current="page">' + pT(p, 'title') + '</span>' +
-                '</li>' +
-            '</ol>' +
-        '</nav>';
-
-    // ── Variants HTML ─────────────────────────────────────────────────────────
-    var variantsHtml = variants.map(function(v) {
-        var available = v.isAvailable !== false && v.inStock !== false;
-        var ep = (v.effectivePrice != null && v.effectivePrice > 0) ? v.effectivePrice : v.price;
-        var hasDiscount = available && ep < v.price;
-
-        var priceHtml;
-        if (!available) {
-            priceHtml = '<span class="pdp-variant__price pdp-variant__price--unavailable">' +
-                (v.inStock === false ? t('agotado') : t('no_disponible')) +
-            '</span>';
-        } else if (hasDiscount) {
-            priceHtml =
-                '<span class="pdp-variant__price-original">$' + Math.round(v.price) + ' MXN</span>' +
-                '<span class="pdp-variant__price pdp-variant__price--effective">$' + Math.round(ep) + ' MXN</span>';
-        } else {
-            priceHtml = '<span class="pdp-variant__price">$' + Math.round(ep) + ' MXN</span>';
-        }
-
-        var unavailableLabel = !available
-            ? '<span class="pdp-variant__unavailable-label">' +
-                (v.inStock === false ? t('agotado') : t('no_disponible')) +
-              '</span>'
-            : '';
-
-        return '<div class="pdp-variant-row' + (!available ? ' pdp-variant-row--disabled' : '') + '" data-variant-id="' + v.id + '">' +
-            '<label class="pdp-variant-row__check-wrap">' +
-                '<input type="checkbox" class="pdp-variant-cb" value="' + v.id + '"' +
-                    (available ? '' : ' disabled') +
-                    ' data-price="' + ep + '"' +
-                    ' data-accepts-design="' + (v.acceptsDesignFile ? 'true' : 'false') + '">' +
-                '<span class="pdp-variant-row__label">' + (pT(v, 'title') || v.labelEs || v.labelEn || '') + '</span>' +
-            '</label>' +
-            '<div class="pdp-variant-row__price-wrap">' + priceHtml + '</div>' +
-            unavailableLabel +
-            '<div class="pdp-variant-row__qty-wrap pdp-variant-row__qty-wrap--hidden">' +
-                '<button type="button" class="pdp-qty-btn pdp-qty-btn--dec" aria-label="−">−</button>' +
-                '<input type="number" class="pdp-qty-input" value="1" min="1" max="99" aria-label="' + t('agregar_al_carrito') + '">' +
-                '<button type="button" class="pdp-qty-btn pdp-qty-btn--inc" aria-label="+">+</button>' +
+    var variantsHtml = variants.length ? variants.map(function(v) {
+        var avail = v.isAvailable !== false && v.inStock !== false;
+        var ep = _ep(v), hasDis = avail && ep < v.price;
+        var badge = !avail ? '<span class="pdp2-variant__badge">'+(v.inStock===false?'Agotado':'No disponible')+'</span>' : '';
+        var priceHtml = avail
+            ? (hasDis
+                ? '<span class="pdp2-variant__price-orig">$'+Math.round(v.price)+'</span><span class="pdp2-variant__price-eff">$'+Math.round(ep)+' MXN</span>'
+                : '<span class="pdp2-variant__price">$'+Math.round(ep)+' MXN</span>')
+            : '<span class="pdp2-variant__price pdp2-variant__price--na">\u2014</span>';
+        return '<div class="pdp2-variant'+(avail?'':' pdp2-variant--disabled')+'" data-variant-id="'+v.id+'" data-price="'+ep+'" data-accepts-design="'+(v.acceptsDesignFile?'1':'0')+'">' +
+            '<button type="button" class="pdp2-variant__btn'+(avail?'':' pdp2-variant__btn--disabled')+'"'+(avail?'':' disabled')+' data-variant-id="'+v.id+'">' +
+                '<span class="pdp2-variant__label">'+(v.labelEs||'')+'</span>'+badge +
+            '</button>' +
+            '<div class="pdp2-variant__right">' + priceHtml +
+                (avail ? '<div class="pdp2-variant__qty pdp2-variant__qty--hidden">' +
+                    '<button type="button" class="pdp2-qty-btn pdp2-qty-dec">\u2212</button>' +
+                    '<input type="number" class="pdp2-qty-input" value="1" min="1" max="99">' +
+                    '<button type="button" class="pdp2-qty-btn pdp2-qty-inc">+</button>' +
+                '</div>' : '') +
             '</div>' +
-            (v.acceptsDesignFile
-                ? '<div class="pdp-variant-row__upload-wrap pdp-variant-row__upload-wrap--hidden">' +
-                    '<label class="pdp-upload-label">' +
-                        '<i class="fas fa-upload"></i> ' +
-                        '<span class="pdp-upload-label__text">Subir diseño</span>' +
-                        '<input type="file" class="pdp-design-file" accept=".png,.jpg,.jpeg,.svg,.pdf" data-variant-id="' + v.id + '">' +
-                    '</label>' +
-                  '</div>'
+            (v.acceptsDesignFile && avail
+                ? '<div class="pdp2-variant__upload pdp2-variant__upload--hidden"><label class="pdp2-upload-label"><i class="fas fa-upload"></i> Subir dise\u00f1o<input type="file" class="pdp2-design-file" accept=".png,.jpg,.jpeg,.svg,.pdf" data-variant-id="'+v.id+'"></label></div>'
                 : '') +
         '</div>';
-    }).join('');
+    }).join('') : '<p class="pdp2-no-variants">Sin variantes disponibles.</p>';
 
-    // ── Assemble full page ────────────────────────────────────────────────────
-    container.innerHTML =
-        '<div class="pdp-page">' +
-            breadcrumbHtml +
-            '<div class="pdp-layout">' +
-                '<div class="pdp-layout__gallery">' +
-                    galleryHtml +
-                '</div>' +
-                '<div class="pdp-layout__info">' +
-                    '<h1 class="pdp-title">' + pT(p, 'title') + '</h1>' +
-                    '<p class="pdp-desc">' + (pT(p, 'desc') || '') + '</p>' +
-                    '<section class="pdp-variants" aria-label="' + t('agregar_al_carrito') + '">' +
-                        (variants.length
-                            ? variantsHtml
-                            : '<p class="pdp-variants__empty">' + t('no_disponible') + '</p>') +
-                    '</section>' +
-                    '<div class="pdp-total-row">' +
-                        '<span class="pdp-total-label">' + t('cart_total') + '</span>' +
-                        '<span class="pdp-total-amount" id="pdpTotalAmount">$0 MXN</span>' +
+    var tagsHtml = (p.tags && p.tags.length)
+        ? '<div class="pdp2-tags">'+p.tags.map(function(tag){return '<span class="pdp2-tag">'+tag+'</span>';}).join('')+'</div>' : '';
+    var badgeHtml = p.badge ? '<span class="pdp2-badge pdp2-badge--'+p.badge+'">'+(t('badge_'+p.badge)||p.badge)+'</span>' : '';
+
+    root.innerHTML =
+        '<div class="pdp2-page">' +
+            '<div class="pdp2-breadcrumb">' +
+                '<button class="pdp2-back-btn" id="pdp2Back"><i class="fas fa-arrow-left"></i> Tienda</button>' +
+                '<span class="pdp2-breadcrumb__sep">/</span>' +
+                '<span class="pdp2-breadcrumb__current">'+(p.titleEs||'')+'</span>' +
+            '</div>' +
+            '<div class="pdp2-layout">' +
+                '<div class="pdp2-layout__gallery">'+galleryHtml+'</div>' +
+                '<div class="pdp2-layout__info">' +
+                    badgeHtml +
+                    '<h1 class="pdp2-title">'+(p.titleEs||'')+'</h1>' +
+                    '<p class="pdp2-desc">'+(p.descriptionEs||'')+'</p>' +
+                    tagsHtml +
+                    '<div class="pdp2-divider"></div>' +
+                    '<p class="pdp2-variants-label">Elige una opci\u00f3n</p>' +
+                    '<div class="pdp2-variants" id="pdp2Variants">'+variantsHtml+'</div>' +
+                    '<div class="pdp2-total-row">' +
+                        '<span class="pdp2-total-label">Total</span>' +
+                        '<span class="pdp2-total-amount" id="pdp2Total">$0 MXN</span>' +
                     '</div>' +
-                    '<button class="pdp-add-btn" id="pdpAddBtn" disabled>' +
-                        '<i class="fas fa-cart-plus"></i> ' + t('agregar_al_carrito') +
-                    '</button>' +
-                    '<button class="pdp-back-link" onclick="window._spaNavigate(\'#home\')">' +
-                        '<i class="fas fa-arrow-left"></i> ' + t('back_to_catalog') +
-                    '</button>' +
+                    '<button class="pdp2-add-btn" id="pdp2AddBtn" disabled><i class="fas fa-cart-plus"></i> Agregar al carrito</button>' +
+                    '<a class="pdp2-wa-btn" href="https://wa.me/13152071586?text='+encodeURIComponent('Hola! Me interesa: '+(p.titleEs||''))+'" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Consultar por WhatsApp</a>' +
+                    '<div class="pdp2-trust">' +
+                        '<span><i class="fas fa-shield-alt"></i> Pago seguro</span>' +
+                        '<span><i class="fas fa-truck"></i> Env\u00edo a todo M\u00e9xico</span>' +
+                        '<span><i class="fas fa-star"></i> Calidad garantizada</span>' +
+                    '</div>' +
                 '</div>' +
             '</div>' +
         '</div>';
 
-    // ── Wire gallery thumbnails + auto-advance ────────────────────────────────
-    var _galleryThumbs = Array.from(container.querySelectorAll('.pdp-gallery__thumb'));
-    var _galleryTimer = null;
-    var _galleryCurrentIdx = 0;
-
-    function _galleryGoTo(idx) {
-        var mainImg = document.getElementById('pdpMainImg');
-        if (!_galleryThumbs.length || !mainImg) return;
-        _galleryCurrentIdx = (idx + _galleryThumbs.length) % _galleryThumbs.length;
-        var thumb = _galleryThumbs[_galleryCurrentIdx];
-        mainImg.src = thumb.dataset.src;
-        _galleryThumbs.forEach(function(b) { b.classList.remove('pdp-gallery__thumb--active'); });
-        thumb.classList.add('pdp-gallery__thumb--active');
+    var _cur = 0, _thumbBtns = Array.from(root.querySelectorAll('.pdp2-thumb')), _mainImg = root.querySelector('#pdp2MainImg');
+    function _goImg(idx) {
+        if (!imgs.length) return;
+        _cur = (idx + imgs.length) % imgs.length;
+        if (_mainImg) _mainImg.src = resolveImageUrl(imgs[_cur]);
+        _thumbBtns.forEach(function(b,i){ b.classList.toggle('pdp2-thumb--active', i===_cur); });
     }
+    _thumbBtns.forEach(function(b,i){ b.addEventListener('click', function(){ _goImg(i); }); });
+    var pBtn = root.querySelector('#pdp2Prev'), nBtn = root.querySelector('#pdp2Next');
+    if (pBtn) pBtn.addEventListener('click', function(){ _goImg(_cur-1); });
+    if (nBtn) nBtn.addEventListener('click', function(){ _goImg(_cur+1); });
+    if (_mainImg) _mainImg.addEventListener('error', function(){ this.src = _IMG_PLACEHOLDER; });
 
-    function _galleryStartAuto() {
-        if (_galleryThumbs.length <= 1) return;
-        _galleryTimer = setInterval(function() {
-            _galleryGoTo(_galleryCurrentIdx + 1);
-        }, 3000);
-    }
-
-    function _galleryStopAuto() {
-        clearInterval(_galleryTimer);
-        _galleryTimer = null;
-    }
-
-    _galleryThumbs.forEach(function(btn, idx) {
-        btn.addEventListener('click', function() {
-            _galleryStopAuto();
-            _galleryGoTo(idx);
-            _galleryStartAuto();
-        });
+    var backBtn = root.querySelector('#pdp2Back');
+    if (backBtn) backBtn.addEventListener('click', function(){
+        if (window.FilamorfosisRouter) window.FilamorfosisRouter.navigate('/tienda');
+        else window.history.back();
     });
 
-    // Auto-advance only when multiple images exist
-    if (_galleryThumbs.length > 1) {
-        _galleryStartAuto();
-        var galleryEl = container.querySelector('.pdp-gallery');
-        if (galleryEl) {
-            galleryEl.addEventListener('mouseenter', _galleryStopAuto);
-            galleryEl.addEventListener('mouseleave', _galleryStartAuto);
-        }
-    }
-
-    // ── Broken image fallback ─────────────────────────────────────────────────
-    var mainImgEl = document.getElementById('pdpMainImg');
-    if (mainImgEl) {
-        mainImgEl.addEventListener('error', function() {
-            this.src = _IMG_PLACEHOLDER;
-        });
-    }
-
-    // ── Variant selection logic ───────────────────────────────────────────────
-    var addBtn = document.getElementById('pdpAddBtn');
-    var totalAmountEl = document.getElementById('pdpTotalAmount');
-
+    var _sel = {}, addBtn = root.querySelector('#pdp2AddBtn'), totalEl = root.querySelector('#pdp2Total');
     function _updateTotal() {
         var total = 0;
-        container.querySelectorAll('.pdp-variant-cb:checked').forEach(function(cb) {
-            var row = cb.closest('.pdp-variant-row');
-            var qty = row ? (parseInt(row.querySelector('.pdp-qty-input').value) || 1) : 1;
-            var price = parseFloat(cb.dataset.price) || 0;
-            total += price * qty;
+        Object.keys(_sel).forEach(function(vid) {
+            var el = root.querySelector('.pdp2-variant[data-variant-id="'+vid+'"]');
+            total += (el ? parseFloat(el.dataset.price)||0 : 0) * (_sel[vid]||1);
         });
-        if (totalAmountEl) totalAmountEl.textContent = '$' + Math.round(total) + ' MXN';
-        var anyChecked = container.querySelectorAll('.pdp-variant-cb:checked').length > 0;
-        if (addBtn) addBtn.disabled = !anyChecked;
+        if (totalEl) totalEl.textContent = '$'+Math.round(total)+' MXN';
+        if (addBtn) addBtn.disabled = Object.keys(_sel).length === 0;
     }
 
-    container.querySelectorAll('.pdp-variant-cb').forEach(function(cb) {
-        cb.addEventListener('change', function() {
-            var row = cb.closest('.pdp-variant-row');
-            if (!row) return;
-            var qtyWrap = row.querySelector('.pdp-variant-row__qty-wrap');
-            var uploadWrap = row.querySelector('.pdp-variant-row__upload-wrap');
-            if (qtyWrap) qtyWrap.classList.toggle('pdp-variant-row__qty-wrap--hidden', !cb.checked);
-            if (uploadWrap && cb.dataset.acceptsDesign === 'true') {
-                uploadWrap.classList.toggle('pdp-variant-row__upload-wrap--hidden', !cb.checked);
+    root.querySelectorAll('.pdp2-variant__btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var vid = btn.dataset.variantId;
+            var el = root.querySelector('.pdp2-variant[data-variant-id="'+vid+'"]');
+            if (!el) return;
+            var qtyWrap = el.querySelector('.pdp2-variant__qty');
+            var upWrap  = el.querySelector('.pdp2-variant__upload');
+            if (_sel[vid]) {
+                delete _sel[vid];
+                btn.classList.remove('pdp2-variant__btn--selected');
+                el.classList.remove('pdp2-variant--selected');
+                if (qtyWrap) qtyWrap.classList.add('pdp2-variant__qty--hidden');
+                if (upWrap)  upWrap.classList.add('pdp2-variant__upload--hidden');
+            } else {
+                _sel[vid] = 1;
+                btn.classList.add('pdp2-variant__btn--selected');
+                el.classList.add('pdp2-variant--selected');
+                if (qtyWrap) qtyWrap.classList.remove('pdp2-variant__qty--hidden');
+                if (upWrap && el.dataset.acceptsDesign==='1') upWrap.classList.remove('pdp2-variant__upload--hidden');
+                var qi = el.querySelector('.pdp2-qty-input'); if (qi) qi.value = 1;
             }
-            row.classList.toggle('pdp-variant-row--selected', cb.checked);
             _updateTotal();
         });
     });
 
-    // ── Qty stepper ───────────────────────────────────────────────────────────
-    container.querySelectorAll('.pdp-qty-btn--dec').forEach(function(btn) {
+    root.querySelectorAll('.pdp2-qty-dec').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            var input = btn.closest('.pdp-variant-row__qty-wrap').querySelector('.pdp-qty-input');
-            if (input) { input.value = Math.max(1, (parseInt(input.value) || 1) - 1); _updateTotal(); }
+            var el = btn.closest('.pdp2-variant'), vid = el&&el.dataset.variantId, inp = el&&el.querySelector('.pdp2-qty-input');
+            if (!inp||!vid) return;
+            inp.value = Math.max(1,(parseInt(inp.value)||1)-1);
+            if (_sel[vid]) { _sel[vid]=parseInt(inp.value); _updateTotal(); }
         });
     });
-    container.querySelectorAll('.pdp-qty-btn--inc').forEach(function(btn) {
+    root.querySelectorAll('.pdp2-qty-inc').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            var input = btn.closest('.pdp-variant-row__qty-wrap').querySelector('.pdp-qty-input');
-            if (input) { input.value = Math.min(99, (parseInt(input.value) || 1) + 1); _updateTotal(); }
+            var el = btn.closest('.pdp2-variant'), vid = el&&el.dataset.variantId, inp = el&&el.querySelector('.pdp2-qty-input');
+            if (!inp||!vid) return;
+            inp.value = Math.min(99,(parseInt(inp.value)||1)+1);
+            if (_sel[vid]) { _sel[vid]=parseInt(inp.value); _updateTotal(); }
         });
     });
-    container.querySelectorAll('.pdp-qty-input').forEach(function(input) {
-        input.addEventListener('change', _updateTotal);
+    root.querySelectorAll('.pdp2-qty-input').forEach(function(inp) {
+        inp.addEventListener('change', function() {
+            var el = inp.closest('.pdp2-variant'), vid = el&&el.dataset.variantId;
+            if (vid&&_sel[vid]) { _sel[vid]=Math.max(1,parseInt(inp.value)||1); _updateTotal(); }
+        });
     });
 
-    // ── Add to cart ───────────────────────────────────────────────────────────
     if (addBtn) {
         addBtn.addEventListener('click', async function() {
-            var checked = container.querySelectorAll('.pdp-variant-cb:checked');
-            if (!checked.length) return;
-
+            var vids = Object.keys(_sel); if (!vids.length) return;
             addBtn.disabled = true;
-
-            var productTitle = pT(p, 'title');
-            var thumbUrl = imgs.length ? resolveImageUrl(imgs[0]) : '';
+            addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
             var allOk = true;
-
-            for (var i = 0; i < checked.length; i++) {
-                var cb = checked[i];
-                var row = cb.closest('.pdp-variant-row');
-                var qty = row ? (parseInt(row.querySelector('.pdp-qty-input').value) || 1) : 1;
-                var variantId = cb.value;
-
-                // Check for design file
-                var designFileInput = row ? row.querySelector('.pdp-design-file') : null;
-                var designFile = designFileInput && designFileInput.files.length ? designFileInput.files[0] : null;
-
+            for (var i = 0; i < vids.length; i++) {
+                var vid = vids[i], qty = _sel[vid]||1;
+                var el = root.querySelector('.pdp2-variant[data-variant-id="'+vid+'"]');
+                var df = el&&el.querySelector('.pdp2-design-file');
+                var file = df&&df.files.length ? df.files[0] : null;
                 try {
-                    var cartResult = await window.addToCart({ productVariantId: variantId, quantity: qty });
-
-                    // Upload design file if present
-                    if (designFile && cartResult && cartResult.id) {
-                        try {
-                            await window.uploadDesign(cartResult.id, designFile);
-                        } catch (_) { /* design upload failure is non-fatal */ }
-                    }
-                } catch (err) {
+                    var res = await window.addToCart({ productVariantId: vid, quantity: qty });
+                    if (file && res && res.id) { try { await window.uploadDesign(res.id, file); } catch(_){} }
+                } catch(err) {
                     allOk = false;
-                    if (err && err.status === 401) {
-                        if (window.FilamorfosisAuth) window.FilamorfosisAuth.showModal('login');
-                        break;
-                    }
+                    if (err&&err.status===401 && window.FilamorfosisAuth) { window.FilamorfosisAuth.showModal('login'); break; }
                 }
             }
-
-            // Update cart badge
-            if (window.FilamorfosisCart && window.FilamorfosisCart.loadCart) {
-                window.FilamorfosisCart.loadCart();
-            }
-
-            if (allOk) {
-                if (window.Toast) {
-                    window.Toast.show({ message: t('cart_add_success') || productTitle, type: 'success', thumbnail: thumbUrl || null });
-                }
-            } else {
-                if (window.Toast) {
-                    window.Toast.show({ message: t('cart_add_error') || 'Error al agregar al carrito', type: 'error' });
-                }
-            }
-
+            if (window.FilamorfosisCart&&window.FilamorfosisCart.loadCart) window.FilamorfosisCart.loadCart();
             addBtn.disabled = false;
+            addBtn.innerHTML = '<i class="fas fa-cart-plus"></i> Agregar al carrito';
             _updateTotal();
         });
     }
-}
+};
 
-// Expose for SPA router wiring
-window.renderProductDetail = renderProductDetail;
+window.renderProductDetail = window.renderProductDetailPage;

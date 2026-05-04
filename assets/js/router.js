@@ -77,6 +77,19 @@
             init: function () {
                 _reApplyLang();
             }
+        },
+        {
+            path: '/producto',
+            templateId: 'tpl-producto',
+            title: 'Producto | Filamorfosis®',
+            description: 'Personaliza y ordena tu producto en Filamorfosis®.',
+            bodyClass: 'page-producto',
+            init: function () {
+                _initWhatsApp();
+                _initPromoBanner();
+                _initProductDetail();
+                _reApplyLang();
+            }
         }
     ];
 
@@ -98,6 +111,14 @@
     function _initPromoBanner() {
         if (typeof window.initPromoBanner === 'function') {
             window.initPromoBanner();
+        }
+    }
+
+    function _initProductDetail() {
+        var pathParts = window.location.pathname.split('/');
+        var productId = (pathParts[1] === 'producto' && pathParts[2]) ? pathParts[2] : null;
+        if (productId && typeof window.renderProductDetailPage === 'function') {
+            window.renderProductDetailPage(productId);
         }
     }
 
@@ -212,6 +233,11 @@
         // /servicios/:slug — treat as servicios route with a process slug
         if (/^\/servicios\/[^/]+$/.test(p)) {
             return routes[2]; // servicios route (index 2)
+        }
+
+        // /producto/:id — product detail page
+        if (/^\/producto\/[^/]+$/.test(p)) {
+            return routes[5]; // producto route
         }
 
         return routes[0]; // default to home
