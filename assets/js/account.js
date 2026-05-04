@@ -1,10 +1,20 @@
 /**
- * account.js — Account/Profile management page
- * Handles profile editing, addresses, and orders display
+ * account.js — Account/Profile management page v2
+ * Enhanced UX: interests, prettier addresses, bigger fonts, site-matching design.
  */
 
 (function () {
   'use strict';
+
+  /* ── Subcategory interests (fetched from API) ────────────────────────── */
+  const INTERESTS_KEY = 'filamorfosis_interests';
+
+  function _loadInterests() {
+    try { return JSON.parse(localStorage.getItem(INTERESTS_KEY) || '[]'); } catch { return []; }
+  }
+  function _saveInterests(ids) {
+    localStorage.setItem(INTERESTS_KEY, JSON.stringify(ids));
+  }
 
   /* ── Canvas animated background ─────────────────────────────────────── */
   function initAccountCanvas() {
@@ -96,10 +106,7 @@
     try { await getMe(); } catch {
       window.FilamorfosisAuth?.showModal('login');
       document.addEventListener('auth:login', () => {
-        // Reload account page after login
-        if (window.FilamorfosisRouter) {
-          window.FilamorfosisRouter.navigate('/account');
-        }
+        if (window.FilamorfosisRouter) window.FilamorfosisRouter.navigate('/account');
       });
       return;
     }
@@ -111,22 +118,20 @@
       window.FilamorfosisAuth?.logout?.();
     });
 
-    // Tab switching
-    document.querySelectorAll('.account-tab').forEach(btn => {
+    // Tab switching — use new acct-tab class
+    document.querySelectorAll('.acct-tab').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.account-tab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.account-panel').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.acct-tab').forEach(b => b.classList.remove('acct-tab--active'));
+        btn.classList.add('acct-tab--active');
+        document.querySelectorAll('.acct-panel').forEach(p => { p.style.display = 'none'; });
         document.getElementById(`tab-${btn.dataset.tab}`).style.display = '';
-        if (btn.dataset.tab === 'orders') {
-          _loadOrders();
-          _initOrdersControls();
-        }
+        if (btn.dataset.tab === 'orders') { _loadOrders(); _initOrdersControls(); }
         if (btn.dataset.tab === 'addresses') _loadAddresses();
       });
     });
 
     await _loadProfile();
+    _renderInterests();
 
     // Inline validation
     _attachValidation('profile-first', 'hint-first', v => v.trim().length >= 1 ? null : 'Ingresa tu nombre');
@@ -135,15 +140,31 @@
 
     document.getElementById('profile-form')?.addEventListener('submit', _handleProfileSave);
 
+    // Interests save
+    document.getElementById('save-interests-btn')?.addEventListener('click', () => {
+      const chips = Array.from(document.querySelectorAll('.acct-interest-chip--selected'));
+      const selected = chips.map(el => el.dataset.id);
+      // Build a name+icon map from the current DOM for badge rendering
+      const nameMap = {};
+      document.querySelectorAll('.acct-interest-chip').forEach(el => {
+        nameMap[el.dataset.id] = { name: el.dataset.name, icon: el.dataset.icon };
+      });
+      _saveInterests(selected);
+      _updateHeroBadges(selected, nameMap);
+      if (window.Toast) window.Toast.show({ message: '✓ Intereses guardados', type: 'success' });
+    });
+
     // Add address toggle
-    const toggleBtn  = document.getElementById('toggle-add-addr-btn');
-    const addrPanel  = document.getElementById('add-addr-panel');
+    const toggleBtn = document.getElementById('toggle-add-addr-btn');
+    const addrPanel = document.getElementById('add-addr-panel');
+    const cancelBtn = document.getElementById('cancel-add-addr-btn');
+
     toggleBtn?.addEventListener('click', () => {
       const isOpen = addrPanel.classList.contains('open');
       addrPanel.classList.toggle('open', !isOpen);
-      toggleBtn.innerHTML = isOpen
-        ? '<i class="fas fa-plus"></i> Agregar dirección'
-        : '<i class="fas fa-times"></i> Cancelar';
+    });
+    cancelBtn?.addEventListener('click', () => {
+      addrPanel.classList.remove('open');
     });
 
     document.getElementById('add-addr-form')?.addEventListener('submit', _handleAddAddress);
@@ -157,23 +178,138 @@
     document.getElementById('profile-phone').value = user.phoneNumber ?? '';
     document.getElementById('profile-email').value = user.email ?? '';
 
-    // Header name + email
     const nameEl   = document.getElementById('account-header-name');
     const emailEl  = document.getElementById('account-header-email');
     const avatarEl = document.getElementById('account-avatar');
 
     const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email || 'Usuario';
-    nameEl.textContent = fullName;
-    nameEl.className   = 'account-gradient-name';
-
+    if (nameEl) { nameEl.textContent = fullName; nameEl.className = 'acct-hero__name'; }
     if (emailEl) emailEl.textContent = user.email ?? '';
 
-    // Initials
     const initials = [user.firstName, user.lastName]
-      .filter(Boolean)
-      .map(n => n[0].toUpperCase())
-      .join('') || '?';
+      .filter(Boolean).map(n => n[0].toUpperCase()).join('') || '?';
     if (avatarEl) avatarEl.textContent = initials;
+
+    // Show saved interests as hero badges — build nameMap from DOM after grid renders
+    const savedIds = _loadInterests();
+    if (savedIds.length) {
+      // Wait a tick for _renderInterests() to finish populating the DOM
+      setTimeout(() => {
+        const nameMap = {};
+        document.querySelectorAll('.acct-interest-chip').forEach(el => {
+          nameMap[el.dataset.id] = { name: el.dataset.name, icon: el.dataset.icon };
+        });
+        _updateHeroBadges(savedIds, nameMap);
+      }, 300);
+    }
+  }
+
+  /* ── Render interests grid from live subcategories ───────────────────── */
+  /* ── Render interests — two-panel selector ───────────────────────────── */
+  async function _renderInterests() {
+    const grid = document.getElementById('acct-interests-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '<p style="color:#64748b;font-size:1rem"><i class="fas fa-spinner fa-spin"></i> Cargando categorías…</p>';
+
+    let categories;
+    try {
+      categories = await getCategories();
+    } catch {
+      grid.innerHTML = '<p style="color:#f87171;font-size:1rem">No se pudieron cargar las categorías.</p>';
+      return;
+    }
+
+    const groups   = categories.filter(c => c.subCategories && c.subCategories.length);
+    const selected = _loadInterests();
+
+    if (!groups.length) {
+      grid.innerHTML = '<p style="color:#64748b;font-size:1rem">No hay subcategorías disponibles.</p>';
+      return;
+    }
+
+    // Build the two-panel shell
+    grid.innerHTML = `
+      <div class="acct-cat-picker">
+        <nav class="acct-cat-picker__nav" role="tablist" aria-label="Categorías">
+          ${groups.map((cat, i) => {
+            const selCount = cat.subCategories.filter(sc => selected.includes(sc.id)).length;
+            const icon = cat.icon ? `<i class="${_esc(cat.icon)}"></i>` : '';
+            return `<button class="acct-cat-nav-btn${i === 0 ? ' acct-cat-nav-btn--active' : ''}"
+                            role="tab"
+                            aria-selected="${i === 0}"
+                            data-cat-idx="${i}">
+                      <span class="acct-cat-nav-btn__icon">${icon}</span>
+                      <span class="acct-cat-nav-btn__label">${_esc(cat.name)}</span>
+                      <span class="acct-cat-nav-btn__count${selCount ? ' acct-cat-nav-btn__count--has' : ''}"
+                            data-cat-count="${i}">${selCount || ''}</span>
+                    </button>`;
+          }).join('')}
+        </nav>
+        <div class="acct-cat-picker__panel" role="tabpanel">
+          ${groups.map((cat, i) => {
+            const chips = cat.subCategories.map(sc => {
+              const isSel = selected.includes(sc.id);
+              const icon  = sc.icon ? `<i class="${_esc(sc.icon)}"></i>` : '';
+              return `<button type="button"
+                        class="acct-interest-chip${isSel ? ' acct-interest-chip--selected' : ''}"
+                        data-id="${_esc(sc.id)}"
+                        data-name="${_esc(sc.name)}"
+                        data-icon="${_esc(sc.icon || '')}"
+                        data-cat-idx="${i}"
+                        aria-pressed="${isSel}">
+                        ${icon}${_esc(sc.name)}
+                      </button>`;
+            }).join('');
+            return `<div class="acct-cat-subpanel${i === 0 ? ' acct-cat-subpanel--active' : ''}"
+                        data-subpanel="${i}">${chips}</div>`;
+          }).join('')}
+        </div>
+      </div>`;
+
+    // Nav tab switching
+    grid.querySelectorAll('.acct-cat-nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = btn.dataset.catIdx;
+        grid.querySelectorAll('.acct-cat-nav-btn').forEach(b => {
+          b.classList.remove('acct-cat-nav-btn--active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        grid.querySelectorAll('.acct-cat-subpanel').forEach(p => p.classList.remove('acct-cat-subpanel--active'));
+        btn.classList.add('acct-cat-nav-btn--active');
+        btn.setAttribute('aria-selected', 'true');
+        grid.querySelector(`.acct-cat-subpanel[data-subpanel="${idx}"]`).classList.add('acct-cat-subpanel--active');
+      });
+    });
+
+    // Chip toggle — also update the nav count badge
+    grid.querySelectorAll('.acct-interest-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        chip.classList.toggle('acct-interest-chip--selected');
+        chip.setAttribute('aria-pressed', chip.classList.contains('acct-interest-chip--selected'));
+        // Recount for this category
+        const catIdx = chip.dataset.catIdx;
+        const count  = grid.querySelectorAll(`.acct-interest-chip[data-cat-idx="${catIdx}"].acct-interest-chip--selected`).length;
+        const badge  = grid.querySelector(`.acct-cat-nav-btn__count[data-cat-count="${catIdx}"]`);
+        if (badge) {
+          badge.textContent = count || '';
+          badge.classList.toggle('acct-cat-nav-btn__count--has', count > 0);
+        }
+      });
+    });
+  }
+
+  /* ── Update hero interest badges ─────────────────────────────────────── */
+  function _updateHeroBadges(ids, nameMap) {
+    const container = document.getElementById('acct-interest-badges');
+    if (!container) return;
+    if (!ids.length) { container.innerHTML = ''; return; }
+    container.innerHTML = ids.map(id => {
+      const info = nameMap && nameMap[id];
+      if (!info) return '';
+      const icon = info.icon ? `<i class="${_esc(info.icon)}"></i>` : '';
+      return `<span class="acct-interest-badge">${icon}${_esc(info.name)}</span>`;
+    }).join('');
   }
 
   /* ── Inline validation helper ───────────────────────────────────────── */
@@ -207,13 +343,10 @@
         lastName:    document.getElementById('profile-last').value.trim(),
         phoneNumber: document.getElementById('profile-phone').value.trim() || null
       });
-      if (window.Toast) {
-        window.Toast.show({ message: '✓ Perfil actualizado', type: 'success' });
-      }
-      // Refresh header name/avatar
+      if (window.Toast) window.Toast.show({ message: '✓ Perfil actualizado', type: 'success' });
       await _loadProfile();
     } catch (err) {
-      alert(err.detail || 'Error al guardar.');
+      if (window.Toast) window.Toast.show({ message: err.detail || 'Error al guardar.', type: 'error' });
     } finally {
       btn.disabled = false;
     }
@@ -223,18 +356,30 @@
   async function _loadAddresses() {
     const profile = await getMe();
     const list    = document.getElementById('addresses-list');
+    if (!list) return;
+
     if (!profile.addresses?.length) {
-      list.innerHTML = '<p style="color:#64748b">No tienes direcciones guardadas.</p>';
+      list.innerHTML = `
+        <div class="acct-addr-empty">
+          <i class="fas fa-map-marker-alt"></i>
+          <p>Aún no tienes direcciones guardadas</p>
+        </div>`;
       return;
     }
+
     list.innerHTML = profile.addresses.map((a, idx) => `
-      <div class="card address-card ${idx === 0 ? 'address-card--default' : ''}" style="display:flex;align-items:flex-start;gap:1rem;margin-bottom:0.75rem">
-        <i class="fas fa-map-marker-alt" style="color:#a78bfa;margin-top:2px;flex-shrink:0"></i>
-        <div style="flex:1">
-          <span>${_esc(a.street)}, ${_esc(a.city)}, ${_esc(a.state)} ${_esc(a.postalCode)}, ${_esc(a.country)}</span>
-          ${idx === 0 ? '<span class="address-card__badge"><i class="fas fa-star" style="font-size: 1rem"></i> Predeterminada</span>' : ''}
+      <div class="acct-addr-card${idx === 0 ? ' acct-addr-card--default' : ''}">
+        <div class="acct-addr-card__pin">
+          <i class="fas fa-map-marker-alt"></i>
         </div>
-        <button class="btn-danger btn-sm" onclick="deleteAddress('${a.id}').then(() => window._accountLoadAddresses())">
+        <div class="acct-addr-card__body">
+          <p class="acct-addr-card__line">${_esc(a.street)}</p>
+          <p class="acct-addr-card__meta">${_esc(a.city)}, ${_esc(a.state)} ${_esc(a.postalCode)} · ${_esc(a.country)}</p>
+          ${idx === 0 ? '<span class="acct-addr-card__default-badge"><i class="fas fa-star"></i> Predeterminada</span>' : ''}
+        </div>
+        <button class="acct-addr-card__delete"
+                aria-label="Eliminar dirección"
+                onclick="deleteAddress('${a.id}').then(() => window._accountLoadAddresses())">
           <i class="fas fa-trash"></i>
         </button>
       </div>`).join('');
@@ -254,14 +399,11 @@
         country:    document.getElementById('new-country').value.trim()
       });
       e.target.reset();
-      // Close the slide-down form
-      const panel   = document.getElementById('add-addr-panel');
-      const togBtn  = document.getElementById('toggle-add-addr-btn');
-      panel.classList.remove('open');
-      if (togBtn) togBtn.innerHTML = '<i class="fas fa-plus"></i> Agregar dirección';
+      document.getElementById('add-addr-panel')?.classList.remove('open');
+      if (window.Toast) window.Toast.show({ message: '✓ Dirección guardada', type: 'success' });
       await _loadAddresses();
     } catch (err) {
-      alert(err.detail || 'Error al guardar dirección.');
+      if (window.Toast) window.Toast.show({ message: err.detail || 'Error al guardar dirección.', type: 'error' });
     } finally {
       btn.disabled = false;
     }

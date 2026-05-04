@@ -1389,94 +1389,185 @@
 <!-- ── ACCOUNT ───────────────────────────────────────────────────────── -->
 <template id="tpl-account">
 
-    <main class="account-page container">
+    <main class="account-page">
 
-        <!-- Animated header with avatar -->
-        <div class="account-header" style="position:relative;overflow:hidden;padding:2rem 0 1.5rem;margin-bottom:1.5rem">
-            <canvas id="account-bg-canvas" style="position:absolute;inset:0;pointer-events:none;z-index:0;width:100%;height:100%"></canvas>
-            <div class="account-header__content" style="position:relative;z-index:1;display:flex;align-items:center;gap:1.5rem">
-                <div class="account-avatar" id="account-avatar">?</div>
-                <div>
-                    <h1 class="account-header__name" id="account-header-name">Cargando...</h1>
-                    <p class="account-header__email" id="account-header-email"></p>
+        <!-- Hero header -->
+        <div class="acct-hero">
+            <canvas id="account-bg-canvas" aria-hidden="true"></canvas>
+            <div class="acct-hero__inner">
+                <div class="acct-avatar" id="account-avatar" aria-hidden="true">?</div>
+                <div class="acct-hero__info">
+                    <h1 class="acct-hero__name" id="account-header-name">Cargando…</h1>
+                    <p class="acct-hero__email" id="account-header-email"></p>
+                    <div class="acct-hero__badges" id="acct-interest-badges"></div>
                 </div>
-                <button class="btn-ghost account-logout-btn" id="account-logout-btn" style="margin-left:auto" data-action="logout">
-                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                <button class="acct-logout-btn" id="account-logout-btn" aria-label="Cerrar sesión">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Salir</span>
                 </button>
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="account-tabs">
-            <button class="account-tab active" data-tab="profile" data-t="account.profile">Perfil</button>
-            <button class="account-tab" data-tab="addresses" data-t="account.addresses">Direcciones</button>
-            <button class="account-tab" data-tab="orders" data-t="account.orders">Mis pedidos</button>
+        <!-- Tab bar -->
+        <div class="acct-tabs-wrap">
+            <div class="acct-tabs">
+                <button class="acct-tab acct-tab--active" data-tab="profile">
+                    <i class="fas fa-user"></i> Perfil
+                </button>
+                <button class="acct-tab" data-tab="addresses">
+                    <i class="fas fa-map-marker-alt"></i> Direcciones
+                </button>
+                <button class="acct-tab" data-tab="orders">
+                    <i class="fas fa-box"></i> Mis pedidos
+                </button>
+            </div>
         </div>
 
-        <!-- Profile tab -->
-        <section id="tab-profile" class="account-panel">
-            <form id="profile-form" novalidate>
-                <div class="form-row">
-                    <div class="float-field">
-                        <input type="text" id="profile-first" class="float-field__input" placeholder=" " required autocomplete="given-name">
-                        <label class="float-field__label" for="profile-first" data-t="auth.firstName">Nombre</label>
-                        <span class="float-field__hint" id="hint-first"></span>
-                    </div>
-                    <div class="float-field">
-                        <input type="text" id="profile-last" class="float-field__input" placeholder=" " required autocomplete="family-name">
-                        <label class="float-field__label" for="profile-last" data-t="auth.lastName">Apellido</label>
-                        <span class="float-field__hint" id="hint-last"></span>
-                    </div>
-                </div>
-                <div class="float-field">
-                    <input type="tel" id="profile-phone" class="float-field__input" placeholder=" " autocomplete="tel">
-                    <label class="float-field__label" for="profile-phone" data-t="account.phone">Teléfono</label>
-                    <span class="float-field__hint" id="hint-phone"></span>
-                </div>
-                <div class="float-field">
-                    <input type="email" id="profile-email" class="float-field__input" placeholder=" " disabled autocomplete="email">
-                    <label class="float-field__label" for="profile-email" data-t="auth.email">Correo</label>
-                </div>
-                <button type="submit" class="btn-primary" data-t="account.save">Guardar cambios</button>
-            </form>
-        </section>
+        <div class="acct-body container">
 
-        <!-- Addresses tab -->
-        <section id="tab-addresses" class="account-panel" style="display:none">
-            <div id="addresses-list"></div>
-            <button class="btn-secondary" id="toggle-add-addr-btn" style="margin-bottom:0.75rem">
-                <i class="fas fa-plus"></i> Agregar dirección
-            </button>
-            <div class="add-address-form" id="add-addr-panel">
-                <form id="add-addr-form" novalidate style="display:flex;flex-direction:column;gap:0.75rem;padding:1rem;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.08);margin-bottom:1rem">
-                    <div class="form-field"><label>Calle</label><input type="text" id="new-street" required autocomplete="street-address"></div>
-                    <div class="form-row">
-                        <div class="form-field"><label>Ciudad</label><input type="text" id="new-city" required autocomplete="address-level2"></div>
-                        <div class="form-field"><label>Estado</label><input type="text" id="new-state" required autocomplete="address-level1"></div>
+            <!-- ── PROFILE TAB ─────────────────────────────────────────── -->
+            <section id="tab-profile" class="acct-panel">
+                <div class="acct-section-card">
+                    <div class="acct-section-card__header">
+                        <i class="fas fa-id-card acct-section-card__icon"></i>
+                        <div>
+                            <h2 class="acct-section-card__title">Información personal</h2>
+                            <p class="acct-section-card__sub">Así te verán en tus pedidos y facturas</p>
+                        </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-field"><label>CP</label><input type="text" id="new-postal" required autocomplete="postal-code"></div>
-                        <div class="form-field"><label>País</label><input type="text" id="new-country" value="MX" required autocomplete="country-name"></div>
-                    </div>
-                    <button type="submit" class="btn-secondary" data-t="checkout.saveAddress">Guardar</button>
-                </form>
-            </div>
-        </section>
+                    <form id="profile-form" novalidate class="acct-form">
+                        <div class="acct-form-row">
+                            <div class="float-field">
+                                <input type="text" id="profile-first" class="float-field__input" placeholder=" " required autocomplete="given-name">
+                                <label class="float-field__label" for="profile-first">Nombre</label>
+                                <span class="float-field__hint" id="hint-first"></span>
+                            </div>
+                            <div class="float-field">
+                                <input type="text" id="profile-last" class="float-field__input" placeholder=" " required autocomplete="family-name">
+                                <label class="float-field__label" for="profile-last">Apellido</label>
+                                <span class="float-field__hint" id="hint-last"></span>
+                            </div>
+                        </div>
+                        <div class="acct-form-row">
+                            <div class="float-field">
+                                <input type="tel" id="profile-phone" class="float-field__input" placeholder=" " autocomplete="tel">
+                                <label class="float-field__label" for="profile-phone">Teléfono</label>
+                                <span class="float-field__hint" id="hint-phone"></span>
+                            </div>
+                            <div class="float-field">
+                                <input type="email" id="profile-email" class="float-field__input" placeholder=" " disabled autocomplete="email">
+                                <label class="float-field__label" for="profile-email">Correo electrónico</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="acct-save-btn">
+                            <i class="fas fa-save"></i> Guardar cambios
+                        </button>
+                    </form>
+                </div>
 
-        <!-- Orders tab -->
-        <section id="tab-orders" class="account-panel" style="display:none">
-            <div class="orders-search-wrap">
-                <i class="fas fa-search" style="color:#64748b"></i>
-                <input type="text" id="orders-search" placeholder="Buscar por ID o producto..." autocomplete="off">
-            </div>
-            <div class="orders-filter-tabs">
-                <button class="orders-filter-tab active" data-filter="all">Todos</button>
-                <button class="orders-filter-tab" data-filter="active">Activos</button>
-                <button class="orders-filter-tab" data-filter="done">Completados</button>
-            </div>
-            <div id="orders-list"></div>
-            <div id="orders-pagination" class="pagination"></div>
-        </section>
+                <!-- Interests -->
+                <div class="acct-section-card">
+                    <div class="acct-section-card__header">
+                        <i class="fas fa-heart acct-section-card__icon acct-section-card__icon--pink"></i>
+                        <div>
+                            <h2 class="acct-section-card__title">Mis intereses</h2>
+                            <p class="acct-section-card__sub">Selecciona las subcategorías que más te interesan — te mostraremos productos relevantes</p>
+                        </div>
+                    </div>
+                    <div class="acct-interests" id="acct-interests-grid">
+                        <!-- populated by JS -->
+                    </div>
+                    <button class="acct-save-btn acct-save-btn--outline" id="save-interests-btn">
+                        <i class="fas fa-check"></i> Guardar intereses
+                    </button>
+                </div>
+            </section>
+
+            <!-- ── ADDRESSES TAB ───────────────────────────────────────── -->
+            <section id="tab-addresses" class="acct-panel" style="display:none">
+                <div class="acct-section-card">
+                    <div class="acct-section-card__header">
+                        <i class="fas fa-map-marked-alt acct-section-card__icon acct-section-card__icon--blue"></i>
+                        <div>
+                            <h2 class="acct-section-card__title">Mis direcciones</h2>
+                            <p class="acct-section-card__sub">Tus direcciones de envío guardadas</p>
+                        </div>
+                        <button class="acct-add-btn" id="toggle-add-addr-btn">
+                            <i class="fas fa-plus"></i> Nueva
+                        </button>
+                    </div>
+
+                    <!-- Address list -->
+                    <div id="addresses-list" class="acct-addr-list"></div>
+
+                    <!-- Add address slide-down -->
+                    <div class="acct-addr-form-wrap" id="add-addr-panel">
+                        <form id="add-addr-form" novalidate class="acct-addr-form">
+                            <h3 class="acct-addr-form__title"><i class="fas fa-plus-circle"></i> Nueva dirección</h3>
+                            <div class="float-field">
+                                <input type="text" id="new-street" class="float-field__input" placeholder=" " required autocomplete="street-address">
+                                <label class="float-field__label" for="new-street">Calle y número</label>
+                            </div>
+                            <div class="acct-form-row">
+                                <div class="float-field">
+                                    <input type="text" id="new-city" class="float-field__input" placeholder=" " required autocomplete="address-level2">
+                                    <label class="float-field__label" for="new-city">Ciudad</label>
+                                </div>
+                                <div class="float-field">
+                                    <input type="text" id="new-state" class="float-field__input" placeholder=" " required autocomplete="address-level1">
+                                    <label class="float-field__label" for="new-state">Estado</label>
+                                </div>
+                            </div>
+                            <div class="acct-form-row">
+                                <div class="float-field">
+                                    <input type="text" id="new-postal" class="float-field__input" placeholder=" " required autocomplete="postal-code">
+                                    <label class="float-field__label" for="new-postal">Código postal</label>
+                                </div>
+                                <div class="float-field">
+                                    <input type="text" id="new-country" class="float-field__input" placeholder=" " value="MX" required autocomplete="country-name">
+                                    <label class="float-field__label" for="new-country">País</label>
+                                </div>
+                            </div>
+                            <div class="acct-addr-form__actions">
+                                <button type="submit" class="acct-save-btn">
+                                    <i class="fas fa-save"></i> Guardar dirección
+                                </button>
+                                <button type="button" class="acct-save-btn acct-save-btn--ghost" id="cancel-add-addr-btn">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── ORDERS TAB ──────────────────────────────────────────── -->
+            <section id="tab-orders" class="acct-panel" style="display:none">
+                <div class="acct-section-card">
+                    <div class="acct-section-card__header">
+                        <i class="fas fa-shopping-bag acct-section-card__icon acct-section-card__icon--green"></i>
+                        <div>
+                            <h2 class="acct-section-card__title">Mis pedidos</h2>
+                            <p class="acct-section-card__sub">Historial completo de tus compras</p>
+                        </div>
+                    </div>
+                    <div class="acct-orders-toolbar">
+                        <div class="acct-orders-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="orders-search" placeholder="Buscar por ID o producto…" autocomplete="off">
+                        </div>
+                        <div class="orders-filter-tabs">
+                            <button class="orders-filter-tab active" data-filter="all">Todos</button>
+                            <button class="orders-filter-tab" data-filter="active">Activos</button>
+                            <button class="orders-filter-tab" data-filter="done">Completados</button>
+                        </div>
+                    </div>
+                    <div id="orders-list"></div>
+                    <div id="orders-pagination" class="pagination"></div>
+                </div>
+            </section>
+
+        </div><!-- /.acct-body -->
     </main>
 
 </template>
