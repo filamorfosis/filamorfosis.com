@@ -7,11 +7,12 @@ public class ProductSummaryDto
     public string TitleEs { get; set; } = string.Empty;
     public string DescriptionEs { get; set; } = string.Empty;
     public string[] Tags { get; set; } = [];
+    /// <summary>Aggregated from all variant ImageUrls (deduplicated, order preserved).</summary>
     public string[] ImageUrls { get; set; } = [];
     public string? Badge { get; set; }
     public bool IsActive { get; set; }
     public Guid ProcessId { get; set; }
-    public decimal BasePrice { get; set; }  // minimum effective (discounted) variant price
-    public bool HasDiscount { get; set; }   // true if any available variant has an active discount
+    public decimal BasePrice { get; set; }
+    public bool HasDiscount { get; set; }
     public List<ProductVariantDto> Variants { get; set; } = new();
 }

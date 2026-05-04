@@ -144,7 +144,6 @@ public static class DbSeeder
                 TitleEs       = "Taza Personalizada UV",
                 DescriptionEs = "Impresión UV directa sobre taza de cerámica.",
                 Tags          = ["taza", "uv", "personalizado"],
-                ImageUrls     = [],
                 IsActive      = true,
                 CreatedAt     = DateTime.UtcNow
             };
@@ -200,7 +199,6 @@ public static class DbSeeder
         string Title,
         string Desc,
         string[] Tags,
-        string[] Images,
         PricingRow[] Rows);
 
     // ── Main seed method ─────────────────────────────────────────────────────
@@ -233,7 +231,6 @@ public static class DbSeeder
                 TitleEs       = def.Title,
                 DescriptionEs = def.Desc,
                 Tags          = def.Tags,
-                ImageUrls     = def.Images,
                 Badge         = def.Badge,
                 IsActive      = true,
                 CreatedAt     = DateTime.UtcNow
@@ -284,7 +281,6 @@ public static class DbSeeder
             "Coasters Personalizados",
             "Posavasos con tu diseño, logo o foto en una variedad de materiales.",
             ["Vidrio","Madera","Corcho","Cerámica","Silicón","Plástico"],
-            ["products/images/uv/uv-coaster-1.jpeg","products/images/uv/uv-coaster-2.jpeg"],
             [
                 new("Vidrio (9cm)",       "$85",  "$110"),
                 new("Vidrio (11cm)",      "$95",  "$125"),
@@ -301,7 +297,6 @@ public static class DbSeeder
             "Tumblers Personalizados",
             "Vasos térmicos de doble pared con impresión UV de alta resolución.",
             ["12oz","20oz","30oz","40oz","Acero inox","Tapa incluida"],
-            ["products/images/uv/uv-tumbler-1.jpeg","products/images/uv/uv-tumbler-2.jpeg"],
             [
                 new("12oz — Impresión parcial", "$120", "$155"),
                 new("12oz — Impresión 360°",    "$160", "$200"),
@@ -317,7 +312,6 @@ public static class DbSeeder
             "Tazas Personalizadas",
             "Tazas de cerámica y acero con tu diseño, foto o logo.",
             ["11oz","15oz","20oz","Cerámica","Acero","Mágica"],
-            ["products/images/uv/uv-mug-1.jpeg","products/images/uv/uv-mug-2.jpeg"],
             [
                 new("11oz Cerámica — 1 lado",  "$95",  "$125"),
                 new("11oz Cerámica — 2 lados", "$120", "$155"),
@@ -332,7 +326,6 @@ public static class DbSeeder
             "Stickers UV DTF",
             "Calcomanías de alta resolución resistentes al agua, UV y rayones.",
             ["Resistente agua","Anti-UV","Cualquier superficie","Sin fondo"],
-            ["products/images/uv/uv-sticker-1.jpeg"],
             [
                 new("3×3cm",              "$18",    "$25"),
                 new("5×5cm",              "$28",    "$38"),
@@ -345,7 +338,6 @@ public static class DbSeeder
             "Magnetos Personalizados",
             "Imanes para refrigerador con impresión UV de alta calidad.",
             ["Refrigerador","Souvenir","Branding","Varios tamaños"],
-            ["products/images/uv/uv-magnet-1.jpeg"],
             [
                 new("5×5cm",      "$45",    "$60"),
                 new("7×5cm",      "$55",    "$72"),
@@ -358,7 +350,6 @@ public static class DbSeeder
             "Botellas de Agua",
             "Botellas de acero inoxidable o aluminio con impresión UV 360°.",
             ["500ml","750ml","1L","Acero","Aluminio","360°"],
-            ["products/images/uv/uv-bottle-1.jpeg"],
             [
                 new("500ml Aluminio — parcial", "$130", "$165"),
                 new("500ml Aluminio — 360°",    "$170", "$210"),
@@ -372,7 +363,6 @@ public static class DbSeeder
             "Fundas de Teléfono UV",
             "Fundas personalizadas con impresión UV directa.",
             ["iPhone","Samsung","Xiaomi","Transparente","Negra"],
-            ["products/images/uv/uv-phone-case-1.jpeg"],
             [
                 new("Funda transparente", "$150", "$190"),
                 new("Funda negra",        "$150", "$190"),
@@ -384,7 +374,6 @@ public static class DbSeeder
             "Placas de Madera UV",
             "Placas de madera natural con impresión UV a todo color.",
             ["Pino","MDF","Bambú","Decoración","Señalética"],
-            ["products/images/uv/uv-wood-sign-1.jpeg"],
             [
                 new("10×15cm",     "$90",    "$120"),
                 new("15×20cm",     "$120",   "$155"),
@@ -397,7 +386,6 @@ public static class DbSeeder
             "Llaveros UV",
             "Llaveros de acrílico, madera o metal con impresión UV.",
             ["Acrílico","Madera","Metal","Souvenir","Branding"],
-            ["products/images/uv/uv-keychain-1.jpeg"],
             [
                 new("Acrílico 5×3cm",     "$35",    "$48"),
                 new("Madera 5×3cm",        "$38",    "$52"),
@@ -409,7 +397,6 @@ public static class DbSeeder
             "Azulejos y Cerámicas UV",
             "Azulejos de cerámica con impresión UV fotorrealista.",
             ["Cerámica","10×10","15×15","20×20","Decoración"],
-            ["products/images/uv/uv-tile-1.jpeg"],
             [
                 new("10×10cm", "$80",  "$105"),
                 new("15×15cm", "$110", "$140"),
@@ -421,7 +408,6 @@ public static class DbSeeder
             "Vidrio Emplomado UV",
             "Paneles de vidrio con impresión UV que imitan el efecto de vitral emplomado.",
             ["Vidrio","Translúcido","Decoración","Ventana","Arte"],
-            [],
             [
                 new("15×20cm",     "$180",   "$230"),
                 new("20×30cm",     "$260",   "$320"),
@@ -434,7 +420,6 @@ public static class DbSeeder
             "Posters de Metal Personalizados",
             "Impresión UV directa sobre aluminio o acero.",
             ["Aluminio","Acero","Arte","Decoración","Señalética"],
-            [],
             [
                 new("20×30cm",     "$220",   "$280"),
                 new("30×40cm",     "$320",   "$400"),
@@ -447,7 +432,6 @@ public static class DbSeeder
             "Cuadros en Marco de Madera",
             "Impresión UV sobre lienzo o madera con marco de madera natural incluido.",
             ["Marco","Madera","Lienzo","Arte","Retrato"],
-            [],
             [
                 new("13×18cm", "$180", "$230"),
                 new("20×25cm", "$250", "$310"),
@@ -460,7 +444,6 @@ public static class DbSeeder
             "Impresión en Canvas",
             "Impresión UV sobre lienzo de alta calidad.",
             ["Lienzo","Arte","Foto","Decoración","Pared"],
-            [],
             [
                 new("20×30cm",  "$200", "$255"),
                 new("30×40cm",  "$290", "$360"),
@@ -473,7 +456,6 @@ public static class DbSeeder
             "Destapadores Personalizados",
             "Destapadores de metal o madera con impresión UV a todo color.",
             ["Metal","Madera","Boda","Bar","Regalo"],
-            [],
             [
                 new("Metal rectangular",  "$65", "$85"),
                 new("Metal redondo",       "$70", "$90"),
@@ -485,7 +467,6 @@ public static class DbSeeder
             "Arte en Acrílico",
             "Impresión UV sobre acrílico transparente o de color.",
             ["Acrílico","Transparente","Arte","Decoración","Premium"],
-            [],
             [
                 new("15×20cm",     "$210",   "$265"),
                 new("20×30cm",     "$300",   "$375"),
@@ -498,7 +479,6 @@ public static class DbSeeder
             "Tote Bags Personalizadas",
             "Bolsas de tela con impresión UV a todo color.",
             ["Tela","Eco","Moda","Branding","Evento"],
-            [],
             [
                 new("Tote estándar 38×42cm", "$120", "$155"),
                 new("Tote grande 42×48cm",   "$145", "$185"),
@@ -509,7 +489,6 @@ public static class DbSeeder
             "Tarjetas de Presentación UV",
             "Tarjetas de presentación con impresión UV sobre acrílico, madera o metal.",
             ["Acrílico","Madera","Metal","Negocio","Premium"],
-            [],
             [
                 new("Acrílico transparente", "$28", "$38"),
                 new("Acrílico negro",        "$28", "$38"),
@@ -521,7 +500,6 @@ public static class DbSeeder
             "Accesorios para Mascotas",
             "Placas de identificación y accesorios personalizados para tu mascota.",
             ["Mascota","Perro","Gato","Placa","Llavero"],
-            [],
             [
                 new("Placa redonda 3cm",       "$55", "$72"),
                 new("Placa ósea 4cm",          "$60", "$78"),
@@ -533,7 +511,6 @@ public static class DbSeeder
             "Trofeos y Reconocimientos",
             "Trofeos y placas de reconocimiento en acrílico con impresión UV.",
             ["Acrílico","Trofeo","Corporativo","Deportivo","Premio"],
-            [],
             [
                 new("Bloque 8×6×3cm",  "$180", "$230"),
                 new("Bloque 10×8×4cm", "$240", "$300"),
@@ -545,7 +522,6 @@ public static class DbSeeder
             "Nail Art UV",
             "Uñas postizas con diseños UV de alta resolución.",
             ["Uñas","Moda","Arte","Postizas","Diseño"],
-            [],
             [
                 new("Set 10 — diseño simple",    "$120", "$160"),
                 new("Set 10 — diseño detallado", "$160", "$210"),
@@ -556,7 +532,6 @@ public static class DbSeeder
             "Pelotas de Golf Personalizadas",
             "Pelotas de golf con impresión UV directa.",
             ["Golf","Deporte","Regalo","Branding","Evento"],
-            [],
             [
                 new("1 lado — logo/texto",       "$85",  "$110"),
                 new("2 lados — diseño completo", "$110", "$140"),
@@ -568,7 +543,6 @@ public static class DbSeeder
             "Etiquetas y Tags Personalizados",
             "Etiquetas de equipaje, marcadores de plantas y tags con código QR.",
             ["Equipaje","QR","Jardín","Viaje","Organización"],
-            [],
             [
                 new("Etiqueta equipaje acrílico", "$55", "$72"),
                 new("Etiqueta equipaje metal",    "$70", "$90"),
@@ -580,7 +554,6 @@ public static class DbSeeder
             "Papelería de Boda UV",
             "Papelería de boda con impresión UV sobre acrílico y madera.",
             ["Boda","Invitación","Acrílico","Lujo","Evento"],
-            [],
             [
                 new("Invitación acrílico A5", "$85",    "$110"),
                 new("Invitación madera A5",   "$75",    "$98"),
@@ -593,7 +566,6 @@ public static class DbSeeder
             "Joyería Personalizada UV",
             "Aretes, colgantes y pulseras personalizados con impresión UV.",
             ["Aretes","Colgante","Moda","Acrílico","Regalo"],
-            [],
             [
                 new("Par de aretes",         "$95",  "$125"),
                 new("Colgante simple",       "$80",  "$105"),
@@ -605,7 +577,6 @@ public static class DbSeeder
             "Tablas de Skate Personalizadas",
             "Tablas de skate y longboard con impresión UV.",
             ["Skate","Longboard","Deporte","Arte","Gráfico"],
-            [],
             [
                 new("Cara inferior", "$280", "$350"),
                 new("Ambas caras",   "$420", "$520"),
@@ -617,7 +588,6 @@ public static class DbSeeder
             "Monedas Conmemorativas",
             "Monedas de acrílico o metal con impresión UV.",
             ["Metal","Acrílico","Souvenir","Club","Evento"],
-            [],
             [
                 new("Acrílico 4cm", "$65",  "$85"),
                 new("Acrílico 5cm", "$80",  "$105"),
@@ -629,7 +599,6 @@ public static class DbSeeder
             "Posters UV Premium",
             "Posters con impresión UV sobre papel fotográfico o acrílico.",
             ["Papel","Acrílico","PVC","Arte","Señalética"],
-            [],
             [
                 new("A3 — papel fotográfico", "$85",  "$110"),
                 new("A2 — papel fotográfico", "$130", "$165"),
@@ -644,7 +613,6 @@ public static class DbSeeder
             "Grabado en Madera",
             "Grabado láser de alta precisión sobre madera natural, MDF y bambú.",
             ["Madera","MDF","Bambú","Personalizado","Regalo"],
-            [],
             [
                 new("10×15cm",     "$80",    "N/A"),
                 new("15×20cm",     "$110",   "N/A"),
@@ -657,7 +625,6 @@ public static class DbSeeder
             "Grabado en Metal",
             "Grabado láser sobre acero inoxidable, aluminio y latón.",
             ["Acero","Aluminio","Latón","Trofeo","Corporativo"],
-            [],
             [
                 new("Placa 10×7cm",       "$120",   "N/A"),
                 new("Placa 15×10cm",      "$170",   "N/A"),
@@ -670,7 +637,6 @@ public static class DbSeeder
             "Grabado en Vidrio",
             "Grabado láser sobre vasos, botellas, espejos y cristal.",
             ["Vidrio","Vaso","Botella","Espejo","Branding"],
-            [],
             [
                 new("Vaso estándar",       "$90",    "N/A"),
                 new("Vaso térmico",        "$110",   "N/A"),
@@ -683,7 +649,6 @@ public static class DbSeeder
             "Grabado en Cuero",
             "Grabado láser sobre cuero genuino y sintético.",
             ["Cuero","Cartera","Cinturón","Agenda","Moda"],
-            [],
             [
                 new("Cartera/billetera",   "$95",    "N/A"),
                 new("Cinturón",            "$110",   "N/A"),
@@ -696,7 +661,6 @@ public static class DbSeeder
             "Grabado en Acrílico",
             "Grabado láser sobre acrílico transparente, de color o espejado.",
             ["Acrílico","Transparente","Espejado","Letrero","Display"],
-            [],
             [
                 new("10×15cm",     "$95",    "N/A"),
                 new("15×20cm",     "$130",   "N/A"),
@@ -709,7 +673,6 @@ public static class DbSeeder
             "Grabado en Piedra",
             "Grabado láser sobre pizarra, mármol y granito.",
             ["Pizarra","Mármol","Granito","Decoración","Memorial"],
-            [],
             [
                 new("Pizarra 10×15cm",       "$100",   "N/A"),
                 new("Pizarra 20×30cm",       "$160",   "N/A"),

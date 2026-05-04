@@ -50,7 +50,6 @@ public class ProductCatalogPropertyTests
                                 TitleEs = $"Producto {j}",
                                 DescriptionEs = "Descripción",
                                 Tags = [],
-                                ImageUrls = [],
                                 IsActive = isActive,
                                 CreatedAt = DateTime.UtcNow
                             };

@@ -290,7 +290,7 @@ public class MaterialSupplyCostModelPropertyTests
             {
                 Id = prodId, ProcessId = catId, Slug = $"p4-prod-{prodId:N}",
                 TitleEs = "P", DescriptionEs = "D",
-                Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
+                Tags = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
 
             for (int i = 0; i < countA + countB; i++)
@@ -388,7 +388,7 @@ public class MaterialSupplyCostModelPropertyTests
             {
                 Id = prodId, ProcessId = catId, Slug = $"p5-prod-{prodId:N}",
                 TitleEs = "P", DescriptionEs = "D",
-                Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
+                Tags = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             await db.SaveChangesAsync();
         });
@@ -444,7 +444,7 @@ public class MaterialSupplyCostModelPropertyTests
             {
                 Id = prodId, ProcessId = catId, Slug = $"p6-prod-{prodId:N}",
                 TitleEs = "P", DescriptionEs = "D",
-                Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
+                Tags = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             await db.SaveChangesAsync();
         });
@@ -553,7 +553,7 @@ public class MaterialSupplyCostModelPropertyTests
             {
                 Id = prodId, ProcessId = catId, Slug = $"p7-prod-{prodId:N}",
                 TitleEs = "P", DescriptionEs = "D",
-                Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
+                Tags = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             variantId = Guid.NewGuid();
             db.ProductVariants.Add(new ProductVariant
@@ -723,7 +723,7 @@ public class MaterialSupplyCostModelPropertyTests
             {
                 Id = prodId, ProcessId = catId, Slug = $"p10-prod-{prodId:N}",
                 TitleEs = "P", DescriptionEs = "D",
-                Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
+                Tags = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
 
             for (int i = 0; i < n; i++)

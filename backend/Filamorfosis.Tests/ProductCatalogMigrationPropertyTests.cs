@@ -75,7 +75,6 @@ public class ProductCatalogMigrationPropertyTests
                     TitleEs       = "Test",
                     DescriptionEs = "D",
                     Tags          = [],
-                    ImageUrls     = [],
                     Badge         = badge,
                     IsActive      = true,
                     CreatedAt     = DateTime.UtcNow
@@ -265,7 +264,6 @@ public class ProductCatalogMigrationPropertyTests
                     TitleEs       = $"P {b}",
                     DescriptionEs = "D",
                     Tags          = [],
-                    ImageUrls     = [],
                     Badge         = b,
                     IsActive      = true,
                     CreatedAt     = DateTime.UtcNow

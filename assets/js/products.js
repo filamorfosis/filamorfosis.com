@@ -34,8 +34,12 @@ function resolveImageUrl(url) {
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
     const cdn = window.FILAMORFOSIS_CDN_BASE;
     if (cdn) return `${cdn}/${url}`;
-    // Local dev / no CDN — serve as root-relative path
-    return '/' + url;
+    // Raw S3 key — resolve via the API origin's /uploads/ path
+    const apiBase = (typeof API_BASE !== 'undefined' ? API_BASE : null)
+        || window.FILAMORFOSIS_API_BASE
+        || 'http://localhost:5205/api/v1';
+    const origin = apiBase.replace(/\/api\/v1\/?$/, '');
+    return `${origin}/uploads/${url.replace(/^\//, '')}`;
 }
 
 // closeModal exposed globally for router
@@ -91,10 +95,13 @@ let _searchDebounce = null;
 let _loadedProducts = [];     // accumulated across "load more" pages
 let processSlugToId = {};    // maps API process slug → API GUID
 let _categorySlug   = null;  // active category slug from /tienda/:slug
+let _categoryName   = null;  // display name for the active category (set after categories load)
+let _categoriesCache = [];   // flat list of all categories + subcategories for name lookup
 
 // Set by router before renderAll() is called
 window.setCategorySlug = function(slug) {
     _categorySlug = slug || null;
+    _categoryName = null; // will be resolved after categories load
 };
 
 /* ═══════════════════════════════════════════════
@@ -122,7 +129,17 @@ async function fetchProducts(opts) {
     opts = opts || {};
     const params = { pageSize: pageSize };
     if (opts.search) params.search = opts.search;
-    if (_categorySlug) params.category = _categorySlug;
+    if (opts.badge)  params.badge  = opts.badge;
+
+    // Category filtering: send as categorySlug — backend matches parent OR subcategory slug
+    if (_categorySlug) {
+        params.categorySlug = _categorySlug;
+    }
+
+    // Process strip selection overrides category slug
+    var activeProcess = window._stripProcessId || SPAState.activeProcessId;
+    if (activeProcess) params.processId = activeProcess;
+
     params.page = opts.page || 1;
     return window.getProducts(params);
 }
@@ -239,14 +256,144 @@ function renderChips() {
 function renderSectionHeader() {
     const titleEl = document.getElementById('catSectionTitle');
     const descEl  = document.getElementById('catSectionDesc');
-    if (titleEl) titleEl.textContent = t('all_products') || 'Todos los Productos';
-    const count = totalCount || _loadedProducts.length;
+    const count   = totalCount || _loadedProducts.length;
+
+    // Resolve category display name from cache if not yet set
+    if (_categorySlug && !_categoryName && _categoriesCache.length) {
+        var found = _categoriesCache.find(function(c) { return c.slug === _categorySlug; });
+        if (found) _categoryName = found.name;
+    }
+
+    if (_categoryName) {
+        if (titleEl) titleEl.textContent = _categoryName;
+    } else if (_categorySlug) {
+        // Slug set but name not resolved yet — show slug prettified
+        if (titleEl) titleEl.textContent = _categorySlug.replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    } else {
+        if (titleEl) titleEl.textContent = t('all_products') || 'Todos los Productos';
+    }
+
     if (descEl) descEl.textContent = count + ' ' + (count === 1 ? t('products_count_one') : t('products_count_many'));
 
     // Animate stat counter
     const statEl = document.getElementById('statProducts');
     if (statEl) animateCounter(statEl, count, 600);
+
+    // Render active filter pill
+    _renderActiveFilterPill();
 }
+
+/* ═══════════════════════════════════════════════
+   ACTIVE FILTER PILL
+   ═══════════════════════════════════════════════ */
+function _renderActiveFilterPill() {
+    var bar = document.getElementById('catFilterBar');
+    if (!bar) return;
+
+    var existing = document.getElementById('catActivePills');
+    if (existing) existing.remove();
+
+    var hasCategory = !!_categorySlug;
+    var hasProcess  = !!(window._stripProcessId || SPAState.activeProcessId);
+    var hasSearch   = !!searchQuery;
+
+    if (!hasCategory && !hasProcess && !hasSearch) return;
+
+    var pills = [];
+
+    if (hasCategory) {
+        var label = _categoryName || (_categorySlug ? _categorySlug.replace(/-/g, ' ') : '');
+        pills.push(
+            '<span class="cat-filter-pill">' +
+                '<i class="fas fa-tag"></i> ' + label +
+                '<button class="cat-filter-pill__remove" onclick="AdminProducts_clearCategoryFilter()" aria-label="Quitar filtro de categoría">' +
+                    '<i class="fas fa-times"></i>' +
+                '</button>' +
+            '</span>'
+        );
+    }
+
+    if (hasProcess) {
+        var processId = window._stripProcessId || SPAState.activeProcessId;
+        var proc = SPAState.processCache && SPAState.processCache.find(function(p) { return p.id === processId; });
+        var procLabel = proc ? _processName(proc) : 'Proceso';
+        pills.push(
+            '<span class="cat-filter-pill">' +
+                '<i class="fas fa-layer-group"></i> ' + procLabel +
+                '<button class="cat-filter-pill__remove" onclick="window.filterByProcess(\'' + processId + '\')" aria-label="Quitar filtro de proceso">' +
+                    '<i class="fas fa-times"></i>' +
+                '</button>' +
+            '</span>'
+        );
+    }
+
+    if (hasSearch) {
+        pills.push(
+            '<span class="cat-filter-pill">' +
+                '<i class="fas fa-search"></i> "' + searchQuery + '"' +
+                '<button class="cat-filter-pill__remove" onclick="window._clearSearchFilter()" aria-label="Quitar búsqueda">' +
+                    '<i class="fas fa-times"></i>' +
+                '</button>' +
+            '</span>'
+        );
+    }
+
+    if (!pills.length) return;
+
+    var wrap = document.createElement('div');
+    wrap.id = 'catActivePills';
+    wrap.className = 'cat-active-pills';
+    wrap.innerHTML = pills.join('') +
+        (pills.length > 1
+            ? '<button class="cat-filter-pill cat-filter-pill--clear-all" onclick="window._clearAllFilters()">' +
+                '<i class="fas fa-times-circle"></i> Limpiar todo' +
+              '</button>'
+            : '');
+    bar.querySelector('.cat-filter-inner').appendChild(wrap);
+}
+
+// Clear category filter — navigate to /tienda
+window.AdminProducts_clearCategoryFilter = function() {
+    if (typeof window.FilamorfosisRouter !== 'undefined' && window.FilamorfosisRouter.navigate) {
+        window.FilamorfosisRouter.navigate('/tienda');
+    } else {
+        window.location.href = '/tienda';
+    }
+};
+
+// Clear search filter
+window._clearSearchFilter = function() {
+    searchQuery = '';
+    var searchEl = document.getElementById('catSearch');
+    if (searchEl) searchEl.value = '';
+    currentPage = 1;
+    _loadedProducts = [];
+    loadProducts(true);
+};
+
+// Clear all active filters
+window._clearAllFilters = function() {
+    searchQuery = '';
+    var searchEl = document.getElementById('catSearch');
+    if (searchEl) searchEl.value = '';
+    SPAState.activeProcessId = null;
+    window._stripProcessId = null;
+    // Update strip UI
+    var listEl = document.querySelector('#category-strip .cat-strip__list');
+    if (listEl) {
+        listEl.querySelectorAll('.cat-strip__card').forEach(function(btn) {
+            btn.classList.remove('cat-strip__card--active');
+            btn.setAttribute('aria-pressed', 'false');
+        });
+    }
+    if (_categorySlug) {
+        window.AdminProducts_clearCategoryFilter();
+    } else {
+        currentPage = 1;
+        _loadedProducts = [];
+        loadProducts(true);
+    }
+};
 
 /* ═══════════════════════════════════════════════
    CLIENT-SIDE FILTER HELPER
@@ -296,7 +443,14 @@ function renderGrid() {
         var isAvailable = availableVariants.length > 0;
 
         // ── Carousel ────────────────────────────────────────────────────────────────────
-        var imgs = (p.imageUrls && p.imageUrls.length) ? p.imageUrls : null;
+        // Collect images from all variant imageUrls (deduplicated)
+        var imgs = [];
+        (p.variants || []).forEach(function(v) {
+            (v.imageUrls || []).forEach(function(url) {
+                if (url && imgs.indexOf(url) === -1) imgs.push(url);
+            });
+        });
+        if (!imgs.length) imgs = null;
         var carouselHtml;
         if (imgs) {
             var slides = imgs.map(function(src, si) {
@@ -1034,6 +1188,28 @@ async function renderAll() {
     // renderTabs(); // Removed - tabs hidden
     // renderChips(); // Removed - chips hidden
     renderSectionHeader();
+
+    // Load categories for filter pill name resolution
+    if (!_categoriesCache.length) {
+        try {
+            var cats = await window.getCategories();
+            var catList = Array.isArray(cats) ? cats : (cats && cats.items ? cats.items : []);
+            // Flatten: parent categories + subcategories
+            catList.forEach(function(c) {
+                _categoriesCache.push({ id: c.id, slug: c.slug, name: c.name });
+                (c.subCategories || []).forEach(function(sc) {
+                    _categoriesCache.push({ id: sc.id, slug: sc.slug, name: sc.name });
+                });
+            });
+            // Resolve category name now that cache is populated
+            if (_categorySlug && !_categoryName) {
+                var found = _categoriesCache.find(function(c) { return c.slug === _categorySlug; });
+                if (found) _categoryName = found.name;
+            }
+        } catch (e) {
+            // categories unavailable — continue without name resolution
+        }
+    }
 
     // Fetch processes once — builds slug→id map AND populates process strip
     await renderProcessStrip();

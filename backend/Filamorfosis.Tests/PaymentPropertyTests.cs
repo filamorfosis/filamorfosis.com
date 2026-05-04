@@ -41,7 +41,7 @@ public class PaymentPropertyTests
             {
                 Id = prodId, ProcessId = catId, Slug = "pp",
                 TitleEs = "P", DescriptionEs = "D",
-                Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
+                Tags = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             variantId = Guid.NewGuid();
             db.ProductVariants.Add(new ProductVariant

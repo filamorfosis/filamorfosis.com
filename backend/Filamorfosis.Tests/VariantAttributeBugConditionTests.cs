@@ -61,7 +61,7 @@ public class VariantAttributeBugConditionTests
                 Slug = $"bug-prod-{Guid.NewGuid():N}",
                 TitleEs = "Producto Bug",
                 DescriptionEs = "Desc",
-                Tags = [], ImageUrls = [],
+                Tags = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
 
@@ -130,7 +130,7 @@ public class VariantAttributeBugConditionTests
                 Slug = $"bug2-prod-{Guid.NewGuid():N}",
                 TitleEs = "Producto Bug2",
                 DescriptionEs = "Desc",
-                Tags = [], ImageUrls = [],
+                Tags = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
 

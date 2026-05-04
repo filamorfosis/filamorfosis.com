@@ -1,6 +1,7 @@
 using Filamorfosis.Application;
 using Filamorfosis.Application.DTOs;
 using Filamorfosis.Application.Services;
+using Filamorfosis.Domain.Entities;
 using Filamorfosis.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,9 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
         [FromQuery] Guid? processId = null,
         [FromQuery] string? search = null,
         [FromQuery] string? badge = null,
-        [FromQuery] string? useCase = null)
+        [FromQuery] string? useCase = null,
+        [FromQuery] string? categorySlug = null,
+        [FromQuery] string? subCategorySlug = null)
     {
         var query = db.Products
             .Include(p => p.Discounts)
@@ -30,10 +33,31 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
                     .ThenInclude(u => u.Material)
             .Include(p => p.Variants)
                 .ThenInclude(v => v.Discounts)
+            .Include(p => p.CategoryAssignments)
+                .ThenInclude(ca => ca.Category)
+            .Include(p => p.CategoryAssignments)
+                .ThenInclude(ca => ca.SubCategory)
             .Where(p => p.IsActive);
 
         if (processId.HasValue)
             query = query.Where(p => p.ProcessId == processId.Value);
+
+        // Filter by category slug — matches either parent category OR subcategory slug (OR, not AND)
+        if (!string.IsNullOrWhiteSpace(categorySlug))
+        {
+            query = query.Where(p =>
+                p.CategoryAssignments.Any(ca =>
+                    ca.Category.Slug == categorySlug ||
+                    (ca.SubCategory != null && ca.SubCategory.Slug == categorySlug)));
+        }
+
+        // Explicit subcategory-only filter (optional, kept for future use)
+        if (!string.IsNullOrWhiteSpace(subCategorySlug))
+        {
+            query = query.Where(p =>
+                p.CategoryAssignments.Any(ca =>
+                    ca.SubCategory != null && ca.SubCategory.Slug == subCategorySlug));
+        }
 
         // For SQLite: UseCases is stored as JSON TEXT, so we need to use string operations
         // We'll filter in-memory after fetching the data
@@ -70,7 +94,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
                 TitleEs = p.TitleEs,
                 DescriptionEs = p.DescriptionEs,
                 Tags = p.Tags,
-                ImageUrls = p.ImageUrls,
+                ImageUrls = AggregateVariantImages(p.Variants),
                 Badge = p.Badge,
                 IsActive = p.IsActive,
                 ProcessId = p.ProcessId,
@@ -89,6 +113,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
                     IsAvailable = v.IsAvailable,
                     AcceptsDesignFile = v.AcceptsDesignFile,
                     InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),
+                    ImageUrls = v.ImageUrls,
                     Attributes = v.AttributeValues.Select(a => new VariantAttributeValueDto
                     {
                         AttributeDefinitionId = a.AttributeDefinitionId,
@@ -123,7 +148,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
                 TitleEs = p.TitleEs,
                 DescriptionEs = p.DescriptionEs,
                 Tags = p.Tags,
-                ImageUrls = p.ImageUrls,
+                ImageUrls = AggregateVariantImages(p.Variants),
                 Badge = p.Badge,
                 IsActive = p.IsActive,
                 ProcessId = p.ProcessId,
@@ -142,6 +167,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
                     IsAvailable = v.IsAvailable,
                     AcceptsDesignFile = v.AcceptsDesignFile,
                     InStock = stockService.IsVariantInStock(v.MaterialUsages.Select(u => ((decimal)(u.Material?.StockQuantity ?? 0), u.Quantity))),
+                    ImageUrls = v.ImageUrls,
                     Attributes = v.AttributeValues.Select(a => new VariantAttributeValueDto
                     {
                         AttributeDefinitionId = a.AttributeDefinitionId,
@@ -192,7 +218,7 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
             TitleEs = product.TitleEs,
             DescriptionEs = product.DescriptionEs,
             Tags = product.Tags,
-            ImageUrls = product.ImageUrls,
+            ImageUrls = AggregateVariantImages(product.Variants),
             Badge = product.Badge,
             IsActive = product.IsActive,
             ProcessId = product.ProcessId,
@@ -222,5 +248,24 @@ public class ProductsController(FilamorfosisDbContext db, IStockService stockSer
                 }).ToList()
             }).ToList()
         });
+    }
+
+    /// <summary>
+    /// Aggregates all ImageUrls from a product's variants into a single deduplicated array,
+    /// preserving insertion order. This replaces the removed Product.ImageUrls column.
+    /// </summary>
+    private static string[] AggregateVariantImages(IEnumerable<ProductVariant> variants)
+    {
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var result = new List<string>();
+        foreach (var v in variants)
+        {
+            foreach (var url in v.ImageUrls)
+            {
+                if (!string.IsNullOrEmpty(url) && seen.Add(url))
+                    result.Add(url);
+            }
+        }
+        return result.ToArray();
     }
 }

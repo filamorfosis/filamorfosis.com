@@ -42,7 +42,6 @@ public class ProductFilterPropertyTests
                                 TitleEs = $"Producto {suffix}",
                                 DescriptionEs = "Desc",
                                 Tags = [],
-                                ImageUrls = [],
                                 IsActive = isActive,
                                 CreatedAt = DateTime.UtcNow,
                                 Variants = new List<ProductVariant>
@@ -284,7 +283,6 @@ public class ProductFilterPropertyTests
                                 TitleEs = $"Producto {j}",
                                 DescriptionEs = "Desc",
                                 Tags = [],
-                                ImageUrls = [],
                                 Badge = badge,
                                 IsActive = true,
                                 CreatedAt = DateTime.UtcNow,
@@ -358,7 +356,6 @@ public class ProductFilterPropertyTests
                     TitleEs = $"Producto {j}",
                     DescriptionEs = "Desc",
                     Tags = [],
-                    ImageUrls = [],
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow.AddMinutes(j),
                     Variants = new List<ProductVariant>

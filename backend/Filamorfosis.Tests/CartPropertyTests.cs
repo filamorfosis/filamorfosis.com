@@ -40,7 +40,7 @@ public class CartPropertyTests
                 Id = prodId, ProcessId = catId, Slug = "test-prod",
                 TitleEs = "Prod",
                 DescriptionEs = "D",
-                Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
+                Tags = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             variantId = Guid.NewGuid();
             db.ProductVariants.Add(new ProductVariant

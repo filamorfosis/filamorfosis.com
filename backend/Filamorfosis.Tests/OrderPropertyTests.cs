@@ -39,7 +39,7 @@ public class OrderPropertyTests
                 Id = prodId, ProcessId = catId, Slug = $"prod-{prodId:N}",
                 TitleEs = "Prod",
                 DescriptionEs = "D",
-                Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
+                Tags = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             variantId = Guid.NewGuid();
             db.ProductVariants.Add(new ProductVariant

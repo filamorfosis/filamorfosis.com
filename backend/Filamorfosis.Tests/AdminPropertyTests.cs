@@ -225,7 +225,7 @@ public class AdminPropertyTests
             {
                 Id = prodId, ProcessId = catId, Slug = "sp",
                 TitleEs = "P", DescriptionEs = "D",
-                Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
+                Tags = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             await db.SaveChangesAsync();
         });
@@ -288,7 +288,7 @@ public class AdminProductImagePropertyTests
             {
                 Id = prodId, ProcessId = catId, Slug = $"img-prod-{Guid.NewGuid():N}",
                 TitleEs = "P", DescriptionEs = "D",
-                Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
+                Tags = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
             await db.SaveChangesAsync();
         });

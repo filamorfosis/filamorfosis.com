@@ -3655,3 +3655,61 @@ img:not([alt]) { outline: 2px solid red; } /* dev helper — remove in prod */
 .promo-slide__bg--1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
 .promo-slide__bg--2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
 .promo-slide__bg--3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+
+/* ── Active filter pills ─────────────────────────────────────────────────── */
+.cat-active-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cat-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: #c4b5fd;
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.cat-filter-pill i {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.cat-filter-pill__remove {
+  background: none;
+  border: none;
+  color: #a78bfa;
+  cursor: pointer;
+  padding: 0 0 0 4px;
+  font-size: 1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+
+.cat-filter-pill__remove:hover {
+  color: #f87171;
+}
+
+.cat-filter-pill--clear-all {
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #fca5a5;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cat-filter-pill--clear-all:hover {
+  background: rgba(248, 113, 113, 0.2);
+}

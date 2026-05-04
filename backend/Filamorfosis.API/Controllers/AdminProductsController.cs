@@ -93,7 +93,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
             Slug = req.TitleEs.ToLower().Replace(" ", "-"),
             TitleEs = req.TitleEs,
             DescriptionEs = req.DescriptionEs,
-            Tags = req.Tags, ImageUrls = [],
+            Tags = req.Tags,
             IsActive = req.IsActive, CreatedAt = DateTime.UtcNow
         };
         db.Products.Add(product);
@@ -349,6 +349,21 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         return NoContent();
     }
 
+    private static string[] AggregateVariantImages(IEnumerable<ProductVariant> variants)
+    {
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var result = new List<string>();
+        foreach (var v in variants)
+        {
+            foreach (var url in v.ImageUrls)
+            {
+                if (!string.IsNullOrEmpty(url) && seen.Add(url))
+                    result.Add(url);
+            }
+        }
+        return result.ToArray();
+    }
+
     [HttpPost("{id:guid}/variants/{variantId:guid}/images")]
     public async Task<IActionResult> UploadVariantImage(Guid id, Guid variantId, IFormFile file)
     {
@@ -376,9 +391,9 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         var nextIndex = v.ImageUrls.Length + 1;
         var key = $"products/{id}/variants/{variantId}-{nextIndex}{ext}";
         await using var stream = file.OpenReadStream();
-        await s3.UploadAsync(stream, key, file.ContentType);
+        var storedUrl = await s3.UploadAsync(stream, key, file.ContentType);
 
-        v.ImageUrls = [.. v.ImageUrls, key];
+        v.ImageUrls = [.. v.ImageUrls, storedUrl];
         await db.SaveChangesAsync();
         return Ok(new { imageUrls = v.ImageUrls });
     }
@@ -409,61 +424,24 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
     }
 
     [HttpPost("{id:guid}/images")]
-    public async Task<IActionResult> UploadImage(Guid id, IFormFile file)
-    {
-        var p = await db.Products.FirstOrDefaultAsync(p => p.Id == id);
-        if (p is null) return NotFound();
-
-        var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "image/png", "image/jpeg" };
-        if (file is null || !allowed.Contains(file.ContentType))
-            return UnprocessableEntity(new ProblemDetails
-            {
-                Status = StatusCodes.Status422UnprocessableEntity,
-                Title = "Invalid image type",
-                Detail = "Only PNG and JPG images are accepted."
-            });
-        if (file.Length > 10 * 1024 * 1024)
-            return UnprocessableEntity(new ProblemDetails
-            {
-                Status = StatusCodes.Status422UnprocessableEntity,
-                Title = "Image too large",
-                Detail = "Image exceeds 10 MB limit."
-            });
-
-        var key = $"products/{id}/{Guid.NewGuid()}-{file.FileName}";
-        await using var stream = file.OpenReadStream();
-        await s3.UploadAsync(stream, key, file.ContentType);
-
-        p.ImageUrls = [.. p.ImageUrls, key];
-        await db.SaveChangesAsync();
-        return Ok(new { imageUrls = p.ImageUrls });
-    }
+    [ApiExplorerSettings(IgnoreApi = true)] // Deprecated — images are now per-variant
+    public IActionResult UploadImage_Deprecated() =>
+        StatusCode(410, new ProblemDetails
+        {
+            Status = 410,
+            Title = "Gone",
+            Detail = "Product-level image upload has been removed. Upload images per variant instead."
+        });
 
     [HttpDelete("{id:guid}/images")]
-    public async Task<IActionResult> DeleteImage(Guid id, [FromBody] DeleteImageRequest req)
-    {
-        var p = await db.Products.FirstOrDefaultAsync(p => p.Id == id);
-        if (p is null) return NotFound();
-
-        if (!p.ImageUrls.Contains(req.ImageUrl))
-            return NotFound(new ProblemDetails
-            {
-                Status = StatusCodes.Status404NotFound,
-                Title = "Not Found",
-                Detail = "Image URL not found in product."
-            });
-
-        // Extract S3 key from URL (may be a full CDN URL or a raw key)
-        var key = req.ImageUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
-            ? new Uri(req.ImageUrl).AbsolutePath.TrimStart('/')
-            : req.ImageUrl;
-
-        await s3.DeleteAsync(key);
-
-        p.ImageUrls = p.ImageUrls.Where(u => u != req.ImageUrl).ToArray();
-        await db.SaveChangesAsync();
-        return Ok(new { imageUrls = p.ImageUrls });
-    }
+    [ApiExplorerSettings(IgnoreApi = true)] // Deprecated
+    public IActionResult DeleteImage_Deprecated() =>
+        StatusCode(410, new ProblemDetails
+        {
+            Status = 410,
+            Title = "Gone",
+            Detail = "Product-level image deletion has been removed. Delete images per variant instead."
+        });
 
     [HttpGet("{id:guid}/categories")]
     public async Task<IActionResult> GetProductCategories(Guid id)
@@ -636,7 +614,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         Id = p.Id, Slug = p.Slug,
         TitleEs = p.TitleEs,
         DescriptionEs = p.DescriptionEs,
-        Tags = p.Tags, ImageUrls = p.ImageUrls,
+        Tags = p.Tags, ImageUrls = AggregateVariantImages(p.Variants),
         Badge = p.Badge,
         IsActive = p.IsActive, ProcessId = p.ProcessId,
         ProcessNameEs = p.Process?.NameEs,

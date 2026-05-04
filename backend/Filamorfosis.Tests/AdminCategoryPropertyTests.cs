@@ -130,7 +130,6 @@ public class AdminProcessPropertyTests
                     TitleEs = $"Producto {i}",
                     DescriptionEs = "Descripción",
                     Tags = [],
-                    ImageUrls = [],
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
                 });

@@ -32,7 +32,7 @@ public class BadgeFilterTests
                     Slug = $"badge-filter-{b ?? "null"}-{Guid.NewGuid():N}",
                     TitleEs = $"Product {b}",
                     DescriptionEs = "D",
-                    Tags = [], ImageUrls = [],
+                    Tags = [],
                     Badge = b,
                     IsActive = true, CreatedAt = DateTime.UtcNow
                 });

@@ -30,7 +30,7 @@ public class BadgeValidationControllerTests
                 Slug = $"badge-test-{Guid.NewGuid():N}",
                 TitleEs = "Test",
                 DescriptionEs = "D",
-                Tags = [], ImageUrls = [],
+                Tags = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
             await db.SaveChangesAsync();
@@ -65,7 +65,7 @@ public class BadgeValidationControllerTests
                 Slug = $"badge-valid-{Guid.NewGuid():N}",
                 TitleEs = "Test",
                 DescriptionEs = "D",
-                Tags = [], ImageUrls = [],
+                Tags = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
             await db.SaveChangesAsync();

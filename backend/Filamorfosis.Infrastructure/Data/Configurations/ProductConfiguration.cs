@@ -26,11 +26,6 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasConversion(stringListConverter, stringArrayComparer)
             .HasColumnType("TEXT");
 
-        // Configure ImageUrls as JSON TEXT
-        builder.Property(p => p.ImageUrls)
-            .HasConversion(stringListConverter, stringArrayComparer)
-            .HasColumnType("TEXT");
-
         // Configure UseCases as JSON TEXT (SQLite compatibility)
         builder.Property(p => p.UseCases)
             .HasColumnName("use_cases")

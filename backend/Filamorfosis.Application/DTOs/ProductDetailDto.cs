@@ -7,6 +7,7 @@ public class ProductDetailDto
     public string TitleEs { get; set; } = string.Empty;
     public string DescriptionEs { get; set; } = string.Empty;
     public string[] Tags { get; set; } = [];
+    /// <summary>Aggregated from all variant ImageUrls (deduplicated, order preserved).</summary>
     public string[] ImageUrls { get; set; } = [];
     public string? Badge { get; set; }
     public bool IsActive { get; set; }

@@ -74,7 +74,7 @@ public class VariantAttributePreservationTests
                 Slug = $"pres-prod-{Guid.NewGuid():N}",
                 TitleEs = "Preservation Product",
                 DescriptionEs = "D",
-                Tags = [], ImageUrls = [],
+                Tags = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
             await db.SaveChangesAsync();
@@ -152,7 +152,7 @@ public class VariantAttributePreservationTests
                 Slug = $"dc-prod-{Guid.NewGuid():N}",
                 TitleEs = "P",
                 DescriptionEs = "D",
-                Tags = [], ImageUrls = [],
+                Tags = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
 
@@ -243,7 +243,7 @@ public class VariantAttributePreservationTests
                 Slug = $"del-prod-{Guid.NewGuid():N}",
                 TitleEs = "P",
                 DescriptionEs = "D",
-                Tags = [], ImageUrls = [],
+                Tags = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
 
@@ -291,7 +291,7 @@ public class VariantAttributePreservationTests
                 Slug = $"sf-prod-{Guid.NewGuid():N}",
                 TitleEs = "Producto Storefront",
                 DescriptionEs = "Descripción",
-                Tags = ["tag1", "tag2"], ImageUrls = [],
+                Tags = ["tag1", "tag2"],
                 Badge = "new",
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });

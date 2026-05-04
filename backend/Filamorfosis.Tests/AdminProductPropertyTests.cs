@@ -56,7 +56,7 @@ public class AdminProductPropertyTests
                     Slug = $"pg-prod-{Guid.NewGuid():N}",
                     TitleEs = $"Producto {i}",
                     DescriptionEs = "Desc",
-                    Tags = [], ImageUrls = [],
+                    Tags = [],
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
                 });
@@ -129,7 +129,7 @@ public class AdminProductPropertyTests
                 Slug = $"vc-prod-{Guid.NewGuid():N}",
                 TitleEs = "P",
                 DescriptionEs = "D",
-                Tags = [], ImageUrls = [],
+                Tags = [],
                 IsActive = true, CreatedAt = DateTime.UtcNow
             });
 

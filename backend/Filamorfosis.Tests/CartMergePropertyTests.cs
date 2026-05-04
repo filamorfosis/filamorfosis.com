@@ -44,7 +44,7 @@ public class CartMergePropertyTests
                 Id = prodId, ProcessId = catId, Slug = $"merge-prod-{prodId:N}",
                 TitleEs = "Merge Prod",
                 DescriptionEs = "D",
-                Tags = [], ImageUrls = [], IsActive = true, CreatedAt = DateTime.UtcNow
+                Tags = [], IsActive = true, CreatedAt = DateTime.UtcNow
             });
 
             variantA = Guid.NewGuid();

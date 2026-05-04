@@ -93,7 +93,6 @@ public static class FilamorfosisGenerators
                 TitleEs       = titleEs,
                 DescriptionEs = $"Descripción de {titleEs}",
                 Tags          = [],
-                ImageUrls     = [],
                 IsActive      = isActive,
                 CreatedAt     = DateTime.UtcNow,
                 Variants      = variants

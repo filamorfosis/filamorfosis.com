@@ -8,7 +8,6 @@ public class Product
     public string TitleEs { get; set; } = string.Empty;
     public string DescriptionEs { get; set; } = string.Empty;
     public string[] Tags { get; set; } = [];
-    public string[] ImageUrls { get; set; } = [];
     public string? Badge { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }

@@ -1,4 +1,4 @@
-ï»¿@import 'design-system.css';
+@import 'design-system.css';
 
 /* 3DO - Modern Landing Page Styles */
 
@@ -4947,7 +4947,6 @@ html { scroll-behavior: smooth; }
     padding: 10px 16px 8px;
 }
 
-.service-sidebar.visible { /* always visible ï¿½ no-op */ }
 
 /* Title row */
 .service-sidebar__header {
