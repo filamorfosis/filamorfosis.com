@@ -2512,6 +2512,46 @@ picture img { width: 100%; height: 100%; object-fit: cover; }
   display: block;
 }
 
+/* Auth prompt — shown inside write tab when user is not logged in */
+.pdp-review-auth-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.pdp-review-auth-prompt__icon {
+  font-size: 2.5rem;
+  color: #475569;
+}
+
+.pdp-review-auth-prompt__msg {
+  font-size: 1rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.pdp-review-auth-prompt__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.pdp-review-auth-prompt__btn:hover {
+  opacity: 0.85;
+}
+
 /* Review Cards */
 .pdp-review-card {
   background: rgba(255, 255, 255, 0.03);

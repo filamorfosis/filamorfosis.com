@@ -211,45 +211,7 @@
           </div>
 
           <div class="pdp-reviews-tab-content" id="pdp-reviews-write-tab">
-            <form id="pdp-review-form" class="pdp-review-form">
-              <div class="pdp-review-form-field">
-                <label for="review-author">Tu nombre <span style="color:#f87171">*</span></label>
-                <input type="text" id="review-author" name="authorName" required placeholder="Ej: Juan Pérez">
-              </div>
-
-              <div class="pdp-review-form-field">
-                <label>Calificación <span style="color:#f87171">*</span></label>
-                <div class="pdp-review-rating-input" id="review-rating-input">
-                  <button type="button" class="pdp-rating-star" data-rating="1">☆</button>
-                  <button type="button" class="pdp-rating-star" data-rating="2">☆</button>
-                  <button type="button" class="pdp-rating-star" data-rating="3">☆</button>
-                  <button type="button" class="pdp-rating-star" data-rating="4">☆</button>
-                  <button type="button" class="pdp-rating-star" data-rating="5">☆</button>
-                </div>
-                <input type="hidden" id="review-rating" name="rating" value="0" required>
-              </div>
-
-              <div class="pdp-review-form-field">
-                <label for="review-body">Tu opinión <span style="color:#f87171">*</span></label>
-                <textarea id="review-body" name="body" rows="5" required placeholder="Cuéntanos tu experiencia con este producto..."></textarea>
-              </div>
-
-              <div class="pdp-review-form-field">
-                <label for="review-images">Imágenes (opcional)</label>
-                <input type="file" id="review-images" accept="image/png,image/jpeg" multiple>
-                <p style="font-size:1rem;color:#64748b;margin-top:4px">Máximo 10MB por imagen. PNG o JPG.</p>
-              </div>
-
-              <div class="pdp-review-form-error" id="review-form-error"></div>
-
-              <button type="submit" class="pdp-review-submit-btn" id="review-submit-btn">
-                <i class="fas fa-paper-plane"></i> Enviar Reseña
-              </button>
-
-              <p style="font-size:1rem;color:#64748b;margin-top:12px;text-align:center">
-                Tu reseña será revisada antes de publicarse.
-              </p>
-            </form>
+            <!-- populated on first click by _showReviewForm() or _showAuthPrompt() -->
           </div>
         </div>
       </div>`;
@@ -261,7 +223,124 @@
       root.appendChild(section);
     }
 
-    // Wire up tabs
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    function _isLoggedIn() {
+      return !!(window.FilamorfosisAuth && window.FilamorfosisAuth.getCurrentUser && window.FilamorfosisAuth.getCurrentUser());
+    }
+
+    function _wireFormInteractions(container) {
+      // Star rating
+      const stars = container.querySelectorAll('.pdp-rating-star');
+      const ratingInput = container.querySelector('#review-rating');
+      stars.forEach(star => {
+        star.addEventListener('click', () => {
+          const rating = parseInt(star.dataset.rating);
+          if (ratingInput) ratingInput.value = rating;
+          stars.forEach((s, i) => {
+            s.textContent = i < rating ? '★' : '☆';
+            s.classList.toggle('pdp-rating-star--active', i < rating);
+          });
+        });
+      });
+      // Form submit
+      const form = container.querySelector('#pdp-review-form');
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          await submitReview(productId);
+        });
+      }
+    }
+
+    function _showAuthPrompt() {
+      const writeTab = document.getElementById('pdp-reviews-write-tab');
+      if (!writeTab) return;
+      writeTab.innerHTML = `
+        <div class="pdp-review-auth-prompt">
+          <i class="fas fa-lock pdp-review-auth-prompt__icon"></i>
+          <p class="pdp-review-auth-prompt__msg">Inicia sesión para poder escribir un review</p>
+          <button type="button" class="pdp-review-auth-prompt__btn" id="pdp-review-login-btn">
+            <i class="fas fa-sign-in-alt"></i> Iniciar sesión
+          </button>
+        </div>`;
+      writeTab.querySelector('#pdp-review-login-btn')?.addEventListener('click', () => {
+        window.FilamorfosisAuth?.showModal('login');
+      });
+    }
+
+    function _showReviewForm() {
+      const writeTab = document.getElementById('pdp-reviews-write-tab');
+      if (!writeTab) return;
+      writeTab.innerHTML = `
+        <form id="pdp-review-form" class="pdp-review-form">
+          <div class="pdp-review-form-field">
+            <label for="review-author">Tu nombre <span style="color:#f87171">*</span></label>
+            <input type="text" id="review-author" name="authorName" required placeholder="Ej: Juan Pérez">
+          </div>
+          <div class="pdp-review-form-field">
+            <label>Calificación <span style="color:#f87171">*</span></label>
+            <div class="pdp-review-rating-input" id="review-rating-input">
+              <button type="button" class="pdp-rating-star" data-rating="1">☆</button>
+              <button type="button" class="pdp-rating-star" data-rating="2">☆</button>
+              <button type="button" class="pdp-rating-star" data-rating="3">☆</button>
+              <button type="button" class="pdp-rating-star" data-rating="4">☆</button>
+              <button type="button" class="pdp-rating-star" data-rating="5">☆</button>
+            </div>
+            <input type="hidden" id="review-rating" name="rating" value="0" required>
+          </div>
+          <div class="pdp-review-form-field">
+            <label for="review-body">Tu opinión <span style="color:#f87171">*</span></label>
+            <textarea id="review-body" name="body" rows="5" required placeholder="Cuéntanos tu experiencia con este producto..."></textarea>
+          </div>
+          <div class="pdp-review-form-field">
+            <label for="review-images">Imágenes (opcional)</label>
+            <input type="file" id="review-images" accept="image/png,image/jpeg" multiple>
+            <p style="font-size:1rem;color:#64748b;margin-top:4px">Máximo 10MB por imagen. PNG o JPG.</p>
+          </div>
+          <div class="pdp-review-form-error" id="review-form-error"></div>
+          <button type="submit" class="pdp-review-submit-btn" id="review-submit-btn">
+            <i class="fas fa-paper-plane"></i> Enviar Reseña
+          </button>
+          <p style="font-size:1rem;color:#64748b;margin-top:12px;text-align:center">
+            Tu reseña será revisada antes de publicarse.
+          </p>
+        </form>`;
+      _wireFormInteractions(writeTab);
+    }
+
+    // ── auth:login / auth:restored → swap prompt for form ────────────────────
+    function _onAuthChange() {
+      if (!_isLoggedIn()) return;
+      const writeTab = document.getElementById('pdp-reviews-write-tab');
+      // Only act if the prompt (not the form) is currently shown
+      if (writeTab && writeTab.querySelector('.pdp-review-auth-prompt')) {
+        _showReviewForm();
+      }
+    }
+    document.addEventListener('auth:login', _onAuthChange);
+    document.addEventListener('auth:restored', _onAuthChange);
+
+    // On logout, swap the form back to the login prompt if the write tab is visible
+    function _onLogout() {
+      const writeTab = document.getElementById('pdp-reviews-write-tab');
+      if (writeTab && writeTab.querySelector('#pdp-review-form')) {
+        _showAuthPrompt();
+      }
+    }
+    document.addEventListener('auth:logout', _onLogout);
+
+    // Clean up listeners when the section leaves the DOM (SPA navigation away)
+    new MutationObserver((_, obs) => {
+      if (!document.contains(section)) {
+        document.removeEventListener('auth:login', _onAuthChange);
+        document.removeEventListener('auth:restored', _onAuthChange);
+        document.removeEventListener('auth:logout', _onLogout);
+        obs.disconnect();
+      }
+    }).observe(document.body, { childList: true, subtree: true });
+
+    // ── Wire up tab switching ─────────────────────────────────────────────────
     section.querySelectorAll('.pdp-reviews-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         const targetTab = tab.dataset.tab;
@@ -269,31 +348,19 @@
         section.querySelectorAll('.pdp-reviews-tab-content').forEach(c => c.classList.remove('pdp-reviews-tab-content--active'));
         tab.classList.add('pdp-reviews-tab--active');
         document.getElementById(`pdp-reviews-${targetTab}-tab`).classList.add('pdp-reviews-tab-content--active');
+
+        if (targetTab === 'write') {
+          const writeTab = document.getElementById('pdp-reviews-write-tab');
+          if (!writeTab) return;
+          if (_isLoggedIn()) {
+            // Inject form only if not already there
+            if (!writeTab.querySelector('#pdp-review-form')) _showReviewForm();
+          } else {
+            _showAuthPrompt();
+          }
+        }
       });
     });
-
-    // Wire up rating stars
-    const ratingStars = section.querySelectorAll('.pdp-rating-star');
-    const ratingInput = section.querySelector('#review-rating');
-    ratingStars.forEach(star => {
-      star.addEventListener('click', () => {
-        const rating = parseInt(star.dataset.rating);
-        ratingInput.value = rating;
-        ratingStars.forEach((s, i) => {
-          s.textContent = i < rating ? '★' : '☆';
-          s.classList.toggle('pdp-rating-star--active', i < rating);
-        });
-      });
-    });
-
-    // Wire up form submission
-    const form = section.querySelector('#pdp-review-form');
-    if (form) {
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await submitReview(productId);
-      });
-    }
 
     // Load reviews
     loadProductReviews(productId);

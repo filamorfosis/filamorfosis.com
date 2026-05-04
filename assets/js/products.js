@@ -1182,9 +1182,9 @@ window.renderProductDetailPage = async function(slug) {
         });
     }
 
-    // Render reviews section
+    // Render reviews section — always pass the product UUID, not the slug
     if (window.ProductReviews && window.ProductReviews.renderReviewsSection) {
-        window.ProductReviews.renderReviewsSection(id);
+        window.ProductReviews.renderReviewsSection(p.id);
     }
 };
 

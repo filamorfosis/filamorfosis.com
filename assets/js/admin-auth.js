@@ -130,7 +130,7 @@
    */
   async function checkAdminSession() {
     try {
-      const user = await _fetch('/users/me');
+      const user = await _fetch('/auth/admin/me');
 
       if (!user || !Array.isArray(user.roles) || !user.roles.some(r => ['Master', 'UserManagement', 'ProductManagement', 'OrderManagement'].includes(r))) {
         // Logged in, but not an admin role → show access-denied state
@@ -345,7 +345,7 @@
       if (!target) return;
       e.preventDefault();
       try {
-        await _fetch('/auth/logout', { method: 'POST', body: JSON.stringify({}) });
+        await _fetch('/auth/admin/logout', { method: 'POST', body: JSON.stringify({}) });
       } catch (_) {
         // proceed regardless
       }

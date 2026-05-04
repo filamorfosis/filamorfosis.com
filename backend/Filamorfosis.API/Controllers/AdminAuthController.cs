@@ -207,6 +207,61 @@ public class AdminAuthController(
         return Ok(new { message = "MFA verification successful." });
     }
 
+    // ── GET /api/v1/auth/admin/me ─────────────────────────────────────────────
+    // Returns the currently authenticated admin user profile.
+    // Uses admin_access_token (via the /auth/admin route prefix in Program.cs).
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<IActionResult> GetMe()
+    {
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? User.FindFirstValue(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub);
+
+        if (userIdStr is null || !Guid.TryParse(userIdStr, out var userId))
+            return Unauthorized();
+
+        var user = await userManager.Users
+            .Include(u => u.MfaSecret)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user is null) return NotFound();
+
+        var roles = await userManager.GetRolesAsync(user);
+        var mfaVerified = User.FindFirstValue("mfa_verified") == "true";
+
+        return Ok(new
+        {
+            id = user.Id,
+            email = user.Email,
+            firstName = user.FirstName,
+            lastName = user.LastName,
+            roles = roles.ToList(),
+            mfaEnabled = user.MfaSecret?.IsConfirmed == true,
+            mfaVerified
+        });
+    }
+
+    // ── POST /api/v1/auth/admin/logout ───────────────────────────────────────
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout()
+    {
+        if (Request.Cookies.TryGetValue("admin_refresh_token", out var rawToken) && !string.IsNullOrEmpty(rawToken))
+        {
+            var hash = JwtService.HashToken(rawToken);
+            var stored = await db.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == hash);
+            if (stored is not null)
+            {
+                stored.IsRevoked = true;
+                await db.SaveChangesAsync();
+            }
+        }
+
+        Response.Cookies.Delete("admin_access_token");
+        Response.Cookies.Delete("admin_refresh_token");
+        return Ok(new { message = "Admin logged out." });
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /// <summary>

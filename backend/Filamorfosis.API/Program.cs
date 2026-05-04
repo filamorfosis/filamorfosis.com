@@ -103,11 +103,24 @@ builder.Services.AddAuthentication(options =>
     {
         OnMessageReceived = ctx =>
         {
-            // Check for admin_access_token first (for admin endpoints), then fall back to access_token (for customer endpoints)
-            if (ctx.Request.Cookies.TryGetValue("admin_access_token", out var adminToken))
-                ctx.Token = adminToken;
-            else if (ctx.Request.Cookies.TryGetValue("access_token", out var token))
-                ctx.Token = token;
+            // Route-aware cookie selection:
+            // Admin routes (/api/v1/admin/...) use admin_access_token.
+            // All other routes (store, public) use access_token.
+            // This prevents an active admin session from hijacking the store user session.
+            var path = ctx.Request.Path.Value ?? string.Empty;
+            var isAdminRoute = path.StartsWith("/api/v1/admin", StringComparison.OrdinalIgnoreCase)
+                            || path.StartsWith("/api/v1/auth/admin", StringComparison.OrdinalIgnoreCase);
+
+            if (isAdminRoute)
+            {
+                if (ctx.Request.Cookies.TryGetValue("admin_access_token", out var adminToken))
+                    ctx.Token = adminToken;
+            }
+            else
+            {
+                if (ctx.Request.Cookies.TryGetValue("access_token", out var token))
+                    ctx.Token = token;
+            }
             return Task.CompletedTask;
         }
     };
