@@ -90,6 +90,28 @@
                 _initProductDetail();
                 _reApplyLang();
             }
+        },
+        {
+            path: '/checkout',
+            templateId: 'tpl-checkout',
+            title: 'Finalizar Compra | Filamorfosis®',
+            description: 'Completa tu pedido de forma segura con MercadoPago.',
+            bodyClass: 'page-checkout',
+            init: function () {
+                _initCheckout();
+                _reApplyLang();
+            }
+        },
+        {
+            path: '/account',
+            templateId: 'tpl-account',
+            title: 'Mi Cuenta | Filamorfosis®',
+            description: 'Gestiona tu perfil, direcciones y pedidos.',
+            bodyClass: 'page-account',
+            init: function () {
+                _initAccount();
+                _reApplyLang();
+            }
         }
     ];
 
@@ -119,6 +141,53 @@
         var productId = (pathParts[1] === 'producto' && pathParts[2]) ? pathParts[2] : null;
         if (productId && typeof window.renderProductDetailPage === 'function') {
             window.renderProductDetailPage(productId);
+        }
+    }
+
+    function _initCheckout() {
+        // checkout.js exposes window._initCheckoutPage with init logic
+        // We need to manually trigger the checkout initialization
+        if (typeof window._initCheckoutPage === 'function') {
+            window._initCheckoutPage();
+        } else {
+            console.warn('Checkout init function not found. Retrying...');
+            // Retry with increasing delays to allow scripts to load
+            var attempts = 0;
+            var maxAttempts = 5;
+            var retryInterval = setInterval(function() {
+                attempts++;
+                if (typeof window._initCheckoutPage === 'function') {
+                    clearInterval(retryInterval);
+                    window._initCheckoutPage();
+                    console.log('Checkout init function found after ' + attempts + ' attempts');
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(retryInterval);
+                    console.error('Checkout init function still not found after ' + maxAttempts + ' attempts');
+                }
+            }, 100);
+        }
+    }
+
+    function _initAccount() {
+        // account.js exposes window._initAccountPage with init logic
+        if (typeof window._initAccountPage === 'function') {
+            window._initAccountPage();
+        } else {
+            console.warn('Account init function not found. Retrying...');
+            // Retry with increasing delays to allow scripts to load
+            var attempts = 0;
+            var maxAttempts = 5;
+            var retryInterval = setInterval(function() {
+                attempts++;
+                if (typeof window._initAccountPage === 'function') {
+                    clearInterval(retryInterval);
+                    window._initAccountPage();
+                    console.log('Account init function found after ' + attempts + ' attempts');
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(retryInterval);
+                    console.error('Account init function still not found after ' + maxAttempts + ' attempts');
+                }
+            }, 100);
         }
     }
 
@@ -212,35 +281,60 @@
 
     /**
      * Finds the route object for a given pathname.
-     * Supports exact matches and the /tienda/:slug pattern.
+     * Supports exact matches and dynamic patterns.
      * Falls back to the '/' route if no match is found.
      * @param {string} pathname
      * @returns {Object}
      */
     function _matchRoute(pathname) {
         var p = pathname.replace(/\/$/, '') || '/';
+        
+        console.log('Router: Matching route for pathname:', p);
 
         // Exact match first
         for (var i = 0; i < routes.length; i++) {
-            if (routes[i].path === p) { return routes[i]; }
+            if (routes[i].path === p) {
+                console.log('Router: Found exact match:', routes[i].path);
+                return routes[i];
+            }
         }
 
         // /tienda/:slug — treat as tienda route with a category slug
         if (/^\/tienda\/[^/]+$/.test(p)) {
-            return routes[1]; // tienda route (index 1)
+            // Find tienda route by path
+            for (var i = 0; i < routes.length; i++) {
+                if (routes[i].path === '/tienda') {
+                    console.log('Router: Matched /tienda with slug');
+                    return routes[i];
+                }
+            }
         }
 
         // /servicios/:slug — treat as servicios route with a process slug
         if (/^\/servicios\/[^/]+$/.test(p)) {
-            return routes[2]; // servicios route (index 2)
+            // Find servicios route by path
+            for (var i = 0; i < routes.length; i++) {
+                if (routes[i].path === '/servicios') {
+                    console.log('Router: Matched /servicios with slug');
+                    return routes[i];
+                }
+            }
         }
 
         // /producto/:id — product detail page
         if (/^\/producto\/[^/]+$/.test(p)) {
-            return routes[5]; // producto route
+            // Find producto route by path
+            for (var i = 0; i < routes.length; i++) {
+                if (routes[i].path === '/producto') {
+                    console.log('Router: Matched /producto with ID');
+                    return routes[i];
+                }
+            }
         }
 
-        return routes[0]; // default to home
+        // Default to home
+        console.log('Router: No match found, defaulting to home');
+        return routes[0];
     }
 
     /* ── Render ─────────────────────────────────────────────────────────── */
@@ -254,7 +348,17 @@
         var appView = document.getElementById('app-view');
         var tpl = document.getElementById(route.templateId);
 
-        if (!appView || !tpl) { return; }
+        if (!appView) {
+            console.error('Router: #app-view element not found');
+            return;
+        }
+        
+        if (!tpl) {
+            console.error('Router: Template not found:', route.templateId);
+            return;
+        }
+
+        console.log('Router: Rendering route:', route.path, 'with template:', route.templateId);
 
         // Swap content
         appView.innerHTML = '';
@@ -289,7 +393,10 @@
 
         // Run route-specific init
         if (typeof route.init === 'function') {
+            console.log('Router: Calling init function for route:', route.path);
             route.init();
+        } else {
+            console.warn('Router: No init function for route:', route.path);
         }
 
         // Handle hash anchors (e.g. /conocenos#contact)
@@ -390,7 +497,10 @@
     /* ── Initial render ─────────────────────────────────────────────────── */
 
     document.addEventListener('DOMContentLoaded', function () {
-        _render(_matchRoute(window.location.pathname));
+        // Small delay to ensure all scripts are fully loaded
+        setTimeout(function() {
+            _render(_matchRoute(window.location.pathname));
+        }, 50);
     });
 
     /* ── Public API ─────────────────────────────────────────────────────── */

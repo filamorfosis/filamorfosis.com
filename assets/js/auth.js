@@ -30,7 +30,12 @@
       </div>
       <div class="auth-form__field">
         <label for="login-password" data-t="auth.password">Contraseña</label>
-        <input type="password" id="login-password" autocomplete="current-password" required>
+        <div class="auth-form__password-wrapper">
+          <input type="password" id="login-password" autocomplete="current-password" required>
+          <button type="button" class="auth-form__password-toggle" id="login-password-toggle" aria-label="Mostrar contraseña">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
         <span class="auth-form__error" id="login-password-err"></span>
       </div>
       <span class="auth-form__error" id="login-general-err"></span>
@@ -59,9 +64,34 @@
       </div>
       <div class="auth-form__field">
         <label for="reg-password" data-t="auth.password">Contraseña</label>
-        <input type="password" id="reg-password" autocomplete="new-password" required minlength="8">
-        <span class="auth-form__hint" data-t="auth.passwordHint">Mínimo 8 caracteres, 1 mayúscula y 1 número</span>
+        <div class="auth-form__password-wrapper">
+          <input type="password" id="reg-password" autocomplete="new-password" required minlength="8">
+          <button type="button" class="auth-form__password-toggle" id="reg-password-toggle" aria-label="Mostrar contraseña">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        <div class="auth-form__password-requirements" id="reg-password-requirements">
+          <div class="auth-form__requirement" id="req-length">
+            <i class="fas fa-circle"></i> <span data-t="auth.reqLength">Mínimo 8 caracteres</span>
+          </div>
+          <div class="auth-form__requirement" id="req-upper">
+            <i class="fas fa-circle"></i> <span data-t="auth.reqUpper">Una letra mayúscula</span>
+          </div>
+          <div class="auth-form__requirement" id="req-digit">
+            <i class="fas fa-circle"></i> <span data-t="auth.reqDigit">Un número</span>
+          </div>
+        </div>
         <span class="auth-form__error" id="reg-password-err"></span>
+      </div>
+      <div class="auth-form__field">
+        <label for="reg-password-confirm" data-t="auth.confirmPassword">Confirmar contraseña</label>
+        <div class="auth-form__password-wrapper">
+          <input type="password" id="reg-password-confirm" autocomplete="new-password" required>
+          <button type="button" class="auth-form__password-toggle" id="reg-password-confirm-toggle" aria-label="Mostrar contraseña">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        <span class="auth-form__error" id="reg-password-confirm-err"></span>
       </div>
       <span class="auth-form__error" id="reg-general-err"></span>
       <button type="submit" class="btn-primary" data-t="auth.registerBtn">Crear cuenta</button>
@@ -109,6 +139,21 @@
       _showForm('login');
     });
 
+    // Password toggle buttons
+    _setupPasswordToggle('login-password', 'login-password-toggle');
+    _setupPasswordToggle('reg-password', 'reg-password-toggle');
+    _setupPasswordToggle('reg-password-confirm', 'reg-password-confirm-toggle');
+
+    // Real-time password validation
+    const regPassword = document.getElementById('reg-password');
+    const regPasswordConfirm = document.getElementById('reg-password-confirm');
+    
+    regPassword.addEventListener('input', () => _validatePasswordRequirements());
+    regPasswordConfirm.addEventListener('input', () => _validatePasswordMatch());
+
+    // Email validation
+    document.getElementById('reg-email').addEventListener('blur', _validateEmail);
+
     // Form submissions
     document.getElementById('login-form').addEventListener('submit', _handleLogin);
     document.getElementById('register-form').addEventListener('submit', _handleRegister);
@@ -125,6 +170,77 @@
         logout();
       }
     });
+  }
+
+  function _setupPasswordToggle(inputId, buttonId) {
+    const input = document.getElementById(inputId);
+    const button = document.getElementById(buttonId);
+    if (!input || !button) return;
+
+    button.addEventListener('click', () => {
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      const icon = button.querySelector('i');
+      if (icon) {
+        icon.className = isPassword ? 'fas fa-eye-slash' : 'fas fa-eye';
+      }
+      button.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    });
+  }
+
+  function _validatePasswordRequirements() {
+    const password = document.getElementById('reg-password').value;
+    const hasLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasDigit = /\d/.test(password);
+
+    _updateRequirement('req-length', hasLength);
+    _updateRequirement('req-upper', hasUpper);
+    _updateRequirement('req-digit', hasDigit);
+
+    return hasLength && hasUpper && hasDigit;
+  }
+
+  function _updateRequirement(id, met) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    
+    const icon = el.querySelector('i');
+    if (met) {
+      el.style.color = '#22c55e';
+      if (icon) icon.className = 'fas fa-check-circle';
+    } else {
+      el.style.color = '#64748b';
+      if (icon) icon.className = 'fas fa-circle';
+    }
+  }
+
+  function _validatePasswordMatch() {
+    const password = document.getElementById('reg-password').value;
+    const confirm = document.getElementById('reg-password-confirm').value;
+    const errEl = document.getElementById('reg-password-confirm-err');
+
+    if (confirm && password !== confirm) {
+      if (errEl) errEl.textContent = 'Las contraseñas no coinciden.';
+      return false;
+    } else {
+      if (errEl) errEl.textContent = '';
+      return true;
+    }
+  }
+
+  function _validateEmail() {
+    const email = document.getElementById('reg-email').value.trim();
+    const errEl = document.getElementById('reg-email-err');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (email && !emailRegex.test(email)) {
+      if (errEl) errEl.textContent = 'Ingresa un correo válido.';
+      return false;
+    } else {
+      if (errEl) errEl.textContent = '';
+      return true;
+    }
   }
 
   function _switchTab(tab) {
@@ -170,14 +286,47 @@
     const lastName = document.getElementById('reg-last').value.trim();
     const email = document.getElementById('reg-email').value.trim();
     const password = document.getElementById('reg-password').value;
+    const passwordConfirm = document.getElementById('reg-password-confirm').value;
 
     let valid = true;
+
+    // Validate fields
     if (!firstName) { _setError('reg-first-err', 'Requerido.'); valid = false; }
     if (!lastName) { _setError('reg-last-err', 'Requerido.'); valid = false; }
-    if (!email) { _setError('reg-email-err', 'Ingresa tu correo.'); valid = false; }
-    if (password.length < 8) { _setError('reg-password-err', 'Mínimo 8 caracteres.'); valid = false; }
-    else if (!/[A-Z]/.test(password)) { _setError('reg-password-err', 'Debe incluir una mayúscula.'); valid = false; }
-    else if (!/\d/.test(password)) { _setError('reg-password-err', 'Debe incluir un número.'); valid = false; }
+    
+    // Email validation
+    if (!email) { 
+      _setError('reg-email-err', 'Ingresa tu correo.'); 
+      valid = false; 
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        _setError('reg-email-err', 'Ingresa un correo válido.');
+        valid = false;
+      }
+    }
+
+    // Password requirements validation
+    if (password.length < 8) { 
+      _setError('reg-password-err', 'Mínimo 8 caracteres.'); 
+      valid = false; 
+    } else if (!/[A-Z]/.test(password)) { 
+      _setError('reg-password-err', 'Debe incluir una mayúscula.'); 
+      valid = false; 
+    } else if (!/\d/.test(password)) { 
+      _setError('reg-password-err', 'Debe incluir un número.'); 
+      valid = false; 
+    }
+
+    // Password confirmation validation
+    if (!passwordConfirm) {
+      _setError('reg-password-confirm-err', 'Confirma tu contraseña.');
+      valid = false;
+    } else if (password !== passwordConfirm) {
+      _setError('reg-password-confirm-err', 'Las contraseñas no coinciden.');
+      valid = false;
+    }
+
     if (!valid) return;
 
     const btn = e.target.querySelector('button[type=submit]');

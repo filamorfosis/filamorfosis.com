@@ -36,6 +36,7 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
     public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
     public DbSet<ProductSubCategory> ProductSubCategories => Set<ProductSubCategory>();
     public DbSet<ProductCategoryAssignment> ProductCategoryAssignments => Set<ProductCategoryAssignment>();
+    public DbSet<ProductReview> ProductReviews => Set<ProductReview>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -337,6 +338,41 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
                 .HasForeignKey(pca => pca.SubCategoryId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(true);
+        });
+
+        // ProductReview — approval workflow
+        var jsonOptions2 = new JsonSerializerOptions();
+        var reviewImgConverter = new ValueConverter<string[], string>(
+            v => JsonSerializer.Serialize(v, jsonOptions2),
+            v => JsonSerializer.Deserialize<string[]>(v, jsonOptions2) ?? Array.Empty<string>());
+        var reviewImgComparer = new ValueComparer<string[]>(
+            (a, b) => a != null && b != null && a.SequenceEqual(b),
+            v => v.Aggregate(0, (acc, s) => HashCode.Combine(acc, s.GetHashCode())),
+            v => v.ToArray());
+
+        modelBuilder.Entity<ProductReview>(entity =>
+        {
+            entity.HasKey(r => r.Id);
+            entity.Property(r => r.Status).HasConversion<string>().HasColumnType("TEXT");
+            entity.Property(r => r.ImageUrls)
+                .HasConversion(reviewImgConverter, reviewImgComparer)
+                .HasColumnType("TEXT");
+            entity.HasIndex(r => r.ProductId);
+            entity.HasIndex(r => r.Status);
+            entity.HasOne(r => r.Product)
+                .WithMany()
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(r => r.Variant)
+                .WithMany()
+                .HasForeignKey(r => r.ProductVariantId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         // Seed data — GlobalParameters

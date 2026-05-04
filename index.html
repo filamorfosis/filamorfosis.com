@@ -217,19 +217,19 @@
                         <!-- Logged-in links (hidden when logged out) -->
                         <ul class="nav-user-dropdown__list" id="navUserLinks" style="display:none">
                             <li>
-                                <a class="nav-user-dropdown__item" href="account.html" data-no-spa>
+                                <a class="nav-user-dropdown__item" href="/account">
                                     <i class="fas fa-user" aria-hidden="true"></i>
                                     <span data-translate="nav_my_profile">Mi Perfil</span>
                                 </a>
                             </li>
                             <li>
-                                <a class="nav-user-dropdown__item" href="account.html#addresses" data-no-spa>
+                                <a class="nav-user-dropdown__item" href="/account#addresses">
                                     <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                                     <span data-translate="nav_my_addresses">Mis Direcciones</span>
                                 </a>
                             </li>
                             <li>
-                                <a class="nav-user-dropdown__item" href="account.html#orders" data-no-spa>
+                                <a class="nav-user-dropdown__item" href="/account#orders">
                                     <i class="fas fa-box" aria-hidden="true"></i>
                                     <span data-translate="nav_my_orders">Mis Pedidos</span>
                                 </a>
@@ -355,7 +355,7 @@
     </button>
 
     <!-- ══ SPA VIEW CONTAINER ══ -->
-    <main id="app-view" role="main" aria-live="polite">
+    <main id="app-view" class="app-view-container" role="main" aria-live="polite">
         <!-- Page content is injected here by router.js -->
     </main>
 
@@ -1316,6 +1316,171 @@
 
 </template>
 
+<!-- ── CHECKOUT ──────────────────────────────────────────────────────── -->
+<template id="tpl-checkout">
+
+    <main class="checkout-page container">
+        <h1 class="checkout-page__title" data-t="checkout.title">Finalizar compra</h1>
+
+        <div class="checkout-layout">
+            <!-- Left: Address + Notes -->
+            <section class="checkout-form-section">
+                <h2 data-t="checkout.shipping">Dirección de envío</h2>
+
+                <div id="saved-addresses" class="address-list"></div>
+
+                <details id="new-address-details" class="new-address-form">
+                    <summary data-t="checkout.addAddress">+ Agregar nueva dirección</summary>
+                    <form id="new-address-form" novalidate>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label data-t="checkout.street">Calle y número</label>
+                                <input type="text" id="addr-street" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label data-t="checkout.city">Ciudad</label>
+                                <input type="text" id="addr-city" required>
+                            </div>
+                            <div class="form-field">
+                                <label data-t="checkout.state">Estado</label>
+                                <input type="text" id="addr-state" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label data-t="checkout.postalCode">Código postal</label>
+                                <input type="text" id="addr-postal" required>
+                            </div>
+                            <div class="form-field">
+                                <label data-t="checkout.country">País</label>
+                                <input type="text" id="addr-country" value="MX" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-secondary" data-t="checkout.saveAddress">Guardar dirección</button>
+                    </form>
+                </details>
+
+                <div class="form-field" style="margin-top:1.5rem">
+                    <label for="order-notes" data-t="checkout.notes">Notas del pedido (opcional)</label>
+                    <textarea id="order-notes" rows="3" placeholder="Instrucciones especiales..."></textarea>
+                </div>
+            </section>
+
+            <!-- Right: Order summary -->
+            <aside class="checkout-summary">
+                <h2 data-t="checkout.summary">Resumen del pedido</h2>
+                <div id="checkout-items"></div>
+                <div class="checkout-summary__total">
+                    <span data-t="checkout.total">Total:</span>
+                    <strong id="checkout-total">$0 MXN</strong>
+                </div>
+                <span class="checkout-error" id="checkout-error"></span>
+                <button id="pay-btn" class="btn-primary checkout-summary__pay" data-t="checkout.pay">
+                    <i class="fab fa-mercado-pago"></i> Pagar con MercadoPago
+                </button>
+            </aside>
+        </div>
+    </main>
+
+</template>
+
+<!-- ── ACCOUNT ───────────────────────────────────────────────────────── -->
+<template id="tpl-account">
+
+    <main class="account-page container">
+
+        <!-- Animated header with avatar -->
+        <div class="account-header" style="position:relative;overflow:hidden;padding:2rem 0 1.5rem;margin-bottom:1.5rem">
+            <canvas id="account-bg-canvas" style="position:absolute;inset:0;pointer-events:none;z-index:0;width:100%;height:100%"></canvas>
+            <div class="account-header__content" style="position:relative;z-index:1;display:flex;align-items:center;gap:1.5rem">
+                <div class="account-avatar" id="account-avatar">?</div>
+                <div>
+                    <h1 class="account-header__name" id="account-header-name">Cargando...</h1>
+                    <p class="account-header__email" id="account-header-email"></p>
+                </div>
+                <button class="btn-ghost account-logout-btn" id="account-logout-btn" style="margin-left:auto" data-action="logout">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="account-tabs">
+            <button class="account-tab active" data-tab="profile" data-t="account.profile">Perfil</button>
+            <button class="account-tab" data-tab="addresses" data-t="account.addresses">Direcciones</button>
+            <button class="account-tab" data-tab="orders" data-t="account.orders">Mis pedidos</button>
+        </div>
+
+        <!-- Profile tab -->
+        <section id="tab-profile" class="account-panel">
+            <form id="profile-form" novalidate>
+                <div class="form-row">
+                    <div class="float-field">
+                        <input type="text" id="profile-first" class="float-field__input" placeholder=" " required autocomplete="given-name">
+                        <label class="float-field__label" for="profile-first" data-t="auth.firstName">Nombre</label>
+                        <span class="float-field__hint" id="hint-first"></span>
+                    </div>
+                    <div class="float-field">
+                        <input type="text" id="profile-last" class="float-field__input" placeholder=" " required autocomplete="family-name">
+                        <label class="float-field__label" for="profile-last" data-t="auth.lastName">Apellido</label>
+                        <span class="float-field__hint" id="hint-last"></span>
+                    </div>
+                </div>
+                <div class="float-field">
+                    <input type="tel" id="profile-phone" class="float-field__input" placeholder=" " autocomplete="tel">
+                    <label class="float-field__label" for="profile-phone" data-t="account.phone">Teléfono</label>
+                    <span class="float-field__hint" id="hint-phone"></span>
+                </div>
+                <div class="float-field">
+                    <input type="email" id="profile-email" class="float-field__input" placeholder=" " disabled autocomplete="email">
+                    <label class="float-field__label" for="profile-email" data-t="auth.email">Correo</label>
+                </div>
+                <button type="submit" class="btn-primary" data-t="account.save">Guardar cambios</button>
+            </form>
+        </section>
+
+        <!-- Addresses tab -->
+        <section id="tab-addresses" class="account-panel" style="display:none">
+            <div id="addresses-list"></div>
+            <button class="btn-secondary" id="toggle-add-addr-btn" style="margin-bottom:0.75rem">
+                <i class="fas fa-plus"></i> Agregar dirección
+            </button>
+            <div class="add-address-form" id="add-addr-panel">
+                <form id="add-addr-form" novalidate style="display:flex;flex-direction:column;gap:0.75rem;padding:1rem;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.08);margin-bottom:1rem">
+                    <div class="form-field"><label>Calle</label><input type="text" id="new-street" required autocomplete="street-address"></div>
+                    <div class="form-row">
+                        <div class="form-field"><label>Ciudad</label><input type="text" id="new-city" required autocomplete="address-level2"></div>
+                        <div class="form-field"><label>Estado</label><input type="text" id="new-state" required autocomplete="address-level1"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-field"><label>CP</label><input type="text" id="new-postal" required autocomplete="postal-code"></div>
+                        <div class="form-field"><label>País</label><input type="text" id="new-country" value="MX" required autocomplete="country-name"></div>
+                    </div>
+                    <button type="submit" class="btn-secondary" data-t="checkout.saveAddress">Guardar</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Orders tab -->
+        <section id="tab-orders" class="account-panel" style="display:none">
+            <div class="orders-search-wrap">
+                <i class="fas fa-search" style="color:#64748b"></i>
+                <input type="text" id="orders-search" placeholder="Buscar por ID o producto..." autocomplete="off">
+            </div>
+            <div class="orders-filter-tabs">
+                <button class="orders-filter-tab active" data-filter="all">Todos</button>
+                <button class="orders-filter-tab" data-filter="active">Activos</button>
+                <button class="orders-filter-tab" data-filter="done">Completados</button>
+            </div>
+            <div id="orders-list"></div>
+            <div id="orders-pagination" class="pagination"></div>
+        </section>
+    </main>
+
+</template>
+
 <!-- ══════════════════════════════════════════════════════════════════════
      SCRIPTS
      ══════════════════════════════════════════════════════════════════════ -->
@@ -1334,9 +1499,12 @@
 <script src="assets/js/api.js"></script>
 <script src="assets/js/auth.js"></script>
 <script src="assets/js/cart.js"></script>
+<script src="assets/js/checkout.js"></script>
+<script src="assets/js/account.js"></script>
 
 <!-- Catalog render engine -->
 <script src="assets/js/products.js"></script>
+<script src="assets/js/product-reviews.js"></script>
 
 <!-- i18n language files -->
 <script src="assets/js/i18n/lang.es.js"></script>

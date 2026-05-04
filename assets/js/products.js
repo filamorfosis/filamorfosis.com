@@ -1181,6 +1181,11 @@ window.renderProductDetailPage = async function(id) {
             _updateTotal();
         });
     }
+
+    // Render reviews section
+    if (window.ProductReviews && window.ProductReviews.renderReviewsSection) {
+        window.ProductReviews.renderReviewsSection(id);
+    }
 };
 
 window.renderProductDetail = window.renderProductDetailPage;

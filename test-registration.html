@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Registration - Filamorfosis</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #0a0e1a;
+      color: #e2e8f0;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: 16px;
+    }
+    button {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      width: 100%;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    .success {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid #22c55e;
+      color: #22c55e;
+    }
+    .error {
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid #f87171;
+      color: #f87171;
+    }
+    .info {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid #3b82f6;
+      color: #3b82f6;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Test Registration API</h1>
+  <p>Use this page to test the registration endpoint and see detailed error messages.</p>
+
+  <form id="test-form">
+    <div class="form-group">
+      <label for="firstName">First Name:</label>
+      <input type="text" id="firstName" value="Juan" required>
+    </div>
+
+    <div class="form-group">
+      <label for="lastName">Last Name:</label>
+      <input type="text" id="lastName" value="Pérez" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input type="email" id="email" value="test@example.com" required>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password:</label>
+      <input type="password" id="password" value="Test1234" required>
+      <small style="color: #64748b; display: block; margin-top: 5px;">
+        Requirements: 8+ chars, 1 uppercase, 1 digit
+      </small>
+    </div>
+
+    <button type="submit">🚀 Test Registration</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const API_BASE = 'http://localhost:5205/api/v1';
+
+    document.getElementById('test-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = {
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value
+      };
+
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '<div class="result info">⏳ Sending request...</div>';
+
+      console.log('📤 Request payload:', data);
+
+      try {
+        const response = await fetch(`${API_BASE}/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          credentials: 'include',
+          body: JSON.stringify(data)
+        });
+
+        console.log('📥 Response status:', response.status);
+
+        const responseData = await response.json();
+        console.log('📥 Response data:', responseData);
+
+        if (response.ok) {
+          resultDiv.innerHTML = `<div class="result success">✅ SUCCESS!\n\n${JSON.stringify(responseData, null, 2)}</div>`;
+        } else {
+          resultDiv.innerHTML = `<div class="result error">❌ ERROR ${response.status}\n\n${JSON.stringify(responseData, null, 2)}</div>`;
+        }
+      } catch (error) {
+        console.error('💥 Network error:', error);
+        resultDiv.innerHTML = `<div class="result error">💥 NETWORK ERROR\n\n${error.message}</div>`;
+      }
+    });
+
+    // Show password requirements validation
+    document.getElementById('password').addEventListener('input', (e) => {
+      const pwd = e.target.value;
+      const hasLength = pwd.length >= 8;
+      const hasUpper = /[A-Z]/.test(pwd);
+      const hasDigit = /\d/.test(pwd);
+      
+      console.log('Password validation:', { hasLength, hasUpper, hasDigit });
+    });
+  </script>
+</body>
+</html>

@@ -9,10 +9,8 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Skip non-SPA pages
+# Skip non-SPA pages (admin is a standalone page, not an SPA route)
 RewriteCond %{REQUEST_URI} !^/admin
-RewriteCond %{REQUEST_URI} !^/account
-RewriteCond %{REQUEST_URI} !^/order-confirmation
 
-# Rewrite everything else to index.html
+# Rewrite everything else (including /account, /checkout, /tienda, etc.) to index.html
 RewriteRule ^ index.html [L]

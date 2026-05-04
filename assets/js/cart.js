@@ -34,7 +34,7 @@
         <div class="cart-trust-badge"><i class="fas fa-star"></i> <span data-t="cart_trust_quality">Producción garantizada</span></div>
         <div class="cart-trust-badge"><i class="fas fa-headset"></i> <span data-t="cart_trust_support">Soporte 24/7</span></div>
       </div>
-      <a href="checkout.html" class="btn-primary cart-drawer__checkout" id="cart-checkout-btn" data-t="cart_checkout">
+      <a href="/checkout" class="btn-primary cart-drawer__checkout" id="cart-checkout-btn" data-t="cart_checkout">
         Proceder al pago
       </a>
     </div>

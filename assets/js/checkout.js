@@ -549,10 +549,21 @@
     addTrustBadges();
   }
 
+  // Expose init function for SPA router
+  window._initCheckoutPage = init;
+
+  // Auto-init only if we're on the standalone checkout.html page
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', function() {
+      // Only auto-init if we're NOT in the SPA (no #app-view element)
+      if (!document.getElementById('app-view')) {
+        init();
+      }
+    });
   } else {
-    init();
+    if (!document.getElementById('app-view')) {
+      init();
+    }
   }
 
   /* ── Expose for testing ──────────────────────────────────────────────── */

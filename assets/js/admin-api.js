@@ -526,6 +526,43 @@
     });
   }
 
+  // ── Reviews ───────────────────────────────────────────────────────────────
+
+  /** GET /api/v1/admin/reviews — paginated list with optional status/productId/search filters */
+  function adminGetReviews(params = {}) {
+    const clean = Object.fromEntries(
+      Object.entries(params).filter(([, v]) => v !== '' && v !== null && v !== undefined)
+    );
+    const qs = new URLSearchParams(clean).toString();
+    return apiFetch(`/admin/reviews${qs ? '?' + qs : ''}`);
+  }
+
+  /** GET /api/v1/admin/reviews/{id} — single review */
+  function adminGetReview(id) {
+    return apiFetch(`/admin/reviews/${id}`);
+  }
+
+  /** PUT /api/v1/admin/reviews/{id}/decision — approve or reject */
+  function adminDecideReview(id, decision, adminNote) {
+    return apiFetch(`/admin/reviews/${id}/decision`, {
+      method: 'PUT',
+      body: JSON.stringify({ decision, adminNote: adminNote || null })
+    });
+  }
+
+  /** DELETE /api/v1/admin/reviews/{id} — delete review and its images */
+  function adminDeleteReview(id) {
+    return apiFetch(`/admin/reviews/${id}`, { method: 'DELETE' });
+  }
+
+  /** DELETE /api/v1/admin/reviews/{id}/images — remove a single image */
+  function adminDeleteReviewImage(id, imageUrl) {
+    return apiFetch(`/admin/reviews/${id}/images`, {
+      method: 'DELETE',
+      body: JSON.stringify({ imageUrl })
+    });
+  }
+
   // ── Namespace export ──────────────────────────────────────────────────────
 
   window.adminApi = {
@@ -595,7 +632,13 @@
     adminUpdateSubCategory,
     adminDeleteSubCategory,
     adminGetProductCategories,
-    adminUpdateProductCategories
+    adminUpdateProductCategories,
+    // reviews
+    adminGetReviews,
+    adminGetReview,
+    adminDecideReview,
+    adminDeleteReview,
+    adminDeleteReviewImage
   };
 
   // Also expose each function directly on window so existing admin.html inline

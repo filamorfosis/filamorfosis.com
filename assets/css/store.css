@@ -438,6 +438,62 @@
   font-size: 1rem;
 }
 
+.auth-form__password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-form__password-wrapper input {
+  flex: 1;
+  padding-right: 3rem;
+}
+
+.auth-form__password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  font-size: 1.125rem;
+}
+
+.auth-form__password-toggle:hover {
+  color: var(--color-text-primary);
+}
+
+.auth-form__password-requirements {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.auth-form__requirement {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: var(--color-text-disabled);
+  transition: color 0.2s;
+}
+
+.auth-form__requirement i {
+  font-size: 0.75rem;
+  width: 1rem;
+  text-align: center;
+}
+
 .auth-form__link {
   color: var(--color-info);
   font-size: 1rem;

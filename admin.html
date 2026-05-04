@@ -185,6 +185,7 @@
       <button class="admin-tab" data-tab="users"><i class="fas fa-users"></i> Usuarios</button>
       <button class="admin-tab" data-tab="materials"><i class="fas fa-layer-group"></i> Materiales</button>
       <button class="admin-tab" data-tab="globalparams"><i class="fas fa-globe"></i> Parámetros Globales</button>
+      <button class="admin-tab" data-tab="reviews"><i class="fas fa-star"></i> Reseñas</button>
     </div>
 
  <div id="panel-orders" class="admin-panel active">
@@ -677,6 +678,54 @@
       </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TAB: REVIEWS
+    ═══════════════════════════════════════════════════════════════════ -->
+    <div id="panel-reviews" class="admin-panel">
+      <div class="admin-section">
+        <div class="admin-section-title" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <span><i class="fas fa-star"></i> Reseñas de Productos</span>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <select id="reviews-status-filter"
+                    style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;font-family:Poppins,sans-serif;font-size:1rem;padding:7px 12px;cursor:pointer"
+                    aria-label="Filtrar por estado">
+              <option value="">Todos los estados</option>
+              <option value="Pending">Pendiente</option>
+              <option value="Approved">Aprobada</option>
+              <option value="Rejected">Rechazada</option>
+            </select>
+            <div style="position:relative">
+              <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#64748b;font-size:1rem;pointer-events:none"></i>
+              <input type="search" id="reviews-search" placeholder="Buscar por autor o texto..."
+                     style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;font-family:Poppins,sans-serif;font-size:1rem;padding:7px 12px 7px 32px;width:240px;transition:border-color 0.2s"
+                     aria-label="Buscar reseñas">
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="reviews-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Producto</th>
+                <th>Autor</th>
+                <th>Calificación</th>
+                <th>Reseña</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="reviews-tbody">
+              <tr><td colspan="7" style="text-align:center;padding:24px;color:#64748b"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="reviews-pagination"></div>
+      </div>
+    </div>
+
     <!-- Confirmation Modal (reusable) -->
     <div id="confirm-modal" class="admin-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
       <div class="admin-modal-box">
@@ -698,6 +747,26 @@
       </div>
     </div>
   </main>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+         REVIEWS PANEL
+  ═══════════════════════════════════════════════════════════════════ -->
+  <!-- Reviews panel is injected inside .admin-wrap via the tab system -->
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+         REVIEW DETAIL MODAL
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div id="review-modal" class="admin-modal-overlay" role="dialog" aria-modal="true" style="display:none">
+    <div class="admin-modal-box" style="max-width:640px">
+      <button class="admin-modal-close" id="review-modal-close" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="admin-modal-title">
+        <i class="fas fa-star" style="margin-right:8px;color:#eab308"></i>Detalle de Reseña
+      </div>
+      <div id="review-modal-body" style="margin-top:16px"></div>
+    </div>
+  </div>
 
   <!-- ═══════════════════════════════════════════════════════════════════
          PROCESS MODAL (for Processes/Manufacturing Categories tab)
@@ -989,6 +1058,7 @@
   <script src="assets/js/admin-orders.js"></script>
   <script src="assets/js/admin-users.js"></script>
   <script src="assets/js/admin-costs.js"></script>
+  <script src="assets/js/admin-reviews.js"></script>
 
   <script>
   (function () {
@@ -1002,7 +1072,8 @@
       processes:          ['Master', 'ProductManagement', 'PriceManagement'],
       users:              ['Master', 'UserManagement'],
       materials:          ['Master', 'PriceManagement', 'ProductManagement'],
-      globalparams:       ['Master', 'PriceManagement']
+      globalparams:       ['Master', 'PriceManagement'],
+      reviews:            ['Master', 'ProductManagement', 'OrderManagement']
     };
 
     var ACCESS_DENIED_HTML = `
@@ -1049,6 +1120,7 @@
     function initTabs() {
       var categoriesLoaded = false;
       var processesLoaded = false;
+      var reviewsLoaded = false;
       document.querySelectorAll('.admin-tab').forEach(function (btn) {
         btn.addEventListener('click', function () {
           document.querySelectorAll('.admin-tab').forEach(function (b) { b.classList.remove('active'); });
@@ -1073,6 +1145,11 @@
               AdminProcesses.renderProcessesTable();
             });
           }
+          // Lazy-load reviews on first visit to reviews tab
+          if (btn.dataset.tab === 'reviews' && !reviewsLoaded) {
+            reviewsLoaded = true;
+            AdminReviews.loadReviews();
+          }
         });
       });
     }
@@ -1087,6 +1164,7 @@
         AdminProcesses.init();
         AdminProducts.init();
         AdminOrders.init();
+        AdminReviews.init();
         await AdminProducts.loadProducts();
         await AdminOrders.loadOrders();
         await AdminCosts.loadAll();
