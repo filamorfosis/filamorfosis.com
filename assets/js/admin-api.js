@@ -203,6 +203,45 @@
     });
   }
 
+  // ── Variant Images ────────────────────────────────────────────────────────
+
+  /**
+   * POST /api/v1/admin/products/{productId}/variants/{variantId}/images — upload a variant image (multipart)
+   * @param {string} productId
+   * @param {string} variantId
+   * @param {File} file
+   */
+  function adminUploadVariantImage(productId, variantId, file) {
+    const form = new FormData();
+    form.append('file', file);
+    return fetch(`${ADMIN_API_BASE}/admin/products/${productId}/variants/${variantId}/images`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: form
+    }).then(async (res) => {
+      if (!res.ok) {
+        let errorBody = { status: res.status, detail: res.statusText };
+        try { errorBody = { status: res.status, ...await res.json() }; } catch (_) {}
+        throw errorBody;
+      }
+      return res.status === 204 ? null : res.json();
+    });
+  }
+
+  /**
+   * DELETE /api/v1/admin/products/{productId}/variants/{variantId}/images — remove a variant image URL
+   * @param {string} productId
+   * @param {string} variantId
+   * @param {string} imageUrl
+   */
+  function adminDeleteVariantImage(productId, variantId, imageUrl) {
+    return apiFetch(`/admin/products/${productId}/variants/${variantId}/images`, {
+      method: 'DELETE',
+      body: JSON.stringify({ imageUrl })
+    });
+  }
+
   // ── Discounts ─────────────────────────────────────────────────────────────
 
   /**
@@ -512,6 +551,8 @@
     // images
     adminUploadImage,
     adminDeleteImage,
+    adminUploadVariantImage,
+    adminDeleteVariantImage,
     // discounts
     adminCreateProductDiscount,
     adminCreateVariantDiscount,

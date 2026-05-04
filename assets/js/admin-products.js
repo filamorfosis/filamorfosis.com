@@ -1508,6 +1508,9 @@
     // Render discounts section
     _renderVariantDiscounts(productId, variantId, variant);
 
+    // Render images section
+    _renderVariantImages(productId, variantId, variant);
+
     // Show hint for new variants (no discount form until saved)
     const newVariantHint = document.getElementById('vmod-new-variant-hint');
     if (newVariantHint) newVariantHint.style.display = variantId ? 'none' : '';
@@ -1584,6 +1587,135 @@
     } catch (err) {
       if (errEl) errEl.textContent = err.detail || 'Error al guardar la variante.';
       spin(btn, false);
+    }
+  }
+
+  // -- Variant images -------------------------------------------------------
+
+  /**
+   * Resolve a stored image value to a displayable URL.
+   * In dev the backend returns full http://localhost:5205/uploads/... URLs.
+   * Older entries may have raw S3 keys (no protocol) — leave them as-is;
+   * the browser will show a broken image which is acceptable for stale dev data.
+   */
+  function _resolveImageUrl(url) {
+    if (!url) return '';
+    // Already a full URL
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    // Raw S3 key — derive the uploads URL from the API base
+    const apiBase = (typeof adminApi !== 'undefined' && adminApi.apiFetch)
+      ? window.FILAMORFOSIS_API_BASE || 'http://localhost:5205/api/v1'
+      : 'http://localhost:5205/api/v1';
+    const origin = apiBase.replace(/\/api\/v1\/?$/, '');
+    return `${origin}/uploads/${url.replace(/^\//, '')}`;
+  }
+
+  /**
+   * Render the variant images section below the form.
+   * Shows existing images with delete buttons and an upload control.
+   * Only shown when editing an existing variant (variantId is set).
+   */
+  function _renderVariantImages(productId, variantId, variant) {
+    const container = document.getElementById('vmod-images-body');
+    if (!container) return;
+
+    const imageUrls = (variant && variant.imageUrls) ? variant.imageUrls : [];
+
+    const thumbsHtml = imageUrls.length
+      ? imageUrls.map((url, idx) => {
+          const displayUrl = _resolveImageUrl(url);
+          return `<div class="vmod-img-thumb" id="vmod-img-${idx}">
+            <img src="${esc(displayUrl)}" alt="Imagen ${idx + 1}" loading="lazy">
+            <button type="button"
+                    class="vmod-img-delete"
+                    onclick="AdminProducts._deleteVariantImage('${esc(productId)}','${esc(variantId)}','${esc(url)}')"
+                    title="Eliminar imagen">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>`;
+        }).join('')
+      : '<span class="vmod-img-empty">Sin imágenes. Sube una imagen para esta variante.</span>';
+
+    container.innerHTML = `
+      <hr class="vmod-section-divider">
+      <div class="vmod-section-label">
+        <i class="fas fa-images"></i> Imágenes de Variante
+      </div>
+      <div class="vmod-img-grid">${thumbsHtml}</div>
+      ${variantId ? `
+      <div class="vmod-img-upload-row">
+        <label class="btn-admin btn-admin-secondary btn-admin-sm vmod-img-upload-label" for="vmod-img-file-input">
+          <i class="fas fa-upload"></i> Subir imagen
+        </label>
+        <input type="file" id="vmod-img-file-input" accept="image/png,image/jpeg"
+               onchange="AdminProducts._uploadVariantImage('${esc(productId)}','${esc(variantId)}',this)">
+        <span class="vmod-img-upload-hint">PNG o JPG, máx. 10 MB</span>
+        <div class="form-error" id="vmod-img-err"></div>
+      </div>` : `
+      <p class="vmod-img-save-hint">Guarda la variante primero para poder subir imágenes.</p>`}`;
+  }
+
+  /**
+   * Upload an image for a variant.
+   * @param {string} productId
+   * @param {string} variantId
+   * @param {HTMLInputElement} input
+   */
+  async function _uploadVariantImage(productId, variantId, input) {
+    const errEl = document.getElementById('vmod-img-err');
+    if (errEl) errEl.textContent = '';
+
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    // Reset input so the same file can be re-selected after deletion
+    input.value = '';
+
+    const label = document.querySelector('.vmod-img-upload-label');
+    if (label) {
+      label.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo...';
+      label.setAttribute('disabled', 'disabled');
+    }
+
+    try {
+      const result = await adminApi.adminUploadVariantImage(productId, variantId, file);
+      toast('Imagen subida');
+      // Refresh variant data and re-render images
+      if (_currentProduct) {
+        const updated = await adminApi.adminGetProduct(_currentProduct.id, true);
+        _currentProduct = updated;
+        const updatedVariant = updated.variants ? updated.variants.find(v => v.id === variantId) : null;
+        _renderVariantImages(productId, variantId, updatedVariant);
+      }
+    } catch (err) {
+      if (errEl) errEl.textContent = err.detail || 'Error al subir la imagen.';
+    } finally {
+      if (label) {
+        label.innerHTML = '<i class="fas fa-upload"></i> Subir imagen';
+        label.removeAttribute('disabled');
+      }
+    }
+  }
+
+  /**
+   * Delete an image from a variant.
+   * @param {string} productId
+   * @param {string} variantId
+   * @param {string} imageUrl
+   */
+  async function _deleteVariantImage(productId, variantId, imageUrl) {
+    if (!await adminConfirm('¿Eliminar esta imagen?', 'Eliminar Imagen')) return;
+    try {
+      await adminApi.adminDeleteVariantImage(productId, variantId, imageUrl);
+      toast('Imagen eliminada');
+      if (_currentProduct) {
+        const updated = await adminApi.adminGetProduct(_currentProduct.id, true);
+        _currentProduct = updated;
+        const updatedVariant = updated.variants ? updated.variants.find(v => v.id === variantId) : null;
+        _renderVariantImages(productId, variantId, updatedVariant);
+      }
+    } catch (err) {
+      toast(err.detail || 'Error al eliminar la imagen.', false);
     }
   }
 
@@ -1871,6 +2003,11 @@
     _renderProductDiscounts,
     _addProductDiscount,
     _deleteProductDiscount,
+    // Variant images
+    _renderVariantImages,
+    _resolveImageUrl,
+    _uploadVariantImage,
+    _deleteVariantImage,
     // Category assignment (Task 12.2)
     _renderCategoryAssignmentUI,
     _getSelectedCategoryIds,

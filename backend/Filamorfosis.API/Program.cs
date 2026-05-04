@@ -172,7 +172,10 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IPricingCalculatorService, PricingCalculatorService>();
 builder.Services.AddScoped<IStockService, StockService>();
 builder.Services.AddScoped<IEmailService, NoOpEmailService>();
-builder.Services.AddScoped<IS3Service, NoOpS3Service>();
+builder.Services.AddScoped<IS3Service>(sp =>
+    builder.Environment.IsDevelopment()
+        ? (IS3Service)ActivatorUtilities.CreateInstance<LocalDiskS3Service>(sp)
+        : ActivatorUtilities.CreateInstance<NoOpS3Service>(sp));
 builder.Services.AddScoped<IMercadoPagoService, NoOpMercadoPagoService>();
 builder.Services.AddScoped<ITotpService, OtpNetTotpService>();
 builder.Services.AddScoped<ISlugGenerationService, SlugGenerationService>();
@@ -206,6 +209,19 @@ app.UseCookiePolicy();
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Serve uploaded files as static content in Development
+if (app.Environment.IsDevelopment())
+{
+    var uploadsPath = Path.Combine(app.Environment.WebRootPath
+        ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot"), "uploads");
+    Directory.CreateDirectory(uploadsPath);
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPath),
+        RequestPath = "/uploads"
+    });
+}
 
 // Guest cart session middleware
 app.UseMiddleware<Filamorfosis.API.Middleware.GuestCartMiddleware>();

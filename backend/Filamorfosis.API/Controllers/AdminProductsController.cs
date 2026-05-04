@@ -349,6 +349,65 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         return NoContent();
     }
 
+    [HttpPost("{id:guid}/variants/{variantId:guid}/images")]
+    public async Task<IActionResult> UploadVariantImage(Guid id, Guid variantId, IFormFile file)
+    {
+        var v = await db.ProductVariants.FirstOrDefaultAsync(v => v.Id == variantId && v.ProductId == id);
+        if (v is null) return NotFound();
+
+        var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "image/png", "image/jpeg" };
+        if (file is null || !allowed.Contains(file.ContentType))
+            return UnprocessableEntity(new ProblemDetails
+            {
+                Status = StatusCodes.Status422UnprocessableEntity,
+                Title = "Invalid image type",
+                Detail = "Only PNG and JPG images are accepted."
+            });
+        if (file.Length > 10 * 1024 * 1024)
+            return UnprocessableEntity(new ProblemDetails
+            {
+                Status = StatusCodes.Status422UnprocessableEntity,
+                Title = "Image too large",
+                Detail = "Image exceeds 10 MB limit."
+            });
+
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (string.IsNullOrEmpty(ext)) ext = file.ContentType == "image/png" ? ".png" : ".jpg";
+        var nextIndex = v.ImageUrls.Length + 1;
+        var key = $"products/{id}/variants/{variantId}-{nextIndex}{ext}";
+        await using var stream = file.OpenReadStream();
+        await s3.UploadAsync(stream, key, file.ContentType);
+
+        v.ImageUrls = [.. v.ImageUrls, key];
+        await db.SaveChangesAsync();
+        return Ok(new { imageUrls = v.ImageUrls });
+    }
+
+    [HttpDelete("{id:guid}/variants/{variantId:guid}/images")]
+    public async Task<IActionResult> DeleteVariantImage(Guid id, Guid variantId, [FromBody] DeleteImageRequest req)
+    {
+        var v = await db.ProductVariants.FirstOrDefaultAsync(v => v.Id == variantId && v.ProductId == id);
+        if (v is null) return NotFound();
+
+        if (!v.ImageUrls.Contains(req.ImageUrl))
+            return NotFound(new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Not Found",
+                Detail = "Image URL not found in variant."
+            });
+
+        var key = req.ImageUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+            ? new Uri(req.ImageUrl).AbsolutePath.TrimStart('/')
+            : req.ImageUrl;
+
+        await s3.DeleteAsync(key);
+
+        v.ImageUrls = v.ImageUrls.Where(u => u != req.ImageUrl).ToArray();
+        await db.SaveChangesAsync();
+        return Ok(new { imageUrls = v.ImageUrls });
+    }
+
     [HttpPost("{id:guid}/images")]
     public async Task<IActionResult> UploadImage(Guid id, IFormFile file)
     {
@@ -667,6 +726,7 @@ public class AdminProductsController(FilamorfosisDbContext db, IS3Service s3, IP
         Profit = v.Profit,
         ManufactureTimeMinutes = v.ManufactureTimeMinutes,
         PricingAlert = pricingAlert,
+        ImageUrls = v.ImageUrls,
         Attributes = v.AttributeValues.Select(a => new VariantAttributeValueDto
         {
             AttributeDefinitionId = a.AttributeDefinitionId,

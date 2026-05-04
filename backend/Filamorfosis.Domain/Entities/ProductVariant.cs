@@ -15,6 +15,8 @@ public class ProductVariant
     public decimal BaseCost { get; set; } = 0;
     public decimal Profit { get; set; } = 0;
     public int? ManufactureTimeMinutes { get; set; }
+    /// <summary>S3 keys (or CDN URLs) for images specific to this variant.</summary>
+    public string[] ImageUrls { get; set; } = [];
     public Product Product { get; set; } = null!;
     public ICollection<Discount> Discounts { get; set; } = new List<Discount>();
     public ICollection<VariantAttributeValue> AttributeValues { get; set; } = new List<VariantAttributeValue>();

@@ -41,8 +41,9 @@ public class FilamorfosisDbContext(DbContextOptions<FilamorfosisDbContext> optio
     {
         base.OnModelCreating(modelBuilder);
 
-        // Apply Product configuration
+        // Apply entity configurations
         modelBuilder.ApplyConfiguration(new Configurations.ProductConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.ProductVariantConfiguration());
 
         // OrderStatus as TEXT
         modelBuilder.Entity<Order>()

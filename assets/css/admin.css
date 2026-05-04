@@ -1154,3 +1154,111 @@ span.req {
   transform: translateX(20px);
   background: #a78bfa;
 }
+
+/* ── Variant modal — images section ─────────────────────────────────────── */
+.vmod-section-divider {
+  border: none;
+  border-top: 1px solid rgba(139,92,246,0.15);
+  margin: 16px 0;
+}
+
+.vmod-section-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+
+.vmod-section-label i {
+  color: #8b5cf6;
+  margin-right: 6px;
+}
+
+.vmod-img-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+  min-height: 32px;
+}
+
+.vmod-img-thumb {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(139,92,246,0.3);
+  background: rgba(15,23,42,0.6);
+  flex-shrink: 0;
+}
+
+.vmod-img-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.vmod-img-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(248,113,113,0.85);
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  transition: background 0.2s, opacity 0.2s;
+  opacity: 0;
+}
+
+.vmod-img-thumb:hover .vmod-img-delete {
+  opacity: 1;
+}
+
+.vmod-img-empty {
+  color: #475569;
+  font-size: 1rem;
+  padding: 8px 0;
+}
+
+.vmod-img-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.vmod-img-upload-label {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Hide the native file input */
+#vmod-img-file-input {
+  display: none;
+}
+
+.vmod-img-upload-hint {
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.vmod-img-save-hint {
+  color: #64748b;
+  font-size: 1rem;
+  margin: 4px 0 0;
+}

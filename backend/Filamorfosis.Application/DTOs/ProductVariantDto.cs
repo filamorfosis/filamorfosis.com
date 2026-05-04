@@ -29,4 +29,6 @@ public class ProductVariantDto
     public string? PricingAlert { get; set; }
     /// <summary>Material usages: { materialId -> quantity }</summary>
     public Dictionary<string, decimal> MaterialUsages { get; set; } = new();
+    /// <summary>S3 keys (or CDN URLs) for images specific to this variant.</summary>
+    public string[] ImageUrls { get; set; } = [];
 }
