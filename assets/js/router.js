@@ -109,7 +109,40 @@
             description: 'Gestiona tu perfil, direcciones y pedidos.',
             bodyClass: 'page-account',
             init: function () {
-                _initAccount();
+                _initAccount('profile');
+                _reApplyLang();
+            }
+        },
+        {
+            path: '/perfil',
+            templateId: 'tpl-account',
+            title: 'Mi Perfil | Filamorfosis®',
+            description: 'Gestiona tu información de perfil.',
+            bodyClass: 'page-account',
+            init: function () {
+                _initAccount('profile');
+                _reApplyLang();
+            }
+        },
+        {
+            path: '/direcciones',
+            templateId: 'tpl-account',
+            title: 'Mis Direcciones | Filamorfosis®',
+            description: 'Gestiona tus direcciones de envío.',
+            bodyClass: 'page-account',
+            init: function () {
+                _initAccount('addresses');
+                _reApplyLang();
+            }
+        },
+        {
+            path: '/mis-pedidos',
+            templateId: 'tpl-account',
+            title: 'Mis Pedidos | Filamorfosis®',
+            description: 'Consulta el historial y estado de tus pedidos.',
+            bodyClass: 'page-account',
+            init: function () {
+                _initAccount('orders');
                 _reApplyLang();
             }
         }
@@ -168,24 +201,21 @@
         }
     }
 
-    function _initAccount() {
+    function _initAccount(tab) {
         // account.js exposes window._initAccountPage with init logic
+        var targetTab = tab || 'profile';
         if (typeof window._initAccountPage === 'function') {
-            window._initAccountPage();
+            window._initAccountPage(targetTab);
         } else {
-            console.warn('Account init function not found. Retrying...');
-            // Retry with increasing delays to allow scripts to load
             var attempts = 0;
             var maxAttempts = 5;
             var retryInterval = setInterval(function() {
                 attempts++;
                 if (typeof window._initAccountPage === 'function') {
                     clearInterval(retryInterval);
-                    window._initAccountPage();
-                    console.log('Account init function found after ' + attempts + ' attempts');
+                    window._initAccountPage(targetTab);
                 } else if (attempts >= maxAttempts) {
                     clearInterval(retryInterval);
-                    console.error('Account init function still not found after ' + maxAttempts + ' attempts');
                 }
             }, 100);
         }
@@ -329,6 +359,13 @@
                     console.log('Router: Matched /producto with ID');
                     return routes[i];
                 }
+            }
+        }
+
+        // /account#tab — legacy hash-based tab links → redirect to clean path
+        if (p === '/account') {
+            for (var i = 0; i < routes.length; i++) {
+                if (routes[i].path === '/perfil') return routes[i];
             }
         }
 

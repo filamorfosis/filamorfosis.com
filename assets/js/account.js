@@ -100,13 +100,20 @@
 
   let _ordersPage = 1;
 
+  /* ── Tab → URL mapping ──────────────────────────────────────────────── */
+  const TAB_PATHS = {
+    profile:   '/perfil',
+    addresses: '/direcciones',
+    orders:    '/mis-pedidos'
+  };
+
   /* ── Init ───────────────────────────────────────────────────────────── */
-  async function init() {
+  async function init(initialTab) {
     // Unauthenticated redirect
     try { await getMe(); } catch {
       window.FilamorfosisAuth?.showModal('login');
       document.addEventListener('auth:login', () => {
-        if (window.FilamorfosisRouter) window.FilamorfosisRouter.navigate('/account');
+        if (window.FilamorfosisRouter) window.FilamorfosisRouter.navigate('/perfil');
       });
       return;
     }
@@ -118,17 +125,17 @@
       window.FilamorfosisAuth?.logout?.();
     });
 
-    // Tab switching — use new acct-tab class
+    // Tab switching — update URL and show panel
     document.querySelectorAll('.acct-tab').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.acct-tab').forEach(b => b.classList.remove('acct-tab--active'));
-        btn.classList.add('acct-tab--active');
-        document.querySelectorAll('.acct-panel').forEach(p => { p.style.display = 'none'; });
-        document.getElementById(`tab-${btn.dataset.tab}`).style.display = '';
-        if (btn.dataset.tab === 'orders') { _loadOrders(); _initOrdersControls(); }
-        if (btn.dataset.tab === 'addresses') _loadAddresses();
+        const tab = btn.dataset.tab;
+        _activateTab(tab, true);
       });
     });
+
+    // Activate the requested tab (from router) or default to profile
+    const startTab = initialTab || 'profile';
+    _activateTab(startTab, false);
 
     await _loadProfile();
     _renderInterests();
@@ -144,7 +151,6 @@
     document.getElementById('save-interests-btn')?.addEventListener('click', () => {
       const chips = Array.from(document.querySelectorAll('.acct-interest-chip--selected'));
       const selected = chips.map(el => el.dataset.id);
-      // Build a name+icon map from the current DOM for badge rendering
       const nameMap = {};
       document.querySelectorAll('.acct-interest-chip').forEach(el => {
         nameMap[el.dataset.id] = { name: el.dataset.name, icon: el.dataset.icon };
@@ -168,6 +174,31 @@
     });
 
     document.getElementById('add-addr-form')?.addEventListener('submit', _handleAddAddress);
+  }
+
+  /* ── Activate a tab and optionally push URL ─────────────────────────── */
+  function _activateTab(tab, pushUrl) {
+    // Update tab button active state
+    document.querySelectorAll('.acct-tab').forEach(b => b.classList.remove('acct-tab--active'));
+    const activeBtn = document.querySelector(`.acct-tab[data-tab="${tab}"]`);
+    if (activeBtn) activeBtn.classList.add('acct-tab--active');
+
+    // Show the correct panel
+    document.querySelectorAll('.acct-panel').forEach(p => { p.style.display = 'none'; });
+    const panel = document.getElementById(`tab-${tab}`);
+    if (panel) panel.style.display = '';
+
+    // Load data for the tab
+    if (tab === 'orders') { _loadOrders(); _initOrdersControls(); }
+    if (tab === 'addresses') _loadAddresses();
+
+    // Push clean URL (without triggering a full re-render)
+    if (pushUrl && TAB_PATHS[tab]) {
+      const newPath = TAB_PATHS[tab];
+      if (window.location.pathname !== newPath) {
+        window.history.pushState({}, '', newPath);
+      }
+    }
   }
 
   /* ── Load profile ───────────────────────────────────────────────────── */
