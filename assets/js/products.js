@@ -89,7 +89,12 @@ let _loadedProducts = [];     // accumulated across "load more" pages
 let processSlugToId = {};    // maps API process slug → API GUID
 let _categorySlug   = null;  // active category slug from /tienda/:slug
 let _categoryName   = null;  // display name for the active category (set after categories load)
+let _subCategorySlug = null; // active subcategory slug (more specific filter)
+let _subCategoryName = null; // display name for the active subcategory
 let _categoriesCache = [];   // flat list of all categories + subcategories for name lookup
+let _fullCategoriesCache = []; // full category tree (with subCategories arrays) for sidebar re-init
+let _activeTag = null;       // active tag chip filter
+let _sortBy    = 'default';  // sort order: 'default' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc' | 'most-sold' | 'best-reviews'
 
 // Set by router before renderAll() is called
 window.setCategorySlug = function(slug) {
@@ -121,11 +126,13 @@ function renderSkeletons(n) {
 async function fetchProducts(opts) {
     opts = opts || {};
     const params = { pageSize: pageSize };
-    if (opts.search) params.search = opts.search;
+    // badge filter (for featured sections only)
     if (opts.badge)  params.badge  = opts.badge;
 
-    // Category filtering: send as categorySlug — backend matches parent OR subcategory slug
-    if (_categorySlug) {
+    // Subcategory takes priority; otherwise use parent category slug
+    if (_subCategorySlug) {
+        params.subCategorySlug = _subCategorySlug;
+    } else if (_categorySlug) {
         params.categorySlug = _categorySlug;
     }
 
@@ -144,70 +151,142 @@ async function loadProducts(reset) {
     if (reset) {
         _loadedProducts = [];
         currentPage = 1;
+        // Tear down scroll observer so it re-initialises after fresh load
+        _teardownInfiniteScroll();
     }
 
-    // Show skeleton within 100ms of fetch initiation
-    var _skeletonTimer = setTimeout(function() { renderSkeletons(8); }, 100);
+    // On reset: show full skeleton. On append: skeleton cards already injected by _loadNextPage.
+    var _skeletonTimer = null;
+    if (reset) {
+        _skeletonTimer = setTimeout(function() { renderSkeletons(8); }, 100);
+    }
 
     const empty = document.getElementById('catEmpty');
     if (empty) empty.classList.add('cat-empty--hidden');
 
     const opts = { page: currentPage };
-    
-    if (searchQuery) opts.search = searchQuery;
+
+    // Note: search and tag filtering are applied client-side in _applyClientFilter
 
     try {
         const result = await fetchProducts(opts);
-        clearTimeout(_skeletonTimer);
+        if (_skeletonTimer) clearTimeout(_skeletonTimer);
+
         const items = (result && result.items) ? result.items : (Array.isArray(result) ? result : []);
         totalCount = (result && result.totalCount != null) ? result.totalCount : items.length;
 
         if (reset) {
             _loadedProducts = items;
         } else {
+            // Remove appended skeleton cards before rendering real ones
+            var grid = document.getElementById('catGrid');
+            if (grid) {
+                grid.querySelectorAll('.cat-card--skeleton-append').forEach(function(el) { el.remove(); });
+            }
             _loadedProducts = _loadedProducts.concat(items);
         }
 
         renderGrid();
         renderSectionHeader();
-        _updateLoadMoreBtn();
+        _renderTagChips();
 
         if (_loadedProducts.length === 0) {
-            const grid = document.getElementById('catGrid');
-            if (grid) grid.innerHTML = '';
+            var gridEl = document.getElementById('catGrid');
+            if (gridEl) gridEl.innerHTML = '';
             if (empty) empty.classList.remove('cat-empty--hidden');
         }
+
+        // (Re-)initialise infinite scroll after every load
+        _initInfiniteScroll();
+
     } catch (e) {
-        clearTimeout(_skeletonTimer);
+        if (_skeletonTimer) clearTimeout(_skeletonTimer);
         renderError(function() { loadProducts(reset); });
     }
 }
 
 function _updateLoadMoreBtn() {
-    let btn = document.getElementById('catLoadMore');
-    if (!btn) {
-        btn = document.createElement('div');
-        btn.id = 'catLoadMore';
-        btn.className = 'cat-load-more-wrap cat-load-more-wrap--hidden';
-        btn.innerHTML = `<button class="cat-load-more-btn">
-            <i class="fas fa-plus"></i> <span class="cat-load-more-label">${t('load_more')}</span>
-        </button>`;
-        const main = document.querySelector('.cat-main');
-        if (main) main.appendChild(btn);
-        btn.querySelector('button').addEventListener('click', function() {
-            currentPage++;
-            loadProducts(false);
-        });
-    }
-    // Update label in case language changed
-    var labelEl = btn.querySelector('.cat-load-more-label');
-    if (labelEl) labelEl.textContent = t('load_more');
+    // Replaced by infinite scroll — keep function for compatibility but do nothing
+}
 
-    if (currentPage * pageSize < totalCount) {
-        btn.classList.remove('cat-load-more-wrap--hidden');
-    } else {
-        btn.classList.add('cat-load-more-wrap--hidden');
+/* ═══════════════════════════════════════════════
+   INFINITE SCROLL
+   Uses an IntersectionObserver on a sentinel div
+   placed after the grid. When it enters the
+   viewport and more pages exist, loads the next
+   page automatically with skeleton cards appended.
+   ═══════════════════════════════════════════════ */
+var _infiniteScrollObserver = null;
+
+function _initInfiniteScroll() {
+    // Tear down any previous observer
+    if (_infiniteScrollObserver) {
+        _infiniteScrollObserver.disconnect();
+        _infiniteScrollObserver = null;
     }
+
+    // Create or reuse the sentinel element
+    var sentinel = document.getElementById('catScrollSentinel');
+    if (!sentinel) {
+        sentinel = document.createElement('div');
+        sentinel.id = 'catScrollSentinel';
+        sentinel.className = 'cat-scroll-sentinel';
+        var grid = document.getElementById('catGrid');
+        if (grid && grid.parentNode) {
+            grid.parentNode.insertBefore(sentinel, grid.nextSibling);
+        }
+    }
+
+    _infiniteScrollObserver = new IntersectionObserver(function(entries) {
+        if (!entries[0].isIntersecting) return;
+        // Only load if there are more pages and we're not already loading
+        if (currentPage * pageSize < totalCount && !_isLoadingMore) {
+            _loadNextPage();
+        }
+    }, { rootMargin: '200px' });
+
+    _infiniteScrollObserver.observe(sentinel);
+}
+
+var _isLoadingMore = false;
+
+async function _loadNextPage() {
+    if (_isLoadingMore) return;
+    _isLoadingMore = true;
+
+    // Append skeleton cards to the grid while fetching
+    var grid = document.getElementById('catGrid');
+    if (grid) {
+        var skeletonHtml = Array.from({ length: Math.min(pageSize, totalCount - _loadedProducts.length) }, function() {
+            return '<div class="cat-card cat-card--skeleton cat-card--skeleton-append">' +
+                '<div class="cat-card-img cat-skeleton-img skeleton-pulse"></div>' +
+                '<div class="cat-card-body">' +
+                    '<div class="cat-skeleton-line cat-skeleton-line--short skeleton-pulse"></div>' +
+                    '<div class="cat-skeleton-line cat-skeleton-line--long skeleton-pulse"></div>' +
+                    '<div class="cat-skeleton-line cat-skeleton-line--medium skeleton-pulse"></div>' +
+                    '<div class="cat-skeleton-btn skeleton-pulse"></div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+        grid.insertAdjacentHTML('beforeend', skeletonHtml);
+    }
+
+    currentPage++;
+    try {
+        await loadProducts(false);
+    } finally {
+        _isLoadingMore = false;
+    }
+}
+
+function _teardownInfiniteScroll() {
+    if (_infiniteScrollObserver) {
+        _infiniteScrollObserver.disconnect();
+        _infiniteScrollObserver = null;
+    }
+    var sentinel = document.getElementById('catScrollSentinel');
+    if (sentinel) sentinel.remove();
+    _isLoadingMore = false;
 }
 
 /* ═══════════════════════════════════════════════
@@ -249,7 +328,10 @@ function renderChips() {
 function renderSectionHeader() {
     const titleEl = document.getElementById('catSectionTitle');
     const descEl  = document.getElementById('catSectionDesc');
-    const count   = totalCount || _loadedProducts.length;
+
+    // Count after client-side filters
+    var filtered = _applyClientFilter(_loadedProducts);
+    var count = filtered.length;
 
     // Resolve category display name from cache if not yet set
     if (_categorySlug && !_categoryName && _categoriesCache.length) {
@@ -257,13 +339,13 @@ function renderSectionHeader() {
         if (found) _categoryName = found.name;
     }
 
-    if (_categoryName) {
-        if (titleEl) titleEl.textContent = _categoryName;
+    var displayName = _subCategoryName || _categoryName;
+    if (displayName) {
+        if (titleEl) titleEl.textContent = displayName;
     } else if (_categorySlug) {
-        // Slug set but name not resolved yet — show slug prettified
         if (titleEl) titleEl.textContent = _categorySlug.replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
     } else {
-        if (titleEl) titleEl.textContent = t('all_products') || 'Todos los Productos';
+        if (titleEl) titleEl.textContent = t('all_products') || 'Todos los productos: (Selecciona una categoría del lado izquierdo)';
     }
 
     if (descEl) descEl.textContent = count + ' ' + (count === 1 ? t('products_count_one') : t('products_count_many'));
@@ -272,8 +354,55 @@ function renderSectionHeader() {
     const statEl = document.getElementById('statProducts');
     if (statEl) animateCounter(statEl, count, 600);
 
+    // Render sort dropdown
+    _renderSortDropdown();
+
     // Render active filter pill
     _renderActiveFilterPill();
+}
+
+/* ═══════════════════════════════════════════════
+   SORT DROPDOWN
+   ═══════════════════════════════════════════════ */
+function _renderSortDropdown() {
+    var titleRow = document.querySelector('#catSectionHeader .cat-content__title-row');
+    if (!titleRow) return;
+
+    var existing = document.getElementById('catSortWrap');
+    if (existing) {
+        // Just update the selected value
+        var sel = existing.querySelector('#catSortBy');
+        if (sel && sel.value !== _sortBy) sel.value = _sortBy;
+        return;
+    }
+
+    var wrap = document.createElement('div');
+    wrap.id = 'catSortWrap';
+    wrap.className = 'cat-sort-wrap';
+    wrap.innerHTML =
+        '<label class="cat-sort-label" for="catSortBy">' +
+            '<i class="fas fa-sort-amount-down"></i> ' + (t('sort_by') || 'Ordenar') +
+        '</label>' +
+        '<select id="catSortBy" class="cat-sort-select" aria-label="' + (t('sort_by') || 'Ordenar por') + '">' +
+            '<option value="default">'  + (t('sort_default')      || 'Relevancia')    + '</option>' +
+            '<option value="name-asc">' + (t('sort_name_asc')     || 'Nombre A-Z')    + '</option>' +
+            '<option value="name-desc">'+ (t('sort_name_desc')    || 'Nombre Z-A')    + '</option>' +
+            '<option value="price-asc">'+ (t('sort_price_asc')    || 'Precio: menor') + '</option>' +
+            '<option value="price-desc">'+(t('sort_price_desc')   || 'Precio: mayor') + '</option>' +
+            '<option value="most-sold">'+ (t('sort_most_sold')    || 'Más vendidos')  + '</option>' +
+            '<option value="best-reviews">'+(t('sort_best_reviews')|| 'Mejor calificados') + '</option>' +
+        '</select>';
+
+    wrap.querySelector('#catSortBy').value = _sortBy;
+
+    wrap.querySelector('#catSortBy').addEventListener('change', function(e) {
+        _sortBy = e.target.value;
+        renderGrid();
+        renderSectionHeader();
+    });
+
+    // Append to the right side of the title row
+    titleRow.appendChild(wrap);
 }
 
 /* ═══════════════════════════════════════════════
@@ -345,12 +474,52 @@ function _renderActiveFilterPill() {
     bar.querySelector('.cat-filter-inner').appendChild(wrap);
 }
 
-// Clear category filter — navigate to /tienda
+// Clear category filter
 window.AdminProducts_clearCategoryFilter = function() {
-    if (typeof window.FilamorfosisRouter !== 'undefined' && window.FilamorfosisRouter.navigate) {
+    // Always clear state directly — don't rely on router navigation
+    // (navigation is a no-op when already on /tienda with no slug)
+    _categorySlug    = null;
+    _categoryName    = null;
+    _subCategorySlug = null;
+    _subCategoryName = null;
+    _activeTag       = null;
+    searchQuery      = '';
+    _sortBy          = 'default';
+
+    var searchEl = document.getElementById('catSearch');
+    if (searchEl) searchEl.value = '';
+    var sortEl = document.getElementById('catSortBy');
+    if (sortEl) sortEl.value = 'default';
+
+    // Sync sidebar "All" button active state
+    var allBtn = document.getElementById('catSidebarAllBtn');
+    if (allBtn) allBtn.classList.add('cat-sidebar__all-btn--active');
+
+    // Re-render sidebar nav to deselect categories
+    if (_fullCategoriesCache.length) {
+        var nav = document.getElementById('catSidebarNav');
+        if (nav) {
+            nav.querySelectorAll('.cat-sidebar__nav-btn').forEach(function(btn) {
+                btn.classList.remove('cat-sidebar__nav-btn--active');
+                btn.setAttribute('aria-expanded', 'false');
+            });
+            nav.querySelectorAll('.cat-sidebar__subs').forEach(function(el) { el.remove(); });
+        }
+    }
+
+    // If the URL has a slug, navigate away to clean it up; otherwise just push /tienda
+    var pathParts = window.location.pathname.split('/');
+    var hasSlugInUrl = pathParts[1] === 'tienda' && pathParts[2];
+    if (hasSlugInUrl && typeof window.FilamorfosisRouter !== 'undefined' && window.FilamorfosisRouter.navigate) {
         window.FilamorfosisRouter.navigate('/tienda');
     } else {
-        window.location.href = '/tienda';
+        if (window.location.pathname !== '/tienda') {
+            window.history.pushState({}, '', '/tienda');
+        }
+        currentPage = 1;
+        _loadedProducts = [];
+        loadProducts(true);
+        renderSectionHeader();
     }
 };
 
@@ -359,18 +528,24 @@ window._clearSearchFilter = function() {
     searchQuery = '';
     var searchEl = document.getElementById('catSearch');
     if (searchEl) searchEl.value = '';
-    currentPage = 1;
-    _loadedProducts = [];
-    loadProducts(true);
+    renderGrid();
+    renderSectionHeader();
+    _renderTagChips();
 };
 
 // Clear all active filters
 window._clearAllFilters = function() {
     searchQuery = '';
+    _sortBy = 'default';
     var searchEl = document.getElementById('catSearch');
     if (searchEl) searchEl.value = '';
+    var sortEl = document.getElementById('catSortBy');
+    if (sortEl) sortEl.value = 'default';
     SPAState.activeProcessId = null;
     window._stripProcessId = null;
+    _subCategorySlug = null;
+    _subCategoryName = null;
+    _activeTag = null;
     // Update strip UI
     var listEl = document.querySelector('#category-strip .cat-strip__list');
     if (listEl) {
@@ -390,10 +565,52 @@ window._clearAllFilters = function() {
 
 /* ═══════════════════════════════════════════════
    CLIENT-SIDE FILTER HELPER
+   Applies (in order): tag chip → text search → sort
    ═══════════════════════════════════════════════ */
 function _applyClientFilter(products) {
-    // All filtering removed - return all products
-    return products;
+    var result = products.slice(); // shallow copy
+
+    // 1. Tag chip filter (final filter layer)
+    if (_activeTag) {
+        result = result.filter(function(p) {
+            return (p.tags || []).indexOf(_activeTag) !== -1;
+        });
+    }
+
+    // 2. Text search — matches title or description in current language
+    if (searchQuery) {
+        var q = searchQuery.toLowerCase();
+        result = result.filter(function(p) {
+            var title = (pT(p, 'title') || '').toLowerCase();
+            var desc  = (pT(p, 'desc')  || '').toLowerCase();
+            var tags  = (p.tags || []).join(' ').toLowerCase();
+            return title.indexOf(q) !== -1 || desc.indexOf(q) !== -1 || tags.indexOf(q) !== -1;
+        });
+    }
+
+    // 3. Sort
+    if (_sortBy && _sortBy !== 'default') {
+        result = result.slice(); // ensure we don't mutate
+        result.sort(function(a, b) {
+            function _minPrice(p) {
+                var avail = (p.variants || []).filter(function(v) { return v.isAvailable !== false && v.inStock !== false; });
+                if (!avail.length) return Infinity;
+                return avail.reduce(function(min, v) {
+                    var ep = (v.effectivePrice != null && v.effectivePrice > 0) ? v.effectivePrice : v.price;
+                    return ep < min ? ep : min;
+                }, Infinity);
+            }
+            if (_sortBy === 'name-asc')  return (pT(a,'title')||'').localeCompare(pT(b,'title')||'');
+            if (_sortBy === 'name-desc') return (pT(b,'title')||'').localeCompare(pT(a,'title')||'');
+            if (_sortBy === 'price-asc')  return _minPrice(a) - _minPrice(b);
+            if (_sortBy === 'price-desc') return _minPrice(b) - _minPrice(a);
+            if (_sortBy === 'most-sold')  return (b.salesCount || 0) - (a.salesCount || 0);
+            if (_sortBy === 'best-reviews') return (b.averageRating || 0) - (a.averageRating || 0);
+            return 0;
+        });
+    }
+
+    return result;
 }
 
 
@@ -726,10 +943,13 @@ window.filterByProcess = function(processId) {
     // Re-fetch product grid with selected process
     currentPage = 1;
     _loadedProducts = [];
-    activeFilter = 'all';
+    _activeTag = null;
     searchQuery = '';
+    _sortBy = 'default';
     var searchEl = document.getElementById('catSearch');
     if (searchEl) searchEl.value = '';
+    var sortEl = document.getElementById('catSortBy');
+    if (sortEl) sortEl.value = 'default';
 
     // Override getActiveProcessId for this fetch
     if (SPAState.activeProcessId) {
@@ -872,21 +1092,70 @@ if (typeof module !== 'undefined' && module.exports) {
 /* ═══════════════════════════════════════════════
    RENDER ALL — main init
    ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   TAG CHIPS — client-side filter
+   ═══════════════════════════════════════════════ */
+function _renderTagChips() {
+    var container = document.getElementById('catTagChips');
+    if (!container) return;
+
+    // Count tags across ALL loaded products (before tag filter)
+    var tagSet = {};
+    _loadedProducts.forEach(function(p) {
+        (p.tags || []).forEach(function(tag) {
+            if (tag) tagSet[tag] = (tagSet[tag] || 0) + 1;
+        });
+    });
+
+    // Only show tags that have at least 1 product
+    var tags = Object.keys(tagSet).filter(function(tag) {
+        return tagSet[tag] > 0;
+    }).sort();
+
+    if (!tags.length) {
+        container.innerHTML = '';
+        return;
+    }
+
+    container.innerHTML = tags.map(function(tag) {
+        var isActive = _activeTag === tag;
+        return '<button class="cat-tag-chip' + (isActive ? ' cat-tag-chip--active' : '') + '" data-tag="' + tag + '">' +
+            tag +
+            ' <span class="cat-tag-chip__count">' + tagSet[tag] + '</span>' +
+        '</button>';
+    }).join('');
+
+    container.querySelectorAll('.cat-tag-chip').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var tag = btn.dataset.tag;
+            _activeTag = (_activeTag === tag) ? null : tag;
+            // Re-render grid with client-side tag + search + sort filter (no API call)
+            renderGrid();
+            renderSectionHeader();
+            _renderTagChips();
+        });
+    });
+}
+
+// Override renderGrid to apply client-side tag filter
+var _originalRenderGrid = null;
+
 async function renderAll() {
-    // renderTabs(); // Removed - tabs hidden
-    // renderChips(); // Removed - chips hidden
     renderSectionHeader();
 
-    // Load categories for filter pill name resolution
+    // Load categories for filter pill name resolution AND sidebar
+    var categoriesData = [];
     if (!_categoriesCache.length) {
         try {
             var cats = await window.getCategories();
-            var catList = Array.isArray(cats) ? cats : (cats && cats.items ? cats.items : []);
+            categoriesData = Array.isArray(cats) ? cats : (cats && cats.items ? cats.items : []);
+            // Store full tree for sidebar re-init on subsequent renderAll() calls
+            _fullCategoriesCache = categoriesData;
             // Flatten: parent categories + subcategories
-            catList.forEach(function(c) {
+            categoriesData.forEach(function(c) {
                 _categoriesCache.push({ id: c.id, slug: c.slug, name: c.name });
                 (c.subCategories || []).forEach(function(sc) {
-                    _categoriesCache.push({ id: sc.id, slug: sc.slug, name: sc.name });
+                    _categoriesCache.push({ id: sc.id, slug: sc.slug, name: sc.name, _isSub: true });
                 });
             });
             // Resolve category name now that cache is populated
@@ -897,6 +1166,29 @@ async function renderAll() {
         } catch (e) {
             // categories unavailable — continue without name resolution
         }
+    } else {
+        // Re-use the full category tree stored in _fullCategoriesCache
+        categoriesData = _fullCategoriesCache;
+    }
+
+    // Build sidebar from full category tree
+    _initSidebar(categoriesData.length ? categoriesData : null);
+
+    // Wire search input — must happen here because the input is in a template
+    // stamped by the router after DOMContentLoaded fires
+    var searchEl = document.getElementById('catSearch');
+    if (searchEl && !searchEl._wired) {
+        searchEl._wired = true;
+        searchEl.addEventListener('input', function(e) {
+            clearTimeout(_searchDebounce);
+            _searchDebounce = setTimeout(function() {
+                searchQuery = e.target.value.toLowerCase().trim();
+                // Text search filters the already-loaded results client-side
+                renderGrid();
+                renderSectionHeader();
+                _renderTagChips();
+            }, 200);
+        });
     }
 
     // Fetch processes once — builds slug→id map AND populates process strip
@@ -928,23 +1220,214 @@ async function renderAll() {
 }
 
 /* ═══════════════════════════════════════════════
-   INIT
+   SIDEBAR — accordion category picker
    ═══════════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', function() {
-    // Search with 300ms debounce
-    var searchEl = document.getElementById('catSearch');
-    if (searchEl) {
-        searchEl.addEventListener('input', function(e) {
-            clearTimeout(_searchDebounce);
-            _searchDebounce = setTimeout(function() {
-                searchQuery = e.target.value.toLowerCase().trim();
-                currentPage = 1;
-                _loadedProducts = [];
-                loadProducts(true);
-            }, 300);
+function _initSidebar(categoriesData) {
+    var nav    = document.getElementById('catSidebarNav');
+    var allBtn = document.getElementById('catSidebarAllBtn');
+    if (!nav) return;
+
+    // Fetch full category tree if not passed in
+    if (!categoriesData || !categoriesData.length) {
+        window.getCategories().then(function(cats) {
+            _initSidebar(Array.isArray(cats) ? cats : []);
+        }).catch(function() {});
+        return;
+    }
+
+    var groups = categoriesData.filter(function(c) { return c.subCategories && c.subCategories.length; });
+    if (!groups.length) return;
+
+    // ── Helper: reload products with current state ──────────────────────
+    function _reload() {
+        currentPage = 1;
+        _loadedProducts = [];
+        _activeTag = null;
+        searchQuery = '';
+        _sortBy = 'default';
+        var searchEl = document.getElementById('catSearch');
+        if (searchEl) searchEl.value = '';
+        var sortEl = document.getElementById('catSortBy');
+        if (sortEl) sortEl.value = 'default';
+
+        // Keep the URL in sync without triggering a full router re-render
+        var newPath = _subCategorySlug
+            ? '/tienda/' + _subCategorySlug
+            : _categorySlug
+                ? '/tienda/' + _categorySlug
+                : '/tienda';
+        if (window.location.pathname !== newPath) {
+            window.history.pushState({}, '', newPath);
+        }
+
+        loadProducts(true);
+        renderSectionHeader();
+    }
+
+    // ── Helper: update "All" button active state ────────────────────────
+    function _syncAllBtn() {
+        if (allBtn) allBtn.classList.toggle('cat-sidebar__all-btn--active', !_categorySlug && !_subCategorySlug);
+    }
+
+    // ── Render the full nav ─────────────────────────────────────────────
+    function _renderNav() {
+        nav.innerHTML = groups.map(function(cat, i) {
+            var icon = cat.icon ? '<i class="' + cat.icon + '"></i>' : '<i class="fas fa-tag"></i>';
+            var isCatActive = _categorySlug === cat.slug;
+            var isExpanded  = isCatActive; // expand when this category is active
+
+            var subHtml = '';
+            if (isExpanded) {
+                subHtml = '<div class="cat-sidebar__subs">' +
+                    cat.subCategories.map(function(sc) {
+                        var scIcon = sc.icon ? '<i class="' + sc.icon + '"></i>' : '';
+                        var isSubActive = _subCategorySlug === sc.slug;
+                        return '<button class="cat-sidebar__sub-btn' + (isSubActive ? ' cat-sidebar__sub-btn--active' : '') + '" ' +
+                            'data-slug="' + sc.slug + '" data-name="' + sc.name + '" data-cat-slug="' + cat.slug + '">' +
+                            scIcon + '<span>' + sc.name + '</span>' +
+                        '</button>';
+                    }).join('') +
+                '</div>';
+            }
+
+            return '<div class="cat-sidebar__cat-group">' +
+                '<button class="cat-sidebar__nav-btn' + (isCatActive ? ' cat-sidebar__nav-btn--active' : '') + '" ' +
+                    'data-cat-slug="' + cat.slug + '" data-cat-name="' + cat.name + '" data-cat-idx="' + i + '" ' +
+                    'aria-expanded="' + isExpanded + '">' +
+                    icon + '<span>' + cat.name + '</span>' +
+                    '<i class="fas fa-chevron-' + (isExpanded ? 'up' : 'down') + ' cat-sidebar__chevron"></i>' +
+                '</button>' +
+                subHtml +
+            '</div>';
+        }).join('');
+
+        // Wire category buttons
+        nav.querySelectorAll('.cat-sidebar__nav-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var slug = btn.dataset.catSlug;
+                var name = btn.dataset.catName;
+
+                if (_categorySlug === slug) {
+                    // Already active — clicking again collapses and clears filter
+                    _categorySlug    = null;
+                    _categoryName    = null;
+                    _subCategorySlug = null;
+                    _subCategoryName = null;
+                } else {
+                    // Select this category, clear any subcategory
+                    _categorySlug    = slug;
+                    _categoryName    = name;
+                    _subCategorySlug = null;
+                    _subCategoryName = null;
+                }
+
+                _syncAllBtn();
+                _renderNav();   // re-render to show/hide subcategories
+                _reload();
+            });
+        });
+
+        // Wire subcategory buttons
+        nav.querySelectorAll('.cat-sidebar__sub-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation(); // don't bubble to category button
+                var slug    = btn.dataset.slug;
+                var name    = btn.dataset.name;
+                var catSlug = btn.dataset.catSlug;
+
+                if (_subCategorySlug === slug) {
+                    // Deselect subcategory — fall back to parent category filter
+                    _subCategorySlug = null;
+                    _subCategoryName = null;
+                    // Keep parent category active
+                } else {
+                    _subCategorySlug = slug;
+                    _subCategoryName = name;
+                    // Ensure parent category is still set
+                    if (!_categorySlug) {
+                        _categorySlug = catSlug;
+                        var catObj = groups.find(function(g) { return g.slug === catSlug; });
+                        _categoryName = catObj ? catObj.name : catSlug;
+                    }
+                }
+
+                _syncAllBtn();
+                _renderNav();   // re-render to update active states
+                _reload();
+
+                // On mobile: close sidebar after selection
+                if (window.innerWidth <= 768) {
+                    var sidebar = document.getElementById('catSidebar');
+                    var overlay = document.getElementById('catSidebarOverlay');
+                    if (sidebar) sidebar.classList.remove('open');
+                    if (overlay) overlay.classList.remove('open');
+                }
+            });
         });
     }
 
+    // ── "All products" button ───────────────────────────────────────────
+    if (allBtn) {
+        allBtn.addEventListener('click', function() {
+            _categorySlug    = null;
+            _categoryName    = null;
+            _subCategorySlug = null;
+            _subCategoryName = null;
+            _syncAllBtn();
+            _renderNav();
+            _reload(); // _reload will push /tienda since all slugs are null
+        });
+    }
+
+    // ── Initial render ──────────────────────────────────────────────────
+    // If a slug came from the URL, find which category it belongs to
+    if (_categorySlug) {
+        var urlCat = groups.find(function(g) { return g.slug === _categorySlug; });
+        if (!urlCat) {
+            // It might be a subcategory slug — find parent
+            for (var gi = 0; gi < groups.length; gi++) {
+                var sc = groups[gi].subCategories.find(function(s) { return s.slug === _categorySlug; });
+                if (sc) {
+                    _subCategorySlug = _categorySlug;
+                    _subCategoryName = sc.name;
+                    _categorySlug    = groups[gi].slug;
+                    _categoryName    = groups[gi].name;
+                    break;
+                }
+            }
+        }
+    }
+
+    _syncAllBtn();
+    _renderNav();
+
+    // ── Mobile toggle ───────────────────────────────────────────────────
+    var toggleBtn = document.getElementById('catSidebarToggle');
+    var sidebar   = document.getElementById('catSidebar');
+    if (toggleBtn && sidebar) {
+        if (!document.getElementById('catSidebarOverlay')) {
+            var overlay = document.createElement('div');
+            overlay.id = 'catSidebarOverlay';
+            overlay.className = 'cat-sidebar-overlay';
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+            });
+            document.body.appendChild(overlay);
+        }
+        toggleBtn.addEventListener('click', function() {
+            var isOpen = sidebar.classList.toggle('open');
+            document.getElementById('catSidebarOverlay').classList.toggle('open', isOpen);
+            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+    }
+}
+
+/* ═══════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
     // Modal close
     var closeBtn = document.getElementById('catModalClose');
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
@@ -1061,7 +1544,7 @@ window.renderProductDetailPage = async function(slug) {
                     '<p class="pdp2-desc">'+(p.descriptionEs||'')+'</p>' +
                     tagsHtml +
                     '<div class="pdp2-divider"></div>' +
-                    '<p class="pdp2-variants-label">Elige una opci\u00f3n</p>' +
+                    '<p class="pdp2-variants-label">Elige tus variantes y la cantidad — durante el checkout podrás compartirnos tu diseño personalizado.</p>' +
                     '<div class="pdp2-variants" id="pdp2Variants">'+variantsHtml+'</div>' +
                     '<div class="pdp2-total-row">' +
                         '<span class="pdp2-total-label">Total</span>' +

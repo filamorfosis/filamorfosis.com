@@ -413,4 +413,13 @@ window.FilamorfosisI18n['zh'] = {
             'auth.reqLength': '至少8个字符',
             'auth.reqUpper': '一个大写字母',
             'auth.reqDigit': '一个数字',
+            sort_by: '排序',
+            sort_default: '相关性',
+            sort_name_asc: '名称 A-Z',
+            sort_name_desc: '名称 Z-A',
+            sort_price_asc: '价格: 从低到高',
+            sort_price_desc: '价格: 从高到低',
+            sort_most_sold: '最畅销',
+            sort_best_reviews: '评分最高',
+            all_products: '所有产品：（请在左侧选择分类）',
         };

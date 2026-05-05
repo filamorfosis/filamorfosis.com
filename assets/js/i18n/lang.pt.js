@@ -413,4 +413,13 @@ window.FilamorfosisI18n['pt'] = {
             'auth.reqLength': 'Mínimo 8 caracteres',
             'auth.reqUpper': 'Uma letra maiúscula',
             'auth.reqDigit': 'Um número',
+            sort_by: 'Ordenar',
+            sort_default: 'Relevância',
+            sort_name_asc: 'Nome A-Z',
+            sort_name_desc: 'Nome Z-A',
+            sort_price_asc: 'Preço: menor primeiro',
+            sort_price_desc: 'Preço: maior primeiro',
+            sort_most_sold: 'Mais vendidos',
+            sort_best_reviews: 'Melhor avaliados',
+            all_products: 'Todos os produtos: (Selecione uma categoria à esquerda)',
         };

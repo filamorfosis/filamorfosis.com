@@ -413,4 +413,13 @@ window.FilamorfosisI18n['ja'] = {
             'auth.reqLength': '最低8文字',
             'auth.reqUpper': '大文字1文字',
             'auth.reqDigit': '数字1文字',
+            sort_by: '並び替え',
+            sort_default: '関連度',
+            sort_name_asc: '名前 A-Z',
+            sort_name_desc: '名前 Z-A',
+            sort_price_asc: '価格: 安い順',
+            sort_price_desc: '価格: 高い順',
+            sort_most_sold: '売れ筋',
+            sort_best_reviews: '評価が高い',
+            all_products: '全商品：（左のカテゴリを選択してください）',
         };

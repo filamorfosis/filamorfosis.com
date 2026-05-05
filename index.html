@@ -670,24 +670,61 @@
 
     <!-- Catalog Section -->
     <section id="catalog" class="catalog-section">
-        <div class="cat-filter-bar" id="catFilterBar">
-            <div class="cat-filter-inner">
-                <div class="cat-search-wrap">
+        <div class="cat-layout">
+
+            <!-- ── LEFT SIDEBAR ─────────────────────────────────────── -->
+            <aside class="cat-sidebar" id="catSidebar" aria-label="Filtrar por categoría">
+
+                <!-- Search -->
+                <div class="cat-sidebar__search">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="catSearch" placeholder="Buscar producto...">
+                    <input type="text" id="catSearch" placeholder="Buscar producto…" autocomplete="off">
+                </div>
+
+                <!-- Category picker -->
+                <div class="cat-sidebar__picker" id="catSidebarPicker">
+                    <!-- "All" entry -->
+                    <div class="cat-sidebar__all-row">
+                        <button class="cat-sidebar__all-btn cat-sidebar__all-btn--active" id="catSidebarAllBtn">
+                            <i class="fas fa-th-large"></i>
+                            <span>Todos los productos</span>
+                        </button>
+                    </div>
+
+                    <div class="cat-sidebar__divider"></div>
+
+                    <!-- Two-panel: category nav with inline subcategories -->
+                    <nav class="cat-sidebar__nav" id="catSidebarNav" role="list" aria-label="Categorías">
+                        <!-- populated by JS -->
+                    </nav>
+                </div>
+
+                <!-- Mobile toggle -->
+                <button class="cat-sidebar__mobile-toggle" id="catSidebarToggle" aria-expanded="false">
+                    <i class="fas fa-filter"></i> Filtrar
+                    <span class="cat-sidebar__mobile-badge" id="catSidebarBadge" style="display:none"></span>
+                </button>
+            </aside>
+
+            <!-- ── RIGHT CONTENT ─────────────────────────────────────── -->
+            <div class="cat-content">
+                <div class="cat-content__header" id="catSectionHeader">
+                    <div class="cat-content__title-row">
+                        <h2 id="catSectionTitle"></h2>
+                        <p id="catSectionDesc"></p>
+                    </div>
+                    <div id="catFilterBar">
+                        <div class="cat-filter-inner"></div>
+                    </div>
+                </div>
+                <div class="cat-tag-chips-row" id="catTagChips"></div>
+                <div class="cat-grid" id="catGrid"></div>
+                <div class="cat-empty cat-empty--hidden" id="catEmpty">
+                    <i class="fas fa-box-open"></i>
+                    <p class="cat-empty-text" data-translate="empty_text">No se encontraron productos</p>
                 </div>
             </div>
-        </div>
-        <div class="cat-main">
-            <div class="cat-section-header" id="catSectionHeader">
-                <h2 id="catSectionTitle"></h2>
-                <p id="catSectionDesc"></p>
-            </div>
-            <div class="cat-grid" id="catGrid"></div>
-            <div class="cat-empty" id="catEmpty">
-                <i class="fas fa-box-open"></i>
-                <p data-translate="empty_text">No se encontraron productos</p>
-            </div>
+
         </div>
     </section>
 

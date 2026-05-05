@@ -2857,41 +2857,25 @@ img:not([alt]) { outline: 2px solid red; } /* dev helper — remove in prod */
   margin-top: 8px;
 }
 
-/* ── Load More button ─────────────────────────── */
-.cat-load-more-wrap {
-  text-align: center;
-  padding: 1.5rem 1rem;
+/* ── Infinite scroll sentinel & loading indicator ── */
+.cat-scroll-sentinel {
+  height: 1px;
+  width: 100%;
+  pointer-events: none;
 }
 
-.cat-load-more-wrap--hidden {
-  display: none;
+/* Appended skeleton cards fade in smoothly */
+.cat-card--skeleton-append {
+  animation: skeletonFadeIn 0.25s ease both;
+}
+@keyframes skeletonFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.cat-load-more-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 2rem;
-  background: rgba(167, 139, 250, 0.12);
-  color: var(--color-accent-purple);
-  border: 1px solid rgba(167, 139, 250, 0.35);
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, transform 0.15s;
-}
-
-.cat-load-more-btn:hover {
-  background: rgba(167, 139, 250, 0.22);
-  border-color: rgba(167, 139, 250, 0.6);
-  transform: translateY(-1px);
-}
-
-.cat-load-more-btn:active {
-  transform: translateY(0);
-}
+/* Keep old load-more classes inert (no visible button) */
+.cat-load-more-wrap { display: none; }
+.cat-load-more-wrap--hidden { display: none; }
 
 /* ── Error state card ─────────────────────────── */
 .cat-error-card {
@@ -4341,7 +4325,7 @@ img:not([alt]) { outline: 2px solid red; } /* dev helper — remove in prod */
   border: none;
   color: var(--color-accent-purple);
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-weight: 600;
   cursor: pointer;
   padding: 0.5rem 1rem;
@@ -4367,7 +4351,7 @@ img:not([alt]) { outline: 2px solid red; } /* dev helper — remove in prod */
 .pdp2-breadcrumb__sep  { color: var(--color-text-disabled); }
 .pdp2-breadcrumb__current {
   color: var(--color-text-muted);
-  font-size: 1rem;
+  font-size: 1.5rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4716,3 +4700,226 @@ img:not([alt]) { outline: 2px solid red; } /* dev helper — remove in prod */
 
 /* Variant btn selected state */
 .pdp2-variant__btn--selected .pdp2-variant__label { color: var(--color-accent-purple); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   PDP2 — WHITE BACKGROUND THEME
+   Overrides dark CSS variables for the product detail page area.
+   Product cards and the rest of the site are untouched.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.pdp2-root {
+  background: #ffffff;
+}
+
+/* Page wrapper */
+.pdp2-page {
+  background: #ffffff;
+}
+
+/* Back button */
+.pdp2-back-btn {
+  color: #7c3aed;
+}
+.pdp2-back-btn:hover {
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+/* Breadcrumb */
+.pdp2-breadcrumb__sep    { color: #cbd5e1; }
+.pdp2-breadcrumb__current { color: #64748b; }
+
+/* Gallery */
+.pdp2-gallery__main {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+.pdp2-gallery__main--placeholder { background: #f1f5f9; }
+.pdp2-placeholder-icon { opacity: 0.25; }
+.pdp2-placeholder-text { color: #94a3b8; }
+
+.pdp2-gallery__arrow {
+  background: rgba(255,255,255,0.9);
+  border-color: #e2e8f0;
+  color: #475569;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.pdp2-gallery__arrow:hover { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+
+.pdp2-thumb {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+.pdp2-thumb:hover  { border-color: rgba(124,58,237,0.5); }
+.pdp2-thumb--active { border-color: #7c3aed; }
+
+/* Title & description */
+.pdp2-title {
+  color: #0f172a;
+}
+.pdp2-desc {
+  color: #475569;
+}
+
+/* Tags */
+.pdp2-tag {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+/* Divider */
+.pdp2-divider { background: #e2e8f0; }
+
+/* Variants label */
+.pdp2-variants-label { color: #94a3b8; }
+
+/* Variant rows */
+.pdp2-variant {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+}
+.pdp2-variant:hover { border-color: #c4b5fd; background: #faf5ff; }
+.pdp2-variant--selected {
+  border-color: #7c3aed;
+  background: #faf5ff;
+}
+
+.pdp2-variant__label { color: #1e293b; }
+.pdp2-variant__btn--selected .pdp2-variant__label { color: #7c3aed; }
+
+.pdp2-variant__price      { color: #0f172a; }
+.pdp2-variant__price-orig { color: #94a3b8; }
+.pdp2-variant__price--na  { color: #94a3b8; }
+
+/* Qty stepper */
+.pdp2-variant__qty {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+.pdp2-qty-btn { color: #374151; }
+.pdp2-qty-btn:hover { background: #f1f5f9; }
+.pdp2-qty-input { color: #0f172a; }
+
+/* Total row */
+.pdp2-total-row {
+  border-color: #e2e8f0;
+}
+.pdp2-total-label  { color: #64748b; }
+.pdp2-total-amount { color: #0f172a; }
+
+/* Trust badges */
+.pdp2-trust span { color: #94a3b8; }
+.pdp2-trust i    { color: #7c3aed; }
+
+/* No variants text */
+.pdp2-no-variants { color: #94a3b8; }
+
+/* Upload label */
+.pdp2-upload-label { color: #7c3aed; }
+
+/* Loading / error states */
+.pdp2-loading { color: #64748b; }
+.pdp2-loading i { color: #7c3aed; }
+
+/* ── Variant rows — stronger contrast ─────────────────────────────────── */
+.pdp2-variant {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+}
+.pdp2-variant:hover { border-color: #a78bfa; background: #faf5ff; }
+.pdp2-variant--selected { border-color: #7c3aed; background: #faf5ff; }
+.pdp2-variant--disabled { opacity: 0.55; }
+
+.pdp2-variant__label { color: #1e293b; font-weight: 600; }
+.pdp2-variant__btn--selected .pdp2-variant__label { color: #7c3aed; }
+.pdp2-variant__price      { color: #0f172a; }
+.pdp2-variant__price-orig { color: #94a3b8; }
+.pdp2-variant__price--na  { color: #94a3b8; }
+
+/* Qty stepper */
+.pdp2-variant__qty { background: #fff; border: 1px solid #cbd5e1; }
+.pdp2-qty-btn      { color: #374151; }
+.pdp2-qty-btn:hover { background: #f1f5f9; }
+.pdp2-qty-input    { color: #0f172a; }
+
+/* "Elige tus variantes" hint */
+.pdp2-variants-label {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #141414;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Tags */
+.pdp2-tag { background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; }
+
+/* Dividers */
+.pdp2-divider { background: #cbd5e1; }
+.pdp2-total-row { border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; }
+
+/* Total */
+.pdp2-total-label  { color: #475569; }
+.pdp2-total-amount { color: #0f172a; font-weight: 800; }
+
+/* Trust badges */
+.pdp2-trust span { color: #141414; }
+.pdp2-trust i    { color: #7c3aed; }
+
+/* ── Reviews section on white background ──────────────────────────────── */
+.pdp-reviews-section { background: #ffffff; }
+
+/* Section title */
+.pdp-reviews-title { color: #0f172a; }
+
+/* Average rating number */
+.pdp-reviews-avg-num { color: #0f172a; }
+.pdp-reviews-count   { color: #64748b; }
+
+/* Tab bar border */
+.pdp-reviews-tabs { border-bottom-color: #e2e8f0; }
+
+/* Tab buttons */
+.pdp-reviews-tab { color: #64748b; }
+.pdp-reviews-tab:hover { color: #1e293b; background: #f8fafc; }
+.pdp-reviews-tab--active { color: #7c3aed; border-bottom-color: #7c3aed; }
+
+/* Review cards */
+.pdp-review-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+.pdp-review-card:hover {
+  background: #f1f5f9;
+  border-color: #c4b5fd;
+}
+.pdp-review-card--verified {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+.pdp-review-card--verified:hover {
+  border-color: #86efac;
+  background: #dcfce7;
+}
+
+/* Author name */
+.pdp-review-author-name { color: #1e293b; }
+
+/* Date */
+.pdp-review-date { color: #64748b; }
+
+/* Rating number */
+.pdp-review-rating-num { color: #64748b; }
+
+/* Review body text */
+.pdp-review-body { color: #374151; }
+
+/* Review image border */
+.pdp-review-img { border-color: #e2e8f0; }
+
+/* Auth prompt on white */
+.pdp-review-auth-prompt__icon { color: #94a3b8; }
+.pdp-review-auth-prompt__msg  { color: #64748b; }

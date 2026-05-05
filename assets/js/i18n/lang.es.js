@@ -431,4 +431,13 @@ window.FilamorfosisI18n['es'] = {
             'account.orders': 'Mis pedidos',
             'account.phone': 'Teléfono',
             'account.save': 'Guardar cambios',
+            sort_by: 'Ordenar',
+            sort_default: 'Relevancia',
+            sort_name_asc: 'Nombre A-Z',
+            sort_name_desc: 'Nombre Z-A',
+            sort_price_asc: 'Precio: menor primero',
+            sort_price_desc: 'Precio: mayor primero',
+            sort_most_sold: 'Más vendidos',
+            sort_best_reviews: 'Mejor calificados',
+            all_products: 'Todos los productos: (Selecciona una categoría del lado izquierdo)',
         };
