@@ -1,40 +1,9 @@
 ï»¿@import 'design-system.css';
 
 /* -----------------------------------------------
-   FILAMORFOSISï¿½ ï¿½ PRODUCTS CATALOG CSS
+   FILAMORFOSIS® — PRODUCTS CATALOG CSS
+   (resets handled by main.css)
    ----------------------------------------------- */
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-    --dark:       #0a0e1a;
-    --dark2:      #0f172a;
-    --dark3:      #1e293b;
-    --card-bg:    #131929;
-    --border:     rgba(255,255,255,0.07);
-    --uv-a:       #f97316;
-    --uv-b:       #ec4899;
-    --uv-grad:    linear-gradient(135deg, #f97316, #ec4899);
-    --accent:     #6366f1;
-    --green:      #22c55e;
-    --white:      #ffffff;
-    --muted:      #94a3b8;
-    --text:       #e2e8f0;
-    --radius:     18px;
-    --shadow:     0 8px 40px rgba(0,0,0,0.45);
-}
-
-html { scroll-behavior: smooth; }
-
-body {
-    font-family: 'Roboto', sans-serif;
-    background: var(--dark);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-}
-
-h1,h2,h3,h4,h5 { font-family: 'Poppins', sans-serif; }
 
 /* -- HEADER: uses .navbar from main.css -- */
 
@@ -236,6 +205,12 @@ h1,h2,h3,h4,h5 { font-family: 'Poppins', sans-serif; }
     color: #1e293b !important;
 }
 
+/* Protect card title gradient from the #catalog color: inherit override */
+#catalog .cat-card-title {
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+}
+
 .cat-layout {
     display: grid;
     grid-template-columns: 260px 1fr;
@@ -250,8 +225,8 @@ h1,h2,h3,h4,h5 { font-family: 'Poppins', sans-serif; }
 /* ── Sidebar ──────────────────────────────────────────────────────────── */
 .cat-sidebar {
     position: sticky;
-    top: 80px;
-    max-height: calc(100vh - 100px);
+    top: calc(80px + var(--promo-banner-height, 0px));
+    max-height: calc(100vh - 100px - var(--promo-banner-height, 0px));
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #e2e8f0 transparent;
@@ -262,6 +237,7 @@ h1,h2,h3,h4,h5 { font-family: 'Poppins', sans-serif; }
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    align-self: start; /* required for sticky inside a grid */
 }
 .cat-sidebar::-webkit-scrollbar { width: 4px; }
 .cat-sidebar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
@@ -602,8 +578,9 @@ h1,h2,h3,h4,h5 { font-family: 'Poppins', sans-serif; }
     gap: 20px;
 }
 
-/* Prevent horizontal overflow */
-html, body { overflow-x: hidden; max-width: 100%; }
+/* Prevent horizontal overflow — use clip on html (doesn't create a scroll container) */
+html { overflow-x: clip; }
+body { overflow-x: hidden; max-width: 100%; }
 
 .cat-grid,
 .checkout-layout {
@@ -699,8 +676,8 @@ html, body { overflow-x: hidden; max-width: 100%; }
 
 /* -- PRODUCT CARD -- */
 .cat-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: var(--radius);
     overflow: hidden;
     cursor: pointer;
@@ -711,42 +688,37 @@ html, body { overflow-x: hidden; max-width: 100%; }
 .cat-card::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(249,115,22,0.1) 0%, transparent 50%);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(249,115,22,0.04) 100%);
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
     z-index: 0;
 }
-.cat-card:hover::before {
-    opacity: 1;
-}
+.cat-card:hover::before { opacity: 1; }
 .cat-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 25px 70px rgba(249,115,22,0.2), 0 0 0 1px rgba(249,115,22,0.3);
-    border-color: rgba(249,115,22,0.5);
+    transform: translateY(-6px) scale(1.015);
+    box-shadow: 0 20px 60px rgba(99,102,241,0.14), 0 0 0 1px rgba(99,102,241,0.25);
+    border-color: rgba(99,102,241,0.35);
 }
 .cat-card-img {
     position: relative; height: 220px; overflow: hidden;
-    background: linear-gradient(135deg, #1e293b, #0f172a);
+    background: linear-gradient(135deg, #e0e7ff, #f1f5f9);
 }
 .cat-card-img img {
     width: 100%; height: 100%; object-fit: cover;
     transition: transform 0.4s ease;
 }
-.cat-card:hover .cat-card-img img { 
-    transform: scale(1.1) rotate(2deg); 
+.cat-card:hover .cat-card-img img {
+    transform: scale(1.08) rotate(1deg);
 }
 .cat-card-img-placeholder {
     width: 100%; height: 100%;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 10px;
-    color: var(--muted);
+    color: #94a3b8;
 }
-.cat-card-img-placeholder .ph-icon { font-size: 3.5rem; opacity: 0.4; }
+.cat-card-img-placeholder .ph-icon { font-size: 3.5rem; opacity: 0.35; }
 .cat-card-img-placeholder span { font-size: 1rem; opacity: 0.5; }
 .cat-card-badge {
     position: absolute; top: 12px; left: 12px;
@@ -759,21 +731,26 @@ html, body { overflow-x: hidden; max-width: 100%; }
 .cat-card-badge.promo { background: linear-gradient(135deg,#eab308,#ca8a04); color:#fff; }
 .cat-card-imgs-count {
     position: absolute; bottom: 10px; right: 10px;
-    background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+    background: rgba(15,23,42,0.55); backdrop-filter: blur(6px);
     color: #fff; font-size: 1rem; padding: 3px 10px; border-radius: 50px;
 }
-.cat-card-body { padding: 20px; }
+.cat-card-body { padding: 20px; position: relative; z-index: 1; }
 .cat-card-category {
-    font-size: 1rem; font-weight: 700; letter-spacing: 0.1em;
-    text-transform: uppercase; color: #fb923c; margin-bottom: 6px;
+    font-size: 1rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #7c3aed; margin-bottom: 6px;
 }
 .cat-card-title {
     font-family: 'Poppins', sans-serif;
     font-size: 1.15rem; font-weight: 700;
-    color: var(--white); margin-bottom: 8px; line-height: 1.3;
+    background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 55%, #0f172a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+    line-height: 1.3;
 }
 .cat-card-desc {
-    font-size: 1rem; color: var(--muted); line-height: 1.6;
+    font-size: 1rem; color: #475569; line-height: 1.6;
     margin-bottom: 16px;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
     overflow: hidden;
@@ -781,15 +758,15 @@ html, body { overflow-x: hidden; max-width: 100%; }
 .cat-card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
 .cat-card-tag {
     padding: 3px 10px; border-radius: 50px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--border);
-    font-size: 1rem; color: var(--muted);
+    background: rgba(99,102,241,0.07);
+    border: 1px solid rgba(99,102,241,0.18);
+    font-size: 1rem; color: #4f46e5;
 }
 .cat-card-price-row {
     display: flex; align-items: center; justify-content: space-between;
-    padding-top: 14px; border-top: 1px solid var(--border);
+    padding-top: 14px; border-top: 1px solid #e2e8f0;
 }
-.cat-card-price-from { font-size: 1rem; color: var(--muted); }
+.cat-card-price-from { font-size: 1rem; color: #64748b; }
 .cat-card-price {
     font-family: 'Poppins', sans-serif;
     font-size: 1.4rem; font-weight: 800;
@@ -797,28 +774,55 @@ html, body { overflow-x: hidden; max-width: 100%; }
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text;
 }
+.cat-card-price-original {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem; font-weight: 500;
+    color: #94a3b8;
+    text-decoration: line-through;
+    margin-right: 4px;
+}
+.cat-card-price--effective {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.cat-card-price--unavailable {
+    font-size: 1rem; font-weight: 600;
+    color: #94a3b8;
+    -webkit-text-fill-color: #94a3b8;
+}
 .cat-card-cta {
     display: flex; align-items: center; gap: 6px;
-    background: rgba(249,115,22,0.12);
-    border: 1px solid rgba(249,115,22,0.3);
-    color: #fb923c; padding: 8px 16px; border-radius: 50px;
+    background: rgba(99,102,241,0.1);
+    border: 1px solid rgba(99,102,241,0.3);
+    color: #4f46e5;
+    padding: 8px 16px; border-radius: 50px;
     font-size: 1rem; font-weight: 600; cursor: pointer;
     transition: all 0.2s;
 }
-.cat-card-cta:hover { background: rgba(249,115,22,0.25); }
+.cat-card-cta:hover {
+    background: rgba(99,102,241,0.18);
+    border-color: rgba(99,102,241,0.5);
+    color: #3730a3;
+}
+.cat-card-cta--disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
 
-/* Card actions row: details + add-to-cart */
+/* Card actions row */
 .cat-card-actions {
     display: flex; flex-direction: column; gap: 6px; align-items: flex-end;
 }
 .cat-card-cta--cart {
-    background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(249,115,22,0.15));
-    border-color: rgba(99,102,241,0.4);
-    color: #a5b4fc;
+    background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(249,115,22,0.1));
+    border-color: rgba(99,102,241,0.35);
+    color: #4f46e5;
 }
 .cat-card-cta--cart:hover {
-    background: linear-gradient(135deg, rgba(99,102,241,0.3), rgba(249,115,22,0.3));
-    color: #fff;
+    background: linear-gradient(135deg, rgba(99,102,241,0.22), rgba(249,115,22,0.18));
+    color: #3730a3;
 }
 
 /* -- MODAL -- */

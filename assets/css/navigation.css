@@ -1108,7 +1108,7 @@
 /* Title text */
 .service-card--image .service-card__title {
   font-family: var(--font-family-heading);
-  font-size: var(--font-size-base);
+  font-size: 1.5rem;
   font-weight: var(--font-weight-semibold);
   color: #fff;
   margin: 0;

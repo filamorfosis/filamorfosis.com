@@ -9,6 +9,23 @@
 /* ── Promo banner height CSS variable ─────────────────────────────────────── */
 :root {
   --promo-banner-height: 0px;
+
+  /* Catalog / store shared tokens */
+  --dark:    #0a0e1a;
+  --dark2:   #0f172a;
+  --dark3:   #1e293b;
+  --card-bg: #131929;
+  --border:  rgba(255,255,255,0.07);
+  --uv-a:    #f97316;
+  --uv-b:    #ec4899;
+  --uv-grad: linear-gradient(135deg, #f97316, #ec4899);
+  --accent:  #6366f1;
+  --green:   #22c55e;
+  --white:   #ffffff;
+  --muted:   #94a3b8;
+  --text:    #e2e8f0;
+  --radius:  18px;
+  --shadow:  0 8px 40px rgba(0,0,0,0.45);
 }
 
 /* ── Reset / base ─────────────────────────────────────────────────────────── */
@@ -897,8 +914,9 @@
   }
 }
 
-/* ── Prevent horizontal overflow ─────────────────────────────────────────── */
-html, body { overflow-x: hidden; max-width: 100%; }
+/* Prevent horizontal overflow — use clip on html (doesn't create a scroll container) */
+html { overflow-x: clip; }
+body { overflow-x: hidden; max-width: 100%; }
 
 .checkout-layout {
   min-width: 0;
@@ -2822,9 +2840,9 @@ img:not([alt]) { outline: 2px solid red; } /* dev helper — remove in prod */
 .skeleton-pulse {
   background: linear-gradient(
     90deg,
-    rgba(255,255,255,0.04) 25%,
-    rgba(255,255,255,0.10) 50%,
-    rgba(255,255,255,0.04) 75%
+    #e2e8f0 25%,
+    #f1f5f9 50%,
+    #e2e8f0 75%
   );
   background-size: 800px 100%;
   animation: skeleton-shimmer 1.4s infinite linear;
@@ -2832,6 +2850,8 @@ img:not([alt]) { outline: 2px solid red; } /* dev helper — remove in prod */
 }
 
 .cat-card--skeleton {
+  background: #f8fafc;
+  border-color: #e2e8f0;
   pointer-events: none;
 }
 
@@ -3728,10 +3748,11 @@ img:not([alt]) { outline: 2px solid red; } /* dev helper — remove in prod */
 .promo-slider {
   position: relative;
   width: 100%;
-  height: 500px;
+  height: 300px;
   overflow: hidden;
   /* margin-top: var(--promo-banner-height, 0px); */
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  padding: 0 !important;
 }
 
 .promo-slider__track {
@@ -4923,3 +4944,68 @@ img:not([alt]) { outline: 2px solid red; } /* dev helper — remove in prod */
 /* Auth prompt on white */
 .pdp-review-auth-prompt__icon { color: #94a3b8; }
 .pdp-review-auth-prompt__msg  { color: #64748b; }
+
+
+/* ═══════════════════════════════════════════════
+   REVIEWS MARQUEE (tienda page)
+   ═══════════════════════════════════════════════ */
+.reviews-section {
+  background: #0a0e1a;
+  padding: 5rem 0 4rem;
+  overflow: hidden;
+}
+
+.reviews-marquee-wrap {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+.reviews-marquee {
+  display: flex;
+  gap: 1.5rem;
+  width: max-content;
+  animation: reviewsScroll 32s linear infinite;
+}
+
+.reviews-marquee:hover { animation-play-state: paused; }
+
+@keyframes reviewsScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.review-card {
+  flex-shrink: 0;
+  width: 320px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.review-card:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(139,92,246,0.35);
+}
+
+.review-stars { font-size: 1rem; letter-spacing: 2px; }
+
+.review-text {
+  color: #cbd5e1;
+  font-size: 1rem;
+  line-height: 1.7;
+  flex: 1;
+  margin: 0;
+}
+
+.review-author {
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
